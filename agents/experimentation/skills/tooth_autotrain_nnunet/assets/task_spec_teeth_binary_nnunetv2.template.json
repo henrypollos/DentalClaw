@@ -1,0 +1,22 @@
+{
+  "task_id": "TDDTeethBinaryNNUNetV2",
+  "modality": "auto",
+  "task_type": "tooth_segmentation",
+  "num_classes": 1,
+  "class_names": [
+    "teeth"
+  ],
+  "primary_metric": "mean_dice",
+  "extra": {
+    "target_backend": "nnunetv2_cli",
+    "nnunet_configuration": "2d",
+    "nnunet_search_mode": "trainer_hparam_search",
+    "nnunet_baseline_trainer": "nnUNetTrainer",
+    "nnunet_followup_parent_trainer": "nnUNetTrainer",
+    "nnunet_search_fold": "all",
+    "nnunet_search_strategy": "adaptive",
+    "reuse_existing_baseline_if_available": true,
+    "auto_select_gpu": true,
+    "run_best_inference": true
+  }
+}

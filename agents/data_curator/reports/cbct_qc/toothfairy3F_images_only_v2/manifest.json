@@ -1,0 +1,20 @@
+{
+  "dataset_name": "dataset",
+  "dataset_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/reports/cbct_qc/toothfairy3F_images_only_subset/dataset",
+  "generated_at": "2026-04-10T15:27:22+00:00",
+  "report_key": "toothfairy3F_images_only_v2",
+  "sample_limit": null,
+  "sample_seed": 13,
+  "label_policy": "ignore",
+  "audited_case_count": 63,
+  "discovery": {
+    "image_dir_count": 1,
+    "label_dir_count": 0,
+    "fallback_walk_used": false,
+    "orphan_labels": []
+  },
+  "label_schema_source": null,
+  "label_schema_values": null,
+  "split_json": null,
+  "output_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/reports/cbct_qc/toothfairy3F_images_only_v2"
+}

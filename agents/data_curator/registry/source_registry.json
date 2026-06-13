@@ -1,0 +1,15 @@
+{
+  "sources": [
+    {
+      "source_id": "tdd_local",
+      "registered_at": "2026-03-24T02:27:46+00:00",
+      "dataset_name": "TDD",
+      "source_type": "local",
+      "source_path": "data/TDD",
+      "version": null,
+      "license": null,
+      "notes": "P0 smoke pipeline example",
+      "updated_at": "2026-03-24T02:27:46+00:00"
+    }
+  ]
+}

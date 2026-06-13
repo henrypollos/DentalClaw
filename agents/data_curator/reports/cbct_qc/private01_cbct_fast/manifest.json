@@ -1,0 +1,6 @@
+{
+  "dataset_root": "/data/data2/yiyang/DentalClaw/data/private01",
+  "output_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/reports/cbct_qc/private01_cbct_fast",
+  "workers": 4,
+  "max_voxel_sample": 120000
+}

@@ -1,0 +1,78 @@
+{
+  "cohort_findings": [],
+  "split_counter": {
+    "train": 100
+  },
+  "status_counter": {
+    "needs_manual_review": 43,
+    "usable": 56,
+    "reject": 1
+  },
+  "finding_counter": {
+    "possible_metal_artifact": 22,
+    "shape_outlier_axis_2": 17,
+    "fov_outlier_axis_2": 17,
+    "shape_outlier_axis_0": 12,
+    "fov_outlier_axis_0": 12,
+    "dynamic_range_outlier": 4,
+    "noise_or_contrast_outlier": 1,
+    "invalid_label_values": 1
+  },
+  "metadata_availability": {
+    "orientation_counts": {
+      "RAS": 100
+    },
+    "manufacturer_counts": {}
+  },
+  "spacing_bounds": {
+    "0": [
+      0.27000001072883606,
+      0.33000001311302185,
+      0.30000001192092896
+    ],
+    "1": [
+      0.27000001072883606,
+      0.33000001311302185,
+      0.30000001192092896
+    ],
+    "2": [
+      0.27000001072883606,
+      0.33000001311302185,
+      0.30000001192092896
+    ]
+  },
+  "shape_bounds": {
+    "0": [
+      313.0,
+      446.0,
+      371.0
+    ],
+    "1": [
+      171.0,
+      521.0,
+      369.0
+    ],
+    "2": [
+      162.0,
+      176.0,
+      169.0
+    ]
+  },
+  "fov_bounds": {
+    "0": [
+      93.90000373125076,
+      133.8000053167343,
+      111.30000442266464
+    ],
+    "1": [
+      51.30000203847885,
+      156.30000621080399,
+      110.70000439882278
+    ],
+    "2": [
+      48.60000193119049,
+      52.800002098083496,
+      50.70000201463699
+    ]
+  }
+}

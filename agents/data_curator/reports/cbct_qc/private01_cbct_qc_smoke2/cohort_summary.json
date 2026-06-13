@@ -1,0 +1,45 @@
+{
+  "cohort_findings": [
+    {
+      "type": "repeated_patient_id",
+      "patient_id": "20250507-112309",
+      "case_ids": [
+        "0000001139",
+        "3001281243"
+      ],
+      "severity": "moderate",
+      "confidence": "medium",
+      "impact": "moderate"
+    }
+  ],
+  "split_counter": {
+    "unspecified": 2
+  },
+  "status_counter": {
+    "needs_manual_review": 2
+  },
+  "finding_counter": {
+    "repeated_patient_identifier": 2
+  },
+  "metadata_availability": {
+    "orientation_counts": {
+      "LPI": 2
+    },
+    "manufacturer_counts": {}
+  },
+  "spacing_bounds": {
+    "0": null,
+    "1": null,
+    "2": null
+  },
+  "shape_bounds": {
+    "0": null,
+    "1": null,
+    "2": null
+  },
+  "fov_bounds": {
+    "0": null,
+    "1": null,
+    "2": null
+  }
+}

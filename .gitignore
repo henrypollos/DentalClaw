@@ -1,0 +1,20 @@
+# Large data & artifacts
+/data/
+/artifacts/
+
+# Experiment outputs / datasets (CBCT image dumps, etc.)
+/agents/data_curator/experiments/
+
+# Generated demo outputs
+/demo_output/
+/demo_output_tta_ensemble1/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

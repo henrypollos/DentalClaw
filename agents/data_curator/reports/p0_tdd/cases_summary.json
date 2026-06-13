@@ -1,0 +1,9 @@
+{
+  "dataset_root": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "primary_image_dir": "/data/data2/yiyang/DentalClaw/data/TDD/Radiographs",
+  "case_count": 24,
+  "label_roles": [
+    "maxillomandibular",
+    "teeth_mask"
+  ]
+}

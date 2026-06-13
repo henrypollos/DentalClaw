@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-04-13T16:39:08+00:00",
+  "count": 1,
+  "items": [
+    {
+      "dataset_id": 501,
+      "folder_name": "Dataset501_TDDTeethBinary2D",
+      "name": "TDDTeethBinary2D",
+      "path": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw/Dataset501_TDDTeethBinary2D",
+      "path_relative": "artifacts/datasets/nnUNet/nnUNet_raw/Dataset501_TDDTeethBinary2D",
+      "file_ending": ".png",
+      "description": "TDD panoramic radiographs with binary teeth masks exported as nnUNet 2D PNG.",
+      "label_count_excluding_background": 1,
+      "label_names_preview": [
+        "teeth"
+      ],
+      "counts": {
+        "imagesTr": 900,
+        "labelsTr": 900,
+        "imagesTs": 100,
+        "labelsTs": 100,
+        "imagesVal": 0,
+        "labelsVal": 0
+      },
+      "delivery_report": null,
+      "delivery_status": null,
+      "qc_status": "review",
+      "qc_report": "/data/data2/yiyang/DentalClaw/artifacts/results/reports/datasets_qc/Dataset501_TDDTeethBinary2D.qc.json",
+      "qc_report_relative": "artifacts/results/reports/datasets_qc/Dataset501_TDDTeethBinary2D.qc.json",
+      "task": null,
+      "generated_at": null,
+      "last_modified": "2026-04-13T15:22:38+00:00",
+      "ready": true
+    }
+  ]
+}

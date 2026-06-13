@@ -1,0 +1,19 @@
+{
+  "cohort_findings": [],
+  "split_counter": {
+    "unspecified": 139
+  },
+  "status_counter": {
+    "reject": 139
+  },
+  "finding_counter": {
+    "unreadable_image": 139
+  },
+  "metadata_availability": {
+    "orientation_counts": {},
+    "manufacturer_counts": {}
+  },
+  "spacing_bounds": {},
+  "shape_bounds": {},
+  "fov_bounds": {}
+}

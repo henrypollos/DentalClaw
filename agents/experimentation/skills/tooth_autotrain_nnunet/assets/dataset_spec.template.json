@@ -1,0 +1,12 @@
+{
+  "root": "/data/data2/yiyang/DentalClaw/data/pano2d",
+  "imagesTr": "imagesTr",
+  "labelsTr": "labelsTr",
+  "imagesVal": "imagesVal",
+  "labelsVal": "labelsVal",
+  "imagesTs": "imagesTs",
+  "extra": {
+    "image_domain": "dental_panoramic",
+    "label_format": "png_index_mask"
+  }
+}

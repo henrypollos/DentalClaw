@@ -1,0 +1,20 @@
+{
+  "dataset_name": "private01",
+  "dataset_root": "/data/data2/yiyang/DentalClaw/data/private01",
+  "generated_at": "2026-04-10T13:56:33+00:00",
+  "report_key": "private01_cbct_qc_smoke2",
+  "sample_limit": 2,
+  "sample_seed": 7,
+  "label_policy": "ignore",
+  "audited_case_count": 2,
+  "discovery": {
+    "image_dir_count": 0,
+    "label_dir_count": 0,
+    "fallback_walk_used": true,
+    "orphan_labels": []
+  },
+  "label_schema_source": null,
+  "label_schema_values": null,
+  "split_json": null,
+  "output_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/reports/cbct_qc/private01_cbct_qc_smoke2"
+}

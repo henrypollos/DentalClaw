@@ -1,0 +1,16 @@
+{
+  "source_id": "tdd_local",
+  "dataset_root_original": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "snapshot_dir": "/data/data2/yiyang/DentalClaw/agents/data_curator/intake/tdd_local/2026-03-24T02-27-46+00-00",
+  "snapshot_path": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "mode": "symlink",
+  "captured_at": "2026-03-24T02:27:47+00:00",
+  "summary": {
+    "primary_case_count": 1000,
+    "task_candidates": [
+      "detection",
+      "segmentation"
+    ],
+    "primary_image_dir": "/data/data2/yiyang/DentalClaw/data/TDD/Radiographs"
+  }
+}

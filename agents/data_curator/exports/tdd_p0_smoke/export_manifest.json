@@ -1,0 +1,39 @@
+{
+  "canonical_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/canonical/tdd_p0_smoke",
+  "output_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke",
+  "tasks": {
+    "segmentation": {
+      "segmentation_maxillomandibular": {
+        "task_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke/segmentation_maxillomandibular",
+        "case_count": 24,
+        "threshold": 127
+      },
+      "segmentation_teeth_mask": {
+        "task_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke/segmentation_teeth_mask",
+        "case_count": 24,
+        "threshold": 127
+      }
+    },
+    "detection": {
+      "task_root": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke/detection_coco",
+      "category_count": 32,
+      "splits": {
+        "train": {
+          "image_count": 17,
+          "annotation_count": 388,
+          "annotation_path": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke/detection_coco/annotations/instances_train.json"
+        },
+        "val": {
+          "image_count": 4,
+          "annotation_count": 118,
+          "annotation_path": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke/detection_coco/annotations/instances_val.json"
+        },
+        "test": {
+          "image_count": 3,
+          "annotation_count": 92,
+          "annotation_path": "/data/data2/yiyang/DentalClaw/agents/data_curator/exports/tdd_p0_smoke/detection_coco/annotations/instances_test.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "root": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw/Dataset503_TDDTeeth32Class2D",
+  "imagesTr": "imagesTr",
+  "labelsTr": "labelsTr",
+  "imagesVal": "imagesVal",
+  "labelsVal": "labelsVal",
+  "imagesTs": "imagesTs",
+  "extra": {
+    "target_backend": "nnunetv2_cli",
+    "nnunet_dataset_id": 503,
+    "nnunet_raw": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw",
+    "nnunet_preprocessed": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_preprocessed",
+    "nnunet_results": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results",
+    "labelsTs": "labelsTs",
+    "image_domain": "dental_panoramic",
+    "label_format": "nnunet_index_mask"
+  }
+}
