@@ -95,6 +95,7 @@ def call_openclaw_agent(
     cmd = [
         "openclaw",
         "agent",
+        "--agent", "main",
         "--message", full_prompt,
         "--json",
         "--timeout", str(timeout),
