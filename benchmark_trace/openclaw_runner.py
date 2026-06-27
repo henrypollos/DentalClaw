@@ -114,27 +114,35 @@ def call_openclaw_agent(
             cwd=str(REPO_ROOT),
         )
 
-        # openclaw agent --json 输出 JSON 到 stdout，warnings 在 stderr
+        # openclaw agent --json 输出 JSON 到 stdout，但 [plugins] 消息也混在 stdout
         stdout = result.stdout.strip()
         stderr = result.stderr.strip()
 
-        # 过滤 stderr 中的 plugins 警告行
-        stderr_clean = "\n".join(
+        # 剥离 stdout 中的 [plugins] 行，只保留 JSON
+        stdout_lines = [
+            line for line in stdout.split("\n")
+            if not line.startswith("[plugins]")
+        ]
+        stdout_clean = "\n".join(stdout_lines).strip()
+
+        # 剥离 stderr 中的 [plugins] 行
+        stderr_lines = [
             line for line in stderr.split("\n")
             if not line.startswith("[plugins]")
-        ).strip()
+        ]
+        stderr_clean = "\n".join(stderr_lines).strip()
 
         if result.returncode != 0:
             return {
                 "status": "error",
                 "error": stderr_clean[:2000] or f"openclaw agent exited with code {result.returncode}",
-                "stdout": stdout[:2000],
+                "stdout": stdout_clean[:2000],
                 "stderr": stderr_clean[:2000],
             }
 
         # 解析 JSON
         try:
-            parsed = json.loads(stdout)
+            parsed = json.loads(stdout_clean)
             oc_status = parsed.get("status", "unknown")
             summary = parsed.get("summary", "unknown")
             result_text = ""
@@ -157,7 +165,7 @@ def call_openclaw_agent(
         except json.JSONDecodeError:
             return {
                 "status": "completed_raw",
-                "raw_output": stdout[:5000],
+                "raw_output": stdout_clean[:5000],
                 "stderr": stderr_clean[:1000],
             }
 
