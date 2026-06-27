@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-CLS-020_20260625_020541_76be1c",
+  "intent_id": "DCI-TF3-CLS-020",
+  "session_id": null,
+  "prompt": "将 ToothFairy3 病例分成 usable 和 needs_manual_review，并输出病例级分类结果。",
+  "dataset": "ToothFairy3",
+  "task_type": "classification",
+  "started_at": "2026-06-25T02:05:41.290+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.296+08:00",
+  "error": null
+}

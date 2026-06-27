@@ -1,0 +1,63 @@
+{
+  "intent_id": "DCI-TDD-DET-006",
+  "intent_category": "standard",
+  "prompt": "把 TDD 的 teeth_bbox.json 整理成 COCO 牙齿检测数据集，供检测模型训练使用。",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed",
+  "actual_terminal_status": "completed",
+  "exception_handling": "completed",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.task_data_compatibility_check",
+    "data.bbox_validation",
+    "data.split_verification",
+    "report.structured_report_generation",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=TDD,task=detection,mode=data_export)",
+    "data_curator.tdd-curation.scripts/probe_tdd.py --dataset-root /data/data2/yiyang/DentalClaw/data/TDD --output-json agents/data_curator/reports/tdd_profile.json --output-md agents/data_curator/reports/tdd_profile.md",
+    "data_curator.tdd-curation.scripts/export_tdd.py --dataset-root /data/data2/yiyang/DentalClaw/data/TDD --output-root agents/data_curator/exports/<run_id> --tasks detection_teeth_coco",
+    "main.verify_coco_annotations(agents/data_curator/exports/<run_id>/detection_teeth_coco/annotations/instances.json)",
+    "main.return_export_manifest_and_annotation_path"
+  ],
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "export_tdd_to_nnunet",
+    "validate_dataset"
+  ],
+  "orchestrator_reasoning": [
+    {
+      "agent": "MainAgent",
+      "action": "parse_intent",
+      "reason": "解析自然语言 prompt，识别数据集=TDD、任务族=detection、任务=export_teeth_detection_coco、意图类别=standard。",
+      "target": {
+        "intent_id": "DCI-TDD-DET-006",
+        "dataset": "TDD",
+        "task_family": "detection",
+        "task": "export_teeth_detection_coco",
+        "intent_category": "standard"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "route_to_data_curator",
+      "reason": "任务需要数据探查、标注/QC检查或导出，因此先路由到 Data Curator，避免未经验证直接训练。",
+      "target": {
+        "dataset_path": "/data/data2/yiyang/DentalClaw/data/TDD",
+        "task": "export_teeth_detection_coco"
+      }
+    }
+  ],
+  "dry_run": true
+}

@@ -1,0 +1,74 @@
+{
+  "root": "/data/data2/yiyang/DentalClaw/workspace/trace_verify/20260624_121453/preprocessed_dataset",
+  "detected_dimension": "unknown",
+  "counts": {
+    "imagesTr": 0,
+    "labelsTr": 0,
+    "imagesVal": 0,
+    "labelsVal": 0,
+    "imagesTs": 0
+  },
+  "image_analysis": {
+    "sample_shapes": [],
+    "sample_modes": [],
+    "looks_like_panoramic_2d": false
+  },
+  "label_analysis": {
+    "sample_shapes": [],
+    "unique_values_preview": [],
+    "num_unique_values_preview": 0,
+    "max_label_value": null
+  },
+  "nnunet_cli_available": true,
+  "recommended_backend": "nnUNetv2_cli",
+  "nnunet_dataset_id": null,
+  "nnunet_layout_detected": false,
+  "nnunet_env": {
+    "nnUNet_raw": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw",
+    "nnUNet_preprocessed": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_preprocessed",
+    "nnUNet_results": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results"
+  },
+  "training_requirements": {
+    "initial_configs": [
+      {
+        "backend": "builtin_nnunet_style_2d",
+        "model_name": "verify_128_c8",
+        "base_channels": 8,
+        "depth": 4,
+        "img_size": 128,
+        "batch_size": 2,
+        "lr": 0.001,
+        "weight_decay": 0.0001,
+        "epochs": 1,
+        "seed": 2026
+      },
+      {
+        "backend": "builtin_nnunet_style_2d",
+        "model_name": "verify_160_c8",
+        "base_channels": 8,
+        "depth": 4,
+        "img_size": 160,
+        "batch_size": 2,
+        "lr": 0.0005,
+        "weight_decay": 5e-05,
+        "epochs": 1,
+        "seed": 2027
+      }
+    ],
+    "img_sizes": [
+      128,
+      160,
+      192
+    ],
+    "base_channels": [
+      8,
+      12,
+      16
+    ],
+    "weight_decays": [
+      0.0001,
+      5e-05
+    ]
+  },
+  "warnings": []
+}

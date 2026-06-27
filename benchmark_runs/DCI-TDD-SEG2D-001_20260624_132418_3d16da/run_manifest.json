@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TDD-SEG2D-001_20260624_132418_3d16da",
+  "intent_id": "DCI-TDD-SEG2D-001",
+  "session_id": null,
+  "prompt": "用 TDD 全景片训练一个默认牙齿二值分割模型，并保留 10% 测试集。",
+  "dataset": "TDD",
+  "task_type": "segmentation_2d",
+  "started_at": "2026-06-24T13:24:18.054+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-24T13:24:18.056+08:00",
+  "error": null
+}

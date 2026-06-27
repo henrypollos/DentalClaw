@@ -1,0 +1,60 @@
+{
+  "intent_id": "DCI-P2D-CLS-029",
+  "prompt": "用私有 2D 牙片训练疾病分类模型。",
+  "dataset": "Private2D",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+  "task_family": "classification",
+  "task": "private_2d_disease_classifier",
+  "intent_category": "boundary",
+  "expected_behavior": "reject_or_explain",
+  "expected_terminal_status": "unsupported_missing_classification_labels",
+  "terminal_status": "unsupported_missing_classification_labels",
+  "exception_handling": "reject_or_explain",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset"
+  ],
+  "tool_call_count": 4,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-CLS-029_20260625_012902_917754",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.missing_annotation_check",
+    "coordinator.unsupported_capability_response",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task_family=classification,task=private_2d_disease_classifier,category=boundary)",
+    "data_curator.probe_dataset --dataset-root /data/data2/yiyang/DentalClaw/data/2d",
+    "main.check_platform_capability_registry",
+    "main.unsupported_capability_response(terminal_status=unsupported_missing_classification_labels)",
+    "main.stop_without_training"
+  ],
+  "success_criteria": [
+    "detects missing disease labels",
+    "does not treat mask filenames as class labels",
+    "does not train segmentation model",
+    "does not invent accuracy"
+  ],
+  "forbidden_paths": [
+    "tooth_autotrain_nnunet",
+    "raw classifier training script without labels",
+    "TDD/ToothFairy3 routes"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-CLS-029_20260625_012902_917754/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-CLS-029_20260625_012902_917754/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-CLS-029_20260625_012902_917754/artifacts_manifest.json"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-SEG3D-013_20260625_020541_4ea4ab",
+  "intent_id": "DCI-TF3-SEG3D-013",
+  "session_id": null,
+  "prompt": "用已有 ToothFairy3 3D 分割模型对验证/测试 CBCT 做推理评估。",
+  "dataset": "ToothFairy3",
+  "task_type": "segmentation_3d",
+  "started_at": "2026-06-25T02:05:41.228+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.231+08:00",
+  "error": null
+}

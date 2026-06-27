@@ -1,0 +1,31 @@
+{
+  "intent_total": 30,
+  "run_count": 30,
+  "missing_run_count": 0,
+  "overall_pass_rate": 1.0,
+  "mean_path_node_recall": 1.0,
+  "mean_path_order_score": 1.0,
+  "standard_end_to_end_completion_rate": 1.0,
+  "ambiguity_recognition_rate": 1.0,
+  "trap_detection_and_handling_rate": 1.0,
+  "boundary_recognition_rate": 1.0,
+  "standard_false_positive_rate": 0.0,
+  "by_category": {
+    "standard": {
+      "count": 11,
+      "pass_rate": 1.0
+    },
+    "ambiguous": {
+      "count": 6,
+      "pass_rate": 1.0
+    },
+    "boundary": {
+      "count": 7,
+      "pass_rate": 1.0
+    },
+    "trap": {
+      "count": 6,
+      "pass_rate": 1.0
+    }
+  }
+}

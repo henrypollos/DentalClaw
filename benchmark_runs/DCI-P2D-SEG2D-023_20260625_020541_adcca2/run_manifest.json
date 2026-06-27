@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-P2D-SEG2D-023_20260625_020541_adcca2",
+  "intent_id": "DCI-P2D-SEG2D-023",
+  "session_id": null,
+  "prompt": "帮我给私有 2D 数据出一份临床结果报告。",
+  "dataset": "Private2D",
+  "task_type": "segmentation_2d",
+  "started_at": "2026-06-25T02:05:41.307+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.310+08:00",
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-P2D-SEG2D-025_20260624_133841_e3d5e4",
+  "intent_id": "DCI-P2D-SEG2D-025",
+  "session_id": null,
+  "prompt": "将私有 2D 数据整理成 DentalClaw canonical case 格式，再导出分割训练格式。",
+  "dataset": "Private2D",
+  "task_type": "segmentation_2d",
+  "started_at": "2026-06-24T13:38:41.361+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-24T13:38:41.362+08:00",
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TDD-DET-008_20260625_012902_a559f1",
+  "intent_id": "DCI-TDD-DET-008",
+  "session_id": null,
+  "prompt": "检查 TDD 检测框是否存在越界、重复或病例泄漏；如果发现阻断性缺陷就停止并列出证据。",
+  "dataset": "TDD",
+  "task_type": "detection",
+  "started_at": "2026-06-25T01:29:02.512+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T01:29:02.516+08:00",
+  "error": null
+}

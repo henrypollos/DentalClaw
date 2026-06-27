@@ -1,0 +1,65 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-022",
+  "prompt": "对私有 2D imagesVal 做分割推理，并用 labelsVal 计算指标。",
+  "dataset": "Private2D",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+  "task_family": "segmentation_2d",
+  "task": "private_2d_inference_eval",
+  "intent_category": "standard",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed",
+  "terminal_status": "completed",
+  "exception_handling": "completed",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_inference"
+  ],
+  "tool_call_count": 5,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-022_20260625_020541_dbdc1e",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.image_annotation_pairing_check",
+    "data.shape_consistency_check",
+    "experiment.inference",
+    "experiment.standardized_evaluation",
+    "report.metric_aggregation",
+    "report.visualization_builder",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task=segmentation_2d,mode=inference_eval)",
+    "main.resolve_existing_private2d_model_or_checkpoint",
+    "main.resolve_dataset_spec(root=/data/data2/yiyang/DentalClaw/data/2d,input_dir=imagesVal,gt_dir=labelsVal)",
+    "experimentation.tooth_autoinfer_nnunet.scripts/run_inference.py --model-path <checkpoint> --dataset-spec <private2d_dataset_spec.json> --task-spec <binary_2d_seg_task_spec.json> --output-dir /data/data2/yiyang/DentalClaw/artifacts/inference_runs/<run_id> --input-dir /data/data2/yiyang/DentalClaw/data/2d/imagesVal --gt-dir /data/data2/yiyang/DentalClaw/data/2d/labelsVal",
+    "main.read_inference_summary_and_return_metrics"
+  ],
+  "success_criteria": [
+    "uses labelsVal for metrics",
+    "does not train if a checkpoint is supplied",
+    "reports metrics only from generated summary",
+    "keeps outputs under artifacts/inference_runs"
+  ],
+  "forbidden_paths": [
+    "TDD dataset paths",
+    "cbct_qc",
+    "clinical report without user asking for report"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-022_20260625_020541_dbdc1e/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-022_20260625_020541_dbdc1e/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-022_20260625_020541_dbdc1e/artifacts_manifest.json"
+  }
+}

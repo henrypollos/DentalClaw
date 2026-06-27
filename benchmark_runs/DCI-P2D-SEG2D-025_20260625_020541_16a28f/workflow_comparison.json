@@ -1,0 +1,66 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-025",
+  "intent_category": "standard",
+  "prompt": "将私有 2D 数据整理成 DentalClaw canonical case 格式，再导出分割训练格式。",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed",
+  "actual_terminal_status": "completed",
+  "exception_handling": "completed",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.image_annotation_pairing_check",
+    "data.shape_consistency_check",
+    "data.label_normalization",
+    "data.split_verification",
+    "report.structured_report_generation",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task=segmentation_2d,mode=canonical_export)",
+    "data_curator.local_dataset_intake.scripts/intake_local_dataset.py --source /data/data2/yiyang/DentalClaw/data/2d --output-root agents/data_curator/intake/<run_id> --mode symlink_or_index",
+    "data_curator.dataset_prober.scripts/probe_dataset.py --dataset-root /data/data2/yiyang/DentalClaw/data/2d --output-json agents/data_curator/reports/<run_id>/probe.json --output-md agents/data_curator/reports/<run_id>/probe.md",
+    "data_curator.case_builder.scripts/build_cases.py --probe-json agents/data_curator/reports/<run_id>/probe.json --output-jsonl agents/data_curator/reports/<run_id>/cases.jsonl",
+    "data_curator.canonical_packager.scripts/package_canonical.py --cases-jsonl agents/data_curator/reports/<run_id>/cases.jsonl --output-root agents/data_curator/canonical/<run_id>",
+    "data_curator.split_manager.scripts/create_split.py --canonical-root agents/data_curator/canonical/<run_id> --output-json agents/data_curator/canonical/<run_id>/splits.json",
+    "data_curator.task_exporter.scripts/export_tasks.py --canonical-root agents/data_curator/canonical/<run_id> --splits-json agents/data_curator/canonical/<run_id>/splits.json --tasks segmentation --output-root agents/data_curator/exports/<run_id>",
+    "main.verify_export_manifest"
+  ],
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset"
+  ],
+  "orchestrator_reasoning": [
+    {
+      "agent": "MainAgent",
+      "action": "parse_intent",
+      "reason": "解析自然语言 prompt，识别数据集=Private2D、任务族=segmentation_2d、任务=private_2d_canonical_export、意图类别=standard。",
+      "target": {
+        "intent_id": "DCI-P2D-SEG2D-025",
+        "dataset": "Private2D",
+        "task_family": "segmentation_2d",
+        "task": "private_2d_canonical_export",
+        "intent_category": "standard"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "route_to_data_curator",
+      "reason": "任务需要数据探查、标注/QC检查或导出，因此先路由到 Data Curator，避免未经验证直接训练。",
+      "target": {
+        "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+        "task": "private_2d_canonical_export"
+      }
+    }
+  ],
+  "dry_run": true
+}

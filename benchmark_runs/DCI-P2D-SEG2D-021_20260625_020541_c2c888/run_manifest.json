@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-P2D-SEG2D-021_20260625_020541_c2c888",
+  "intent_id": "DCI-P2D-SEG2D-021",
+  "session_id": null,
+  "prompt": "用私有 2D 数据 imagesTr/labelsTr 训练牙齿分割模型，并用 imagesVal/labelsVal 验证。",
+  "dataset": "Private2D",
+  "task_type": "segmentation_2d",
+  "started_at": "2026-06-25T02:05:41.297+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.303+08:00",
+  "error": null
+}

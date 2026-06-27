@@ -1,0 +1,8 @@
+{
+  "intent_id": "DCI-TF3-SEG3D-012",
+  "pattern": "artifacts/training_runs/<run_id>/run_status.json",
+  "generated_by": "benchmark_trace.run_intent",
+  "dry_run": true,
+  "terminal_status": "blocked_manual_review_cases_present",
+  "note": "Placeholder artifact for benchmark trace evaluation; real platform runs should replace this with produced output."
+}

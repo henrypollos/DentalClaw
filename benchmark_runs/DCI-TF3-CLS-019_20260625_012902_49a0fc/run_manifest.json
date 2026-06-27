@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-CLS-019_20260625_012902_49a0fc",
+  "intent_id": "DCI-TF3-CLS-019",
+  "session_id": null,
+  "prompt": "帮我按 ToothFairy3 的子集类型做一个分类实验。",
+  "dataset": "ToothFairy3",
+  "task_type": "classification",
+  "started_at": "2026-06-25T01:29:02.671+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T01:29:02.674+08:00",
+  "error": null
+}

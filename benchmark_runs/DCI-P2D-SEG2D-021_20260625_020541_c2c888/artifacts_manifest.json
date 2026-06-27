@@ -1,0 +1,22 @@
+[
+  {
+    "expected_pattern": "agents/data_curator/reports/<run_id>/probe.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/agents/data_curator/reports/<run_id>/probe.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/results/reports/datasets_qc/<run_id>.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/artifacts/results/reports/datasets_qc/<run_id>.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/training_runs/<run_id>/run_status.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/artifacts/training_runs/<run_id>/run_status.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/training_runs/<run_id>/main_handoff.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/artifacts/training_runs/<run_id>/main_handoff.md",
+    "placeholder": true
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-DET-016_20260625_020541_63a0d1",
+  "intent_id": "DCI-TF3-DET-016",
+  "session_id": null,
+  "prompt": "从 ToothFairy3 3D 标签中导出牙齿检测框数据集。",
+  "dataset": "ToothFairy3",
+  "task_type": "detection",
+  "started_at": "2026-06-25T02:05:41.239+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.242+08:00",
+  "error": null
+}

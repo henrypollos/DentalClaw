@@ -1,0 +1,8 @@
+{
+  "intent_id": "DCI-TDD-SEG2D-004",
+  "pattern": "artifacts/inference_runs/<run_id>/overlays/*.png",
+  "generated_by": "benchmark_trace.run_intent",
+  "dry_run": true,
+  "terminal_status": "completed",
+  "note": "Placeholder artifact for benchmark trace evaluation; real platform runs should replace this with produced output."
+}

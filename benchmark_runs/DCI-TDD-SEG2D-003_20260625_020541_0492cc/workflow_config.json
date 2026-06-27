@@ -1,0 +1,54 @@
+{
+  "intent_id": "DCI-TDD-SEG2D-003",
+  "prompt": "帮我用 TDD 做一个区域分割模型，训练好后告诉我效果。",
+  "dataset": "TDD",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "task_family": "segmentation_2d",
+  "task": "maxillomandibular_binary_train",
+  "intent_category": "ambiguous",
+  "expected_behavior": "ask_clarification",
+  "expected_terminal_status": "awaiting_clarification",
+  "terminal_status": "awaiting_clarification",
+  "exception_handling": "request_clarification",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check"
+  ],
+  "tool_call_count": 2,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-003_20260625_020541_0492cc",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "coordinator.ambiguity_detection",
+    "coordinator.request_clarification",
+    "coordinator.await_user_response",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=TDD,task_family=segmentation_2d,task=maxillomandibular_binary_train,category=ambiguous)",
+    "main.dataset_registry_lookup(dataset=TDD,path=/data/data2/yiyang/DentalClaw/data/TDD)",
+    "main.detect_ambiguity(missing_fields=target_anatomy_or_label_schema|train_or_inference_or_report|model_or_case_id)",
+    "main.request_clarification(do_not_train_or_infer=true)",
+    "main.await_user_response"
+  ],
+  "success_criteria": [
+    "uses maxillomandibular_binary exporter task",
+    "does not substitute teeth_binary",
+    "checks holdout labels before training",
+    "training route remains spec-driven"
+  ],
+  "forbidden_paths": [
+    "teeth_binary export for this intent",
+    "manual dataset.json patching",
+    "direct nnUNetv2_plan_and_preprocess from main"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-003_20260625_020541_0492cc/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-003_20260625_020541_0492cc/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-003_20260625_020541_0492cc/artifacts_manifest.json"
+  }
+}

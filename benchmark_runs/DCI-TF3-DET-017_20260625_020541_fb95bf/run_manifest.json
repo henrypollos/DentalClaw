@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-DET-017_20260625_020541_fb95bf",
+  "intent_id": "DCI-TF3-DET-017",
+  "session_id": null,
+  "prompt": "用 ToothFairy3 训练 3D 牙齿检测模型，并报告检测 mAP。",
+  "dataset": "ToothFairy3",
+  "task_type": "detection",
+  "started_at": "2026-06-25T02:05:41.243+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.246+08:00",
+  "error": null
+}

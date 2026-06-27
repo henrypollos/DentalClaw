@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-P2D-SEG2D-022_20260625_020541_dbdc1e",
+  "intent_id": "DCI-P2D-SEG2D-022",
+  "session_id": null,
+  "prompt": "对私有 2D imagesVal 做分割推理，并用 labelsVal 计算指标。",
+  "dataset": "Private2D",
+  "task_type": "segmentation_2d",
+  "started_at": "2026-06-25T02:05:41.304+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.306+08:00",
+  "error": null
+}

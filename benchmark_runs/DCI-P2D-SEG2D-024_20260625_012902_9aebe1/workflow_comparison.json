@@ -1,0 +1,92 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-024",
+  "intent_category": "trap",
+  "prompt": "先检查私有 2D 数据的 train/val/test split 是否存在泄漏或错配；发现阻断问题则不要训练。",
+  "expected_behavior": "warn_and_stop",
+  "expected_terminal_status": "blocked_split_leakage_or_pairing_qc",
+  "actual_terminal_status": "blocked_split_leakage_or_pairing_qc",
+  "exception_handling": "warn_and_stop",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.image_annotation_pairing_check",
+    "data.shape_consistency_check",
+    "data.label_normalization",
+    "data.split_verification",
+    "data.patient_leakage_check",
+    "data.issue_warning",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task_family=segmentation_2d,task=private_2d_split_validation_train,category=trap)",
+    "data_curator.probe_dataset --dataset-root /data/data2/yiyang/DentalClaw/data/2d",
+    "data_curator.validate_or_qc_dataset --dataset-root /data/data2/yiyang/DentalClaw/data/2d --strict true",
+    "main.inspect_qc_for_blocking_findings",
+    "main.warn_and_stop(terminal_status=blocked_split_leakage_or_pairing_qc)"
+  ],
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_dataset_qc"
+  ],
+  "orchestrator_reasoning": [
+    {
+      "agent": "MainAgent",
+      "action": "parse_intent",
+      "reason": "解析自然语言 prompt，识别数据集=Private2D、任务族=segmentation_2d、任务=private_2d_split_validation_train、意图类别=trap。",
+      "target": {
+        "intent_id": "DCI-P2D-SEG2D-024",
+        "dataset": "Private2D",
+        "task_family": "segmentation_2d",
+        "task": "private_2d_split_validation_train",
+        "intent_category": "trap"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "route_to_data_curator",
+      "reason": "任务需要数据探查、标注/QC检查或导出，因此先路由到 Data Curator，避免未经验证直接训练。",
+      "target": {
+        "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+        "task": "private_2d_split_validation_train"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "warn_and_stop",
+      "reason": "任务表述清晰，但数据/QC 检查暴露出已知缺陷；为了避免污染实验结果，停止训练或推理并要求人工确认。",
+      "target": {
+        "expected_terminal_status": "blocked_split_leakage_or_pairing_qc",
+        "success_criteria": [
+          "split QC precedes training",
+          "blocking leakage prevents training",
+          "existing imagesTr/imagesVal/imagesTs folders are respected",
+          "training route is maintained spec-driven"
+        ]
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "stop_without_training",
+      "reason": "陷阱意图的数据缺陷已被验证，必须阻断训练/推理并保留人工复核入口。",
+      "target": {
+        "blocked_actions": [
+          "model_training",
+          "inference",
+          "report_generation"
+        ]
+      }
+    }
+  ],
+  "dry_run": true
+}

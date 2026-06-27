@@ -1,0 +1,12 @@
+{
+  "run_id": "TRACE_SMOKE_TEST_20260624_120922_1bd0eb",
+  "intent_id": "TRACE_SMOKE_TEST",
+  "session_id": null,
+  "prompt": "测试工具追踪功能",
+  "dataset": "dummy_dataset",
+  "task_type": "trace_test",
+  "started_at": "2026-06-24T12:09:22.351+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-24T12:09:22.352+08:00",
+  "error": null
+}

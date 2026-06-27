@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TDD-CLS-009_20260625_012902_5e37f4",
+  "intent_id": "DCI-TDD-CLS-009",
+  "session_id": null,
+  "prompt": "用 TDD 全景片训练一个病例级疾病分类模型。",
+  "dataset": "TDD",
+  "task_type": "classification",
+  "started_at": "2026-06-25T01:29:02.517+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T01:29:02.539+08:00",
+  "error": null
+}

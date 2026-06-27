@@ -1,0 +1,64 @@
+{
+  "intent_id": "DCI-TF3-SEG3D-014",
+  "prompt": "训练 ToothFairy3 前先严格检查标签值是否合法；若有非法标签值就阻断训练并列出病例。",
+  "dataset": "ToothFairy3",
+  "dataset_path": "/data/data2/yiyang/JoD/ToothFairy3_LPS",
+  "task_family": "segmentation_3d",
+  "task": "label_schema_validation_blocking",
+  "intent_category": "trap",
+  "expected_behavior": "warn_and_stop",
+  "expected_terminal_status": "blocked_invalid_label_values",
+  "terminal_status": "blocked_invalid_label_values",
+  "exception_handling": "warn_and_stop",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_dataset_qc"
+  ],
+  "tool_call_count": 5,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-014_20260625_020541_e969d1",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.voxel_spacing_check",
+    "data.fov_consistency_check",
+    "data.split_verification",
+    "data.issue_warning",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=ToothFairy3,task_family=segmentation_3d,task=label_schema_validation_blocking,category=trap)",
+    "data_curator.probe_dataset --dataset-root /data/data2/yiyang/JoD/ToothFairy3_LPS",
+    "data_curator.validate_or_qc_dataset --dataset-root /data/data2/yiyang/JoD/ToothFairy3_LPS --strict true",
+    "main.inspect_qc_for_blocking_findings",
+    "main.warn_and_stop(terminal_status=blocked_invalid_label_values)"
+  ],
+  "success_criteria": [
+    "strict label schema is supplied",
+    "blocking invalid labels prevent training",
+    "case IDs and reasons are reported",
+    "no source labels are modified silently"
+  ],
+  "forbidden_paths": [
+    "training despite blocking invalid labels",
+    "manual label value remapping without a skill/report",
+    "ignoring cohort_summary.json"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-014_20260625_020541_e969d1/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-014_20260625_020541_e969d1/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-014_20260625_020541_e969d1/artifacts_manifest.json"
+  }
+}

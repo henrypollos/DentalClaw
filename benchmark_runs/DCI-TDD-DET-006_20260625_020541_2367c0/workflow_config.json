@@ -1,0 +1,63 @@
+{
+  "intent_id": "DCI-TDD-DET-006",
+  "prompt": "把 TDD 的 teeth_bbox.json 整理成 COCO 牙齿检测数据集，供检测模型训练使用。",
+  "dataset": "TDD",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "task_family": "detection",
+  "task": "export_teeth_detection_coco",
+  "intent_category": "standard",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed",
+  "terminal_status": "completed",
+  "exception_handling": "completed",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "export_tdd_to_nnunet",
+    "validate_dataset"
+  ],
+  "tool_call_count": 5,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-DET-006_20260625_020541_2367c0",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.task_data_compatibility_check",
+    "data.bbox_validation",
+    "data.split_verification",
+    "report.structured_report_generation",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=TDD,task=detection,mode=data_export)",
+    "data_curator.tdd-curation.scripts/probe_tdd.py --dataset-root /data/data2/yiyang/DentalClaw/data/TDD --output-json agents/data_curator/reports/tdd_profile.json --output-md agents/data_curator/reports/tdd_profile.md",
+    "data_curator.tdd-curation.scripts/export_tdd.py --dataset-root /data/data2/yiyang/DentalClaw/data/TDD --output-root agents/data_curator/exports/<run_id> --tasks detection_teeth_coco",
+    "main.verify_coco_annotations(agents/data_curator/exports/<run_id>/detection_teeth_coco/annotations/instances.json)",
+    "main.return_export_manifest_and_annotation_path"
+  ],
+  "success_criteria": [
+    "routes to data_curator only",
+    "uses TDD bbox JSON, not segmentation masks",
+    "produces COCO categories/images/annotations",
+    "does not launch segmentation training"
+  ],
+  "forbidden_paths": [
+    "tdd-nnunet-export for a detection-only export",
+    "tooth_autotrain_nnunet",
+    "manual bbox parsing in chat"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-DET-006_20260625_020541_2367c0/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-DET-006_20260625_020541_2367c0/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-DET-006_20260625_020541_2367c0/artifacts_manifest.json"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "status": "dry_run_command_generated",
+  "command": "python agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/export_tdd_to_nnunet.py --dataset-root /data/data2/yiyang/DentalClaw/data/TDD --output-root artifacts/datasets/nnUNet --task maxillomandibular_binary --test-ratio 0.1",
+  "dataset_id": "DatasetXXX",
+  "dataset_name": "TDDMaxillomandibularBinary2D",
+  "output_path": "artifacts/datasets/nnUNet/nnUNet_raw/DatasetXXX_TDDMaxillomandibularBinary2D"
+}

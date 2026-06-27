@@ -1,0 +1,64 @@
+{
+  "intent_id": "DCI-P2D-DET-026",
+  "prompt": "用私有 2D 数据训练牙齿检测模型。",
+  "dataset": "Private2D",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+  "task_family": "detection",
+  "task": "private_2d_detector_train_missing_bbox",
+  "intent_category": "boundary",
+  "expected_behavior": "reject_or_explain",
+  "expected_terminal_status": "unsupported_missing_detection_annotations",
+  "terminal_status": "unsupported_missing_detection_annotations",
+  "exception_handling": "reject_or_explain",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset"
+  ],
+  "tool_call_count": 4,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-026_20260625_020541_8a6508",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.task_data_compatibility_check",
+    "data.missing_annotation_check",
+    "data.split_verification",
+    "data.patient_leakage_check",
+    "coordinator.unsupported_capability_response",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task_family=detection,task=private_2d_detector_train_missing_bbox,category=boundary)",
+    "data_curator.probe_dataset --dataset-root /data/data2/yiyang/DentalClaw/data/2d",
+    "main.check_platform_capability_registry",
+    "main.unsupported_capability_response(terminal_status=unsupported_missing_detection_annotations)",
+    "main.stop_without_training"
+  ],
+  "success_criteria": [
+    "detects missing detection annotations",
+    "does not derive labels silently from masks",
+    "does not launch segmentation training",
+    "does not fake mAP"
+  ],
+  "forbidden_paths": [
+    "tooth_autotrain_nnunet",
+    "tdd-curation export_tdd.py",
+    "invented COCO annotations"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-026_20260625_020541_8a6508/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-026_20260625_020541_8a6508/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-026_20260625_020541_8a6508/artifacts_manifest.json"
+  }
+}

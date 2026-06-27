@@ -1,0 +1,22 @@
+[
+  {
+    "expected_pattern": "artifacts/inference_runs/<case_id>/<case>.png",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_020541_e90391/artifacts/inference_runs/<case_id>/<case>.png",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/reports/clinical/<case_id>/report.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_020541_e90391/artifacts/reports/clinical/<case_id>/report.md",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/reports/clinical/<case_id>/summary.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_020541_e90391/artifacts/reports/clinical/<case_id>/summary.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/reports/clinical/<case_id>/overlay.png",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_020541_e90391/artifacts/reports/clinical/<case_id>/overlay.png",
+    "placeholder": true
+  }
+]

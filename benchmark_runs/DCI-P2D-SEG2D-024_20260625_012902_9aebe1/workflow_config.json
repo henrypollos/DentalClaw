@@ -1,0 +1,66 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-024",
+  "prompt": "先检查私有 2D 数据的 train/val/test split 是否存在泄漏或错配；发现阻断问题则不要训练。",
+  "dataset": "Private2D",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+  "task_family": "segmentation_2d",
+  "task": "private_2d_split_validation_train",
+  "intent_category": "trap",
+  "expected_behavior": "warn_and_stop",
+  "expected_terminal_status": "blocked_split_leakage_or_pairing_qc",
+  "terminal_status": "blocked_split_leakage_or_pairing_qc",
+  "exception_handling": "warn_and_stop",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_dataset_qc"
+  ],
+  "tool_call_count": 5,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-024_20260625_012902_9aebe1",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.image_annotation_pairing_check",
+    "data.shape_consistency_check",
+    "data.label_normalization",
+    "data.split_verification",
+    "data.patient_leakage_check",
+    "data.issue_warning",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task_family=segmentation_2d,task=private_2d_split_validation_train,category=trap)",
+    "data_curator.probe_dataset --dataset-root /data/data2/yiyang/DentalClaw/data/2d",
+    "data_curator.validate_or_qc_dataset --dataset-root /data/data2/yiyang/DentalClaw/data/2d --strict true",
+    "main.inspect_qc_for_blocking_findings",
+    "main.warn_and_stop(terminal_status=blocked_split_leakage_or_pairing_qc)"
+  ],
+  "success_criteria": [
+    "split QC precedes training",
+    "blocking leakage prevents training",
+    "existing imagesTr/imagesVal/imagesTs folders are respected",
+    "training route is maintained spec-driven"
+  ],
+  "forbidden_paths": [
+    "creating random split before reading existing split folders",
+    "TDD exporter",
+    "manual source file moves"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-024_20260625_012902_9aebe1/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-024_20260625_012902_9aebe1/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-024_20260625_012902_9aebe1/artifacts_manifest.json"
+  }
+}

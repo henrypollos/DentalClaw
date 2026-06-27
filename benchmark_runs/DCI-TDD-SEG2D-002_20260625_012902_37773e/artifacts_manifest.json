@@ -1,0 +1,22 @@
+[
+  {
+    "expected_pattern": "artifacts/datasets/nnUNet/nnUNet_raw/Dataset*_TDDTeeth32Class2D/dataset.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-002_20260625_012902_37773e/artifacts/datasets/nnUNet/nnUNet_raw/Dataset*_TDDTeeth32Class2D/dataset.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/datasets/nnUNet/nnUNet_delivery_Dataset*_TDDTeeth32Class2D.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-002_20260625_012902_37773e/artifacts/datasets/nnUNet/nnUNet_delivery_Dataset*_TDDTeeth32Class2D.md",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/results/reports/datasets_qc/Dataset*_TDDTeeth32Class2D.qc.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-002_20260625_012902_37773e/artifacts/results/reports/datasets_qc/Dataset*_TDDTeeth32Class2D.qc.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/training_runs/<run_id>/main_handoff.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-002_20260625_012902_37773e/artifacts/training_runs/<run_id>/main_handoff.md",
+    "placeholder": true
+  }
+]

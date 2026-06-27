@@ -1,0 +1,54 @@
+{
+  "intent_id": "DCI-TDD-SEG2D-005",
+  "prompt": "帮我从 TDD 里挑一个病例出一份牙齿相关报告。",
+  "dataset": "TDD",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "task_family": "segmentation_2d",
+  "task": "segmentation_clinical_report",
+  "intent_category": "ambiguous",
+  "expected_behavior": "ask_clarification",
+  "expected_terminal_status": "awaiting_clarification",
+  "terminal_status": "awaiting_clarification",
+  "exception_handling": "request_clarification",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check"
+  ],
+  "tool_call_count": 2,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_012902_e80031",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "coordinator.ambiguity_detection",
+    "coordinator.request_clarification",
+    "coordinator.await_user_response",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=TDD,task_family=segmentation_2d,task=segmentation_clinical_report,category=ambiguous)",
+    "main.dataset_registry_lookup(dataset=TDD,path=/data/data2/yiyang/DentalClaw/data/TDD)",
+    "main.detect_ambiguity(missing_fields=target_anatomy_or_label_schema|train_or_inference_or_report|model_or_case_id)",
+    "main.request_clarification(do_not_train_or_infer=true)",
+    "main.await_user_response"
+  ],
+  "success_criteria": [
+    "inference happens before report generation",
+    "reporting is routed to clinical_result, not experimentation",
+    "final output cites report artifact paths",
+    "does not expose private notes"
+  ],
+  "forbidden_paths": [
+    "clinical report without a predicted mask",
+    "training a new model for report generation unless requested",
+    "raw logs as final report"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_012902_e80031/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_012902_e80031/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-005_20260625_012902_e80031/artifacts_manifest.json"
+  }
+}

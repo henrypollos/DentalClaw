@@ -1,0 +1,17 @@
+[
+  {
+    "expected_pattern": "agents/data_curator/reports/cbct_qc/<run_id>/cohort_summary.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-012_20260625_012902_20bddd/agents/data_curator/reports/cbct_qc/<run_id>/cohort_summary.md",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "agents/data_curator/reports/cbct_qc/<run_id>/normalized_cases.jsonl",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-012_20260625_012902_20bddd/agents/data_curator/reports/cbct_qc/<run_id>/normalized_cases.jsonl",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/training_runs/<run_id>/run_status.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TF3-SEG3D-012_20260625_012902_20bddd/artifacts/training_runs/<run_id>/run_status.json",
+    "placeholder": true
+  }
+]

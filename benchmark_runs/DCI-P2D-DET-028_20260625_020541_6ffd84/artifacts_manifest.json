@@ -1,0 +1,17 @@
+[
+  {
+    "expected_pattern": "agents/data_curator/intake/<run_id>/intake_manifest.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-028_20260625_020541_6ffd84/agents/data_curator/intake/<run_id>/intake_manifest.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "agents/data_curator/reports/<run_id>/cases.jsonl",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-028_20260625_020541_6ffd84/agents/data_curator/reports/<run_id>/cases.jsonl",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "agents/data_curator/reports/<run_id>/probe.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-028_20260625_020541_6ffd84/agents/data_curator/reports/<run_id>/probe.md",
+    "placeholder": true
+  }
+]

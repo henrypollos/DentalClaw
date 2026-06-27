@@ -1,0 +1,70 @@
+{
+  "intent_id": "DCI-TDD-SEG2D-001",
+  "prompt": "用 TDD 全景片训练一个默认牙齿二值分割模型，并保留 10% 测试集。",
+  "dataset": "TDD",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/TDD",
+  "task_family": "segmentation_2d",
+  "task": "teeth_binary_train",
+  "intent_category": "standard",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed_or_running_detached",
+  "terminal_status": "completed_or_running_detached",
+  "exception_handling": "completed",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "export_tdd_to_nnunet",
+    "validate_dataset",
+    "run_dataset_qc",
+    "run_training"
+  ],
+  "tool_call_count": 7,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-001_20260625_020541_36b6fd",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.label_normalization",
+    "data.split_verification",
+    "data.patient_leakage_check",
+    "experiment.task_schema_builder",
+    "experiment.experiment_config_generator",
+    "experiment.model_training",
+    "experiment.model_selection",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=TDD,task=segmentation_2d,mode=train,default_task=teeth_binary)",
+    "data_curator.tdd-nnunet-export.scripts/export_tdd_to_nnunet.py --dataset-root /data/data2/yiyang/DentalClaw/data/TDD --output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet --task teeth_binary --test-ratio 0.1",
+    "main.read_export_delivery_and_qc(artifacts/datasets/nnUNet/nnUNet_delivery_Dataset*_TDDTeethBinary2D.status.json,artifacts/results/reports/datasets_qc/Dataset*_TDDTeethBinary2D.qc.md)",
+    "data_curator.tdd-nnunet-export.scripts/build_ready_training_subset.py if QC selects ready-only cases",
+    "experimentation.tooth_autotrain_nnunet.scripts/run_training.py --dataset-spec <TDDTeethBinary2D_dataset_spec.json> --task-spec <teeth_binary_task_spec.json> --budget-spec <budget_spec.json> --workspace /data/data2/yiyang/DentalClaw/artifacts/training_runs/<run_id> --detach",
+    "main.monitor_training(launcher_status.json,run_status.json,search_events.jsonl,history.json)",
+    "main.collect_handoff(main_handoff.md,search_strategy.md,report/summary.md)"
+  ],
+  "success_criteria": [
+    "uses teeth_binary unless the user explicitly asks for 32-class",
+    "export status is completed or already_exists before training",
+    "training is launched through the maintained spec-driven DentalClaw entrypoint",
+    "actual path does not call raw nnUNet CLI directly from main"
+  ],
+  "forbidden_paths": [
+    "agents/data_curator/scripts/tdd_to_nnunet.py",
+    "direct nnUNetv2_train from main",
+    "ad hoc launcher under artifacts/results/training_runs"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-001_20260625_020541_36b6fd/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-001_20260625_020541_36b6fd/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-SEG2D-001_20260625_020541_36b6fd/artifacts_manifest.json"
+  }
+}

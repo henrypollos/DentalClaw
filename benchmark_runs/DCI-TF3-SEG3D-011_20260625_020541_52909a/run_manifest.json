@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-SEG3D-011_20260625_020541_52909a",
+  "intent_id": "DCI-TF3-SEG3D-011",
+  "session_id": null,
+  "prompt": "在 ToothFairy3 CBCT 数据上训练 3D 多类别牙齿分割模型。",
+  "dataset": "ToothFairy3",
+  "task_type": "segmentation_3d",
+  "started_at": "2026-06-25T02:05:41.205+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.223+08:00",
+  "error": null
+}

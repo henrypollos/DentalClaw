@@ -1,0 +1,70 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-021",
+  "prompt": "用私有 2D 数据 imagesTr/labelsTr 训练牙齿分割模型，并用 imagesVal/labelsVal 验证。",
+  "dataset": "Private2D",
+  "dataset_path": "/data/data2/yiyang/DentalClaw/data/2d",
+  "task_family": "segmentation_2d",
+  "task": "private_2d_segmentation_train",
+  "intent_category": "standard",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed_or_running_detached",
+  "terminal_status": "completed_or_running_detached",
+  "exception_handling": "completed",
+  "dry_run": true,
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_dataset_qc",
+    "run_training"
+  ],
+  "tool_call_count": 6,
+  "errors": [],
+  "workspace": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.image_annotation_pairing_check",
+    "data.shape_consistency_check",
+    "data.label_normalization",
+    "data.split_verification",
+    "data.patient_leakage_check",
+    "experiment.task_schema_builder",
+    "experiment.experiment_config_generator",
+    "experiment.model_training",
+    "experiment.model_selection",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task=segmentation_2d,mode=train)",
+    "data_curator.dataset_prober.scripts/probe_dataset.py --dataset-root /data/data2/yiyang/DentalClaw/data/2d --output-json agents/data_curator/reports/<run_id>/probe.json --output-md agents/data_curator/reports/<run_id>/probe.md",
+    "data_curator.dataset_validator.scripts/validate_dataset.py --canonical-root or --dataset-root-equivalent /data/data2/yiyang/DentalClaw/data/2d --report-key <run_id> --output-root /data/data2/yiyang/DentalClaw/artifacts/results/reports/datasets_qc",
+    "main.generate_dataset_task_budget_specs(root=/data/data2/yiyang/DentalClaw/data/2d,train=imagesTr/labelsTr,val=imagesVal/labelsVal,test=imagesTs)",
+    "experimentation.tooth_autotrain_nnunet.scripts/run_training.py --dataset-spec <private2d_dataset_spec.json> --task-spec <binary_2d_seg_task_spec.json> --budget-spec <budget_spec.json> --workspace /data/data2/yiyang/DentalClaw/artifacts/training_runs/<run_id> --detach",
+    "main.monitor_training_and_collect_handoff"
+  ],
+  "success_criteria": [
+    "recognizes imagesTr/labelsTr and imagesVal/labelsVal",
+    "runs validation before training",
+    "uses spec-driven training entrypoint",
+    "does not route to TDD exporter"
+  ],
+  "forbidden_paths": [
+    "tdd-nnunet-export",
+    "cbct_qc",
+    "invented split that ignores existing Val folders"
+  ],
+  "reports": {
+    "execution_report": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/execution_report.md",
+    "workflow_comparison": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/workflow_comparison.json",
+    "artifacts_manifest": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-SEG2D-021_20260625_020541_c2c888/artifacts_manifest.json"
+  }
+}

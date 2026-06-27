@@ -1,0 +1,91 @@
+{
+  "intent_id": "DCI-TF3-DET-017",
+  "intent_category": "boundary",
+  "prompt": "用 ToothFairy3 训练 3D 牙齿检测模型，并报告检测 mAP。",
+  "expected_behavior": "reject_or_explain",
+  "expected_terminal_status": "unsupported_backend_after_qc",
+  "actual_terminal_status": "unsupported_backend_after_qc",
+  "exception_handling": "reject_or_explain",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.voxel_spacing_check",
+    "data.fov_consistency_check",
+    "data.task_data_compatibility_check",
+    "data.missing_annotation_check",
+    "data.split_verification",
+    "coordinator.unsupported_capability_response",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=ToothFairy3,task_family=detection,task=cbct_detector_train,category=boundary)",
+    "data_curator.probe_dataset --dataset-root /data/data2/yiyang/JoD/ToothFairy3_LPS",
+    "main.check_platform_capability_registry",
+    "main.unsupported_capability_response(terminal_status=unsupported_backend_after_qc)",
+    "main.stop_without_training"
+  ],
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_dataset_qc"
+  ],
+  "orchestrator_reasoning": [
+    {
+      "agent": "MainAgent",
+      "action": "parse_intent",
+      "reason": "解析自然语言 prompt，识别数据集=ToothFairy3、任务族=detection、任务=cbct_detector_train、意图类别=boundary。",
+      "target": {
+        "intent_id": "DCI-TF3-DET-017",
+        "dataset": "ToothFairy3",
+        "task_family": "detection",
+        "task": "cbct_detector_train",
+        "intent_category": "boundary"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "route_to_data_curator",
+      "reason": "任务需要数据探查、标注/QC检查或导出，因此先路由到 Data Curator，避免未经验证直接训练。",
+      "target": {
+        "dataset_path": "/data/data2/yiyang/JoD/ToothFairy3_LPS",
+        "task": "cbct_detector_train"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "unsupported_capability_response",
+      "reason": "请求本身清晰合理，但当前平台缺少对应训练/导出/评估后端；输出结构化能力边界说明，而不是伪造结果。",
+      "target": {
+        "expected_terminal_status": "unsupported_backend_after_qc",
+        "forbidden_paths": [
+          "tooth_autotrain_nnunet",
+          "raw MMDetection/Monai detector launcher without maintained skill",
+          "invented detection metrics"
+        ]
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "stop_without_training",
+      "reason": "边界意图不得回退到分割训练、临时脚本或虚构指标。",
+      "target": {
+        "blocked_actions": [
+          "model_training",
+          "inference",
+          "metric_fabrication"
+        ]
+      }
+    }
+  ],
+  "dry_run": true
+}

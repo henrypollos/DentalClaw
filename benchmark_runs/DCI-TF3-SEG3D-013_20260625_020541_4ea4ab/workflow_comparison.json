@@ -1,0 +1,73 @@
+{
+  "intent_id": "DCI-TF3-SEG3D-013",
+  "intent_category": "standard",
+  "prompt": "用已有 ToothFairy3 3D 分割模型对验证/测试 CBCT 做推理评估。",
+  "expected_behavior": "execute_end_to_end",
+  "expected_terminal_status": "completed",
+  "actual_terminal_status": "completed",
+  "exception_handling": "completed",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "data.dataset_import",
+    "data.format_parse",
+    "data.case_structuring",
+    "data.metadata_parse",
+    "data.data_integrity_check",
+    "data.annotation_schema_check",
+    "data.voxel_spacing_check",
+    "data.fov_consistency_check",
+    "experiment.inference",
+    "experiment.standardized_evaluation",
+    "report.metric_aggregation",
+    "report.visualization_builder",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=ToothFairy3,task=segmentation_3d,mode=inference_eval)",
+    "main.resolve_model_path(artifacts/models/nnUNet/nnUNet_results/<ToothFairy3_model> or provided checkpoint)",
+    "main.resolve_dataset_and_task_specs(ToothFairy3_3d_dataset_spec.json,ToothFairy3_multiclass_task_spec.json)",
+    "experimentation.tooth_autoinfer_nnunet.scripts/run_inference.py --model-path <checkpoint_or_model_dir> --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --output-dir /data/data2/yiyang/DentalClaw/artifacts/inference_runs/<run_id> --input-dir <imagesVal_or_imagesTs> --gt-dir <labelsVal_or_labelsTs_if_available>",
+    "main.read_inference_summary_and_return_metrics"
+  ],
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check",
+    "probe_dataset",
+    "validate_dataset",
+    "run_inference"
+  ],
+  "orchestrator_reasoning": [
+    {
+      "agent": "MainAgent",
+      "action": "parse_intent",
+      "reason": "解析自然语言 prompt，识别数据集=ToothFairy3、任务族=segmentation_3d、任务=cbct_segmentation_inference_eval、意图类别=standard。",
+      "target": {
+        "intent_id": "DCI-TF3-SEG3D-013",
+        "dataset": "ToothFairy3",
+        "task_family": "segmentation_3d",
+        "task": "cbct_segmentation_inference_eval",
+        "intent_category": "standard"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "route_to_data_curator",
+      "reason": "任务需要数据探查、标注/QC检查或导出，因此先路由到 Data Curator，避免未经验证直接训练。",
+      "target": {
+        "dataset_path": "/data/data2/yiyang/JoD/ToothFairy3_LPS",
+        "task": "cbct_segmentation_inference_eval"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "route_to_experimentation",
+      "reason": "数据治理和必要 QC 已完成，标准意图可进入实验 Agent 生成训练/推理配置并执行 dry-run。",
+      "target": {
+        "task": "cbct_segmentation_inference_eval"
+      }
+    }
+  ],
+  "dry_run": true
+}

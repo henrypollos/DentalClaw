@@ -1,0 +1,82 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-023",
+  "intent_category": "ambiguous",
+  "prompt": "帮我给私有 2D 数据出一份临床结果报告。",
+  "expected_behavior": "ask_clarification",
+  "expected_terminal_status": "awaiting_clarification",
+  "actual_terminal_status": "awaiting_clarification",
+  "exception_handling": "request_clarification",
+  "reference_workflow": [
+    "coordinator.intent_parse",
+    "coordinator.dataset_registry_lookup",
+    "coordinator.capability_check",
+    "coordinator.ambiguity_detection",
+    "coordinator.request_clarification",
+    "coordinator.await_user_response",
+    "coordinator.stop_without_training",
+    "shared.audit_log_finalize"
+  ],
+  "reference_workflow_path": [
+    "main.parse_intent(dataset=Private2D,task_family=segmentation_2d,task=private_2d_case_report,category=ambiguous)",
+    "main.dataset_registry_lookup(dataset=Private2D,path=/data/data2/yiyang/DentalClaw/data/2d)",
+    "main.detect_ambiguity(missing_fields=target_anatomy_or_label_schema|train_or_inference_or_report|model_or_case_id)",
+    "main.request_clarification(do_not_train_or_infer=true)",
+    "main.await_user_response"
+  ],
+  "tools_called": [
+    "dataset_registry_lookup",
+    "capability_registry_check"
+  ],
+  "orchestrator_reasoning": [
+    {
+      "agent": "MainAgent",
+      "action": "parse_intent",
+      "reason": "解析自然语言 prompt，识别数据集=Private2D、任务族=segmentation_2d、任务=private_2d_case_report、意图类别=ambiguous。",
+      "target": {
+        "intent_id": "DCI-P2D-SEG2D-023",
+        "dataset": "Private2D",
+        "task_family": "segmentation_2d",
+        "task": "private_2d_case_report",
+        "intent_category": "ambiguous"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "request_clarification",
+      "reason": "该 prompt 省略了关键实验信息；直接训练会把用户意图误绑定到错误任务或标签体系，因此先追问。",
+      "target": {
+        "missing_fields": [
+          "target_anatomy_or_label_schema",
+          "train_or_inference_or_report",
+          "model_or_case_id"
+        ],
+        "prompt": "帮我给私有 2D 数据出一份临床结果报告。"
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "await_user_response",
+      "reason": "在用户补充任务类型、目标标签或病例/模型前，不启动训练、推理或报告生成。",
+      "target": {
+        "blocked_actions": [
+          "model_training",
+          "inference",
+          "report_generation"
+        ]
+      }
+    },
+    {
+      "agent": "MainAgent",
+      "action": "stop_without_training",
+      "reason": "模糊意图进入等待澄清状态时必须显式停止训练/推理，避免后台继续执行。",
+      "target": {
+        "blocked_actions": [
+          "model_training",
+          "inference",
+          "report_generation"
+        ]
+      }
+    }
+  ],
+  "dry_run": true
+}

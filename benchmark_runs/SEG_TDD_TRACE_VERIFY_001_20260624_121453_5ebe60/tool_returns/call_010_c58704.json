@@ -1,0 +1,9 @@
+[
+  {
+    "backend": "nnUNetv2_cli",
+    "nnunet_trainer": "nnUNetTrainer",
+    "configuration": "3d_fullres",
+    "fold": 0,
+    "selection_reason": "Baseline default nnUNetTrainer run on fold 0 using the canonical 3d_fullres configuration."
+  }
+]

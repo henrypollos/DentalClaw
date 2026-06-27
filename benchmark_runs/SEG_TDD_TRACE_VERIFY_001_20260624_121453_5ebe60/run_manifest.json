@@ -1,0 +1,12 @@
+{
+  "run_id": "SEG_TDD_TRACE_VERIFY_001_20260624_121453_5ebe60",
+  "intent_id": "SEG_TDD_TRACE_VERIFY_001",
+  "session_id": "offline_20260624_121453",
+  "prompt": "请使用TDD全景片数据集训练32类牙齿分割模型，完成数据预处理、训练、推理、评估和报告生成。",
+  "dataset": "TDD",
+  "task_type": "tooth_segmentation",
+  "started_at": "2026-06-24T12:14:53.317+08:00",
+  "status": "failed",
+  "ended_at": "2026-06-24T12:14:54.526+08:00",
+  "error": "All attempted trials failed. See search_events.jsonl and history.json for the per-trial errors."
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "expected_pattern": "agents/data_curator/reports/<run_id>/probe.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-027_20260625_020541_0da888/agents/data_curator/reports/<run_id>/probe.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "agents/data_curator/reports/<run_id>/probe.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-P2D-DET-027_20260625_020541_0da888/agents/data_curator/reports/<run_id>/probe.md",
+    "placeholder": true
+  }
+]

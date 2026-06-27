@@ -1,0 +1,7 @@
+{
+  "status": "found",
+  "dataset": "ToothFairy3",
+  "dataset_path": "/data/data2/yiyang/JoD/ToothFairy3_LPS",
+  "modality": "3D CBCT",
+  "task_family": "detection"
+}

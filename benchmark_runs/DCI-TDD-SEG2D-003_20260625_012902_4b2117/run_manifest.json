@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TDD-SEG2D-003_20260625_012902_4b2117",
+  "intent_id": "DCI-TDD-SEG2D-003",
+  "session_id": null,
+  "prompt": "帮我用 TDD 做一个区域分割模型，训练好后告诉我效果。",
+  "dataset": "TDD",
+  "task_type": "segmentation_2d",
+  "started_at": "2026-06-25T01:29:02.480+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T01:29:02.483+08:00",
+  "error": null
+}

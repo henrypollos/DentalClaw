@@ -1,0 +1,12 @@
+{
+  "run_id": "DCI-TF3-SEG3D-015_20260625_020541_d896f3",
+  "intent_id": "DCI-TF3-SEG3D-015",
+  "session_id": null,
+  "prompt": "对 ToothFairy3 images-only CBCT 子集运行已有模型推理，不做监督训练。",
+  "dataset": "ToothFairy3",
+  "task_type": "segmentation_3d",
+  "started_at": "2026-06-25T02:05:41.236+08:00",
+  "status": "completed",
+  "ended_at": "2026-06-25T02:05:41.239+08:00",
+  "error": null
+}

@@ -1,0 +1,10 @@
+{
+  "status": "dry_run",
+  "report_command": "python agents/clinical_result/skills/clinical_report/scripts/run_report.py --case_id <case_id> --mask_path <predicted_mask.png> --out_dir artifacts/reports/clinical/<case_id> --image_path <image.png>",
+  "outputs": {
+    "report.md": "artifacts/reports/clinical/<case_id>/report.md",
+    "summary.json": "artifacts/reports/clinical/<case_id>/summary.json",
+    "overlay.png": "artifacts/reports/clinical/<case_id>/overlay.png"
+  },
+  "note": "Dry-run 模式：报告命令已生成"
+}

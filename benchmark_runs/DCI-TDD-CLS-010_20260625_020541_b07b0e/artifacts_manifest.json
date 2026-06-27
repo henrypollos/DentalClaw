@@ -1,0 +1,17 @@
+[
+  {
+    "expected_pattern": "artifacts/results/reports/datasets_qc/<run_id>.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-CLS-010_20260625_020541_b07b0e/artifacts/results/reports/datasets_qc/<run_id>.json",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "artifacts/results/reports/datasets_qc/<run_id>.md",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-CLS-010_20260625_020541_b07b0e/artifacts/results/reports/datasets_qc/<run_id>.md",
+    "placeholder": true
+  },
+  {
+    "expected_pattern": "agents/data_curator/reports/tdd_profile.json",
+    "artifact_path": "/data/data2/yiyang/DentalClaw/benchmark_runs/DCI-TDD-CLS-010_20260625_020541_b07b0e/agents/data_curator/reports/tdd_profile.json",
+    "placeholder": true
+  }
+]

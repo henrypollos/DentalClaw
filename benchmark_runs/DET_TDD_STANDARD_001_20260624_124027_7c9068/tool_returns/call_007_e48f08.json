@@ -1,0 +1,11 @@
+{
+  "status": "completed",
+  "model_source": "yolov8n.pt",
+  "save_dir": "/data/data2/yiyang/DentalClaw/workspace/detection_trace/20260624_124027/training/tdd_tooth_detection",
+  "best_model_path": "/data/data2/yiyang/DentalClaw/workspace/detection_trace/20260624_124027/training/tdd_tooth_detection/weights/best.pt",
+  "last_model_path": "/data/data2/yiyang/DentalClaw/workspace/detection_trace/20260624_124027/training/tdd_tooth_detection/weights/last.pt",
+  "epochs": 1,
+  "image_size": 640,
+  "batch_size": 1,
+  "device": "0"
+}

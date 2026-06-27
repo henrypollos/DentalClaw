@@ -1,0 +1,35 @@
+{
+  "dataset_root": "/data/data2/yiyang/DentalClaw/data/tdd_detection_yolo",
+  "splits": {
+    "train": {
+      "image_count": 0,
+      "label_count": 0,
+      "missing_labels": [],
+      "empty_labels": []
+    },
+    "val": {
+      "image_count": 0,
+      "label_count": 0,
+      "missing_labels": [],
+      "empty_labels": []
+    },
+    "test": {
+      "image_count": 0,
+      "label_count": 0,
+      "missing_labels": [],
+      "empty_labels": []
+    }
+  },
+  "ready_for_training": false,
+  "issues": [
+    {
+      "split": "train",
+      "issue_type": "no_images"
+    },
+    {
+      "split": "val",
+      "issue_type": "no_images"
+    }
+  ],
+  "data_yaml": "/data/data2/yiyang/DentalClaw/data/tdd_detection_yolo/data.yaml"
+}

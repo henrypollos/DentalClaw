@@ -1,0 +1,14 @@
+{
+  "status": "checked",
+  "supported_core_paths": [
+    "segmentation_2d",
+    "segmentation_3d",
+    "dataset_qc",
+    "clinical_report"
+  ],
+  "known_limits": [
+    "no maintained 3D detector backend",
+    "classification requires curated image-level labels",
+    "private mask-to-bbox detector training is not maintained"
+  ]
+}

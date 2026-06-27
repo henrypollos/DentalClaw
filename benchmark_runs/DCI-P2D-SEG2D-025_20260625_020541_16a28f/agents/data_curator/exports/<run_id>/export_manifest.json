@@ -1,0 +1,8 @@
+{
+  "intent_id": "DCI-P2D-SEG2D-025",
+  "pattern": "agents/data_curator/exports/<run_id>/export_manifest.json",
+  "generated_by": "benchmark_trace.run_intent",
+  "dry_run": true,
+  "terminal_status": "completed",
+  "note": "Placeholder artifact for benchmark trace evaluation; real platform runs should replace this with produced output."
+}
