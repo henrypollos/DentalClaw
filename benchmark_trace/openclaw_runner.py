@@ -114,23 +114,51 @@ def call_openclaw_agent(
             cwd=str(REPO_ROOT),
         )
 
+        # openclaw agent --json 输出 JSON 到 stdout，warnings 在 stderr
+        stdout = result.stdout.strip()
+        stderr = result.stderr.strip()
+
+        # 过滤 stderr 中的 plugins 警告行
+        stderr_clean = "\n".join(
+            line for line in stderr.split("\n")
+            if not line.startswith("[plugins]")
+        ).strip()
+
         if result.returncode != 0:
             return {
                 "status": "error",
-                "error": result.stderr[:2000] or "openclaw agent returned non-zero",
-                "stdout": result.stdout[:2000],
-                "stderr": result.stderr[:2000],
+                "error": stderr_clean[:2000] or f"openclaw agent exited with code {result.returncode}",
+                "stdout": stdout[:2000],
+                "stderr": stderr_clean[:2000],
             }
 
-        # openclaw agent --json 输出 JSON
+        # 解析 JSON
         try:
-            parsed = json.loads(result.stdout)
-            return {"status": "completed", **parsed}
+            parsed = json.loads(stdout)
+            oc_status = parsed.get("status", "unknown")
+            summary = parsed.get("summary", "unknown")
+            result_text = ""
+            payloads = parsed.get("result", {}).get("payloads", [])
+            if payloads:
+                result_text = payloads[0].get("text", "")[:5000]
+            meta = parsed.get("result", {}).get("meta", {})
+            return {
+                "status": "completed",
+                "openclaw_status": oc_status,
+                "summary": summary,
+                "result_text": result_text,
+                "agent_meta": {
+                    "session_id": meta.get("agentMeta", {}).get("sessionId"),
+                    "model": meta.get("agentMeta", {}).get("model"),
+                    "duration_ms": meta.get("durationMs"),
+                },
+                "full_result": _safe_value(parsed),
+            }
         except json.JSONDecodeError:
             return {
                 "status": "completed_raw",
-                "raw_output": result.stdout[:5000],
-                "stderr": result.stderr[:1000],
+                "raw_output": stdout[:5000],
+                "stderr": stderr_clean[:1000],
             }
 
     except subprocess.TimeoutExpired:
@@ -244,13 +272,13 @@ def run_intent_with_openclaw(
             result["status"] = "completed"
             end_run(
                 status="completed",
-                final_response=openclaw_result.get("raw_output", "")[:1000]
-                or json.dumps(openclaw_result, ensure_ascii=False, default=str)[:1000],
+                final_response=openclaw_result.get("result_text", "")[:1000],
                 workflow_config={
                     "intent_id": intent_id,
                     "dry_run": dry_run,
                     "model": model,
-                    "openclaw_status": openclaw_result.get("status"),
+                    "openclaw_status": openclaw_result.get("openclaw_status"),
+                    "session_id": openclaw_result.get("agent_meta", {}).get("session_id"),
                 },
             )
         else:
