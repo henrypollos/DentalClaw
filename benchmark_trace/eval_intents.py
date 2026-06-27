@@ -705,18 +705,6 @@ def main():
     if not intents:
         print("错误: 没有加载到意图数据。请检查 --intents-file 路径。")
         sys.exit(1)
-        "--verbose",
-        action="store_true",
-        help="输出详细评估信息",
-    )
-    parser.add_argument(
-        "--csv",
-        help="输出 CSV 汇总文件路径",
-    )
-
-    args = parser.parse_args()
-
-    intents = load_intents()
 
     # 收集要评估的 run 目录
     run_dirs = []
