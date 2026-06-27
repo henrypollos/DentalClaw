@@ -34,6 +34,8 @@ sys.path.insert(0, str(REPO_ROOT))
 from benchmark_trace.trace_recorder import TRACE_ROOT
 
 INTENTS_FILE = REPO_ROOT / "benchmark_intents" / "intents.jsonl"
+INTENTS_EVAL_FILE = REPO_ROOT / "benchmark_intents" / "intents.eval.jsonl"
+INTENTS_FINAL_FILE = REPO_ROOT / "refer" / "DentalClaw_30_intents_final.jsonl"
 
 
 # ==============================================================================
@@ -51,15 +53,22 @@ DIMENSION_WEIGHTS = {
 }
 
 
-def load_intents() -> Dict[str, Dict[str, Any]]:
-    """加载意图，按 id 索引"""
+def load_intents(path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+    """加载意图，按 id (兼容 intent_id) 索引"""
     intents = {}
-    with open(INTENTS_FILE, "r", encoding="utf-8") as f:
+    p = path or INTENTS_FILE
+    if not p.exists():
+        p = INTENTS_EVAL_FILE
+    if not p.exists():
+        return intents
+    with open(p, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
                 intent = json.loads(line)
-                intents[intent["id"]] = intent
+                key = intent.get("id") or intent.get("intent_id", "")
+                if key:
+                    intents[key] = intent
     return intents
 
 
@@ -534,10 +543,34 @@ def evaluate_run(
     intent_id = manifest.get("intent_id", "UNKNOWN")
     intent = intents.get(intent_id, {})
 
+    # 如果直接匹配不到，尝试 fuzzy match (prefix match)
+    if not intent and intent_id:
+        for key in intents:
+            if intent_id.startswith(key) or key.startswith(intent_id):
+                intent = intents[key]
+                break
+
     actual_tools = extract_tool_sequence(events)
     actions = extract_orchestrator_actions(events)
     errors = extract_errors(events)
-    ref_nodes = parse_reference_path(intent.get("reference_workflow_path", []))
+
+    # 多种格式的 reference workflow 兼容
+    ref_path = (
+        intent.get("reference_workflow")            # canonical 格式 (intents.eval.jsonl)
+        or intent.get("reference_workflow_path")     # old 格式 (intents.jsonl)
+        or []
+    )
+    ref_nodes = parse_reference_path(ref_path)
+
+    # 如果参考工作流为空，尝试从 intent 的 assertions 推断
+    if not ref_nodes and intent.get("assertions"):
+        # 义瑞格式：从 assertions 提取 must_include 作为参考路径
+        for a in intent.get("assertions", []):
+            if a.get("type") == "ordered_subsequence":
+                must_include = a.get("target", {}).get("must_include", [])
+                if must_include:
+                    ref_nodes = parse_reference_path(must_include)
+                    break
 
     # 各维度评分
     planning_score, planning_detail = eval_task_planning(actual_tools, ref_nodes, actions)
@@ -655,16 +688,23 @@ def main():
     parser = argparse.ArgumentParser(
         description="DentalClaw Intent Eval — 评估执行轨迹"
     )
+    parser.add_argument("--run-dir", help="评估指定 run 目录")
+    parser.add_argument("--all", action="store_true", help="评估所有 run 目录")
+    parser.add_argument("--verbose", action="store_true", help="输出详细评估信息")
+    parser.add_argument("--csv", help="输出 CSV 汇总文件路径")
     parser.add_argument(
-        "--run-dir",
-        help="评估指定 run 目录",
+        "--intents-file",
+        default=None,
+        help="意图 JSONL 路径 (默认自动探测 intents.jsonl/intents.eval.jsonl)",
     )
-    parser.add_argument(
-        "--all",
-        action="store_true",
-        help="评估所有 run 目录",
-    )
-    parser.add_argument(
+
+    args = parser.parse_args()
+
+    intents_path = Path(args.intents_file) if args.intents_file else None
+    intents = load_intents(intents_path)
+    if not intents:
+        print("错误: 没有加载到意图数据。请检查 --intents-file 路径。")
+        sys.exit(1)
         "--verbose",
         action="store_true",
         help="输出详细评估信息",
