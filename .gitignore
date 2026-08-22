@@ -31,3 +31,18 @@ DIRECTORY_PLAN.md
 # ===== 虚拟环境与编译产物 =====
 .venv/
 DentalClaw.pdf
+
+# ===== 非平台代码(论文/评测产物/实验脚本,仅存 archive tag) =====
+paper_revision/
+benchmark_results/
+assets/
+.vscode/
+审稿意见清单.md
+evaluate_dentalclaw_benchmark.py
+normalize_reference_workflows.py
+register_benchmark_run.py
+run_verification.py
+run_verification_traced.py
+run_tdd_detection_traced.py
+run_tdd_nnunet_export.sh
+workflow_aliases.json
