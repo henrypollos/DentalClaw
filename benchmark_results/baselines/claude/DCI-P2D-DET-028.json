@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_review"
+  },
+  "requires_human_review": true,
+  "reason": "请求将 Private2D 数据导出为 COCO 检测格式，属数据转换/导出任务，注册表中无匹配方法（注册方法均为训练/推理路由）。任务本身合理：Private2D 含四类病灶 bbox 标注，具备导出条件；且'缺少检测框标注即停止并报告缺陷'的守卫逻辑可由现有数据质检脚本支撑。因此提出外部方案，须经人工批准后方可执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

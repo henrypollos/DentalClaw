@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "unknown",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "建议利用平台已有的数据质检脚本，对 Private2D 的 train/val/test split 进行患者级与图像级交叉检查，确认无泄漏或标签错配后再决定是否进入训练流程。"
+  },
+  "requires_human_review": true,
+  "reason": "该请求为数据质量校验（split 泄漏/错配检查），不属于已注册的任何推理或训练方法。平台代码资产中包含数据质检脚本，可据此构建外部方案，但需人工审批后方可执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

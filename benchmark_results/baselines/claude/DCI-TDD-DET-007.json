@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_review"
+  },
+  "requires_human_review": true,
+  "reason": "请求为基于 TDD teeth_bbox.json 标注训练牙齿检测模型并报告验证集 mAP，属 detection 任务。注册方法中无匹配项：dental_anomaly_detection 面向病灶异常检测（anomaly_detection 任务族），与牙齿目标检测不符；其余方法均为分割/超分。任务本身合理，且代码资产含 YOLO 检测模块，可据此提出外部检测训练方案，须经人工批准后方可执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

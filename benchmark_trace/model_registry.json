@@ -1,0 +1,38 @@
+{
+  "nnunet_v2": {
+    "id": "nnunet_v2",
+    "name": "nnU-Net v2",
+    "task_types": ["segmentation"],
+    "modalities": ["2d", "3d"],
+    "supports": ["train", "inference"],
+    "framework": "nnunet",
+    "default_template": "segmentation/train"
+  },
+  "swin_unetr_v2": {
+    "id": "swin_unetr_v2",
+    "name": "Swin UNETR V2",
+    "task_types": ["segmentation"],
+    "modalities": ["3d"],
+    "supports": ["train", "inference"],
+    "framework": "monai",
+    "default_template": "segmentation/train"
+  },
+  "yolov11": {
+    "id": "yolov11",
+    "name": "YOLOv11",
+    "task_types": ["detection"],
+    "modalities": ["2d"],
+    "supports": ["train", "inference"],
+    "framework": "ultralytics",
+    "default_template": "detection/train"
+  },
+  "convnext_v2": {
+    "id": "convnext_v2",
+    "name": "ConvNeXt V2",
+    "task_types": ["classification"],
+    "modalities": ["2d"],
+    "supports": ["train", "inference"],
+    "framework": "torchvision",
+    "default_template": "classification/train"
+  }
+}

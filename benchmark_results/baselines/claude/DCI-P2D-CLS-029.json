@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "classification",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_review"
+  },
+  "requires_human_review": true,
+  "reason": "请求为在 Private2D 私有全景片上训练疾病分类模型（task_family=classification, mode=train），但已验证方法注册表中无分类训练方法：注册表中与 Private2D 相关的方法为 private_2d_segmentation_train（分割）与 dental_anomaly_detection（异常检测），均不覆盖四类病灶分类任务。任务本身在牙科 CV 范围内且路线可行（可基于现有四类病灶 bbox 标注裁剪病灶区域，结合已有代码资产如 YOLO/分类网络构建分类训练流程），故提出外部方案，须经人工批准后方可执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

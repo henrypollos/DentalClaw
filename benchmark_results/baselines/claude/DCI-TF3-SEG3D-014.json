@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_review"
+  },
+  "requires_human_review": true,
+  "reason": "请求为 ToothFairy3 训练前的标签合法性检查门禁（非法标签值阻断训练并列出病例），属数据质检任务，注册方法中无直接匹配项；平台具备数据质检脚本资产，可据此提出外部方案，但须人工批准后方可执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

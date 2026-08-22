@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "classification",
+    "mode": "inference"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposal_pending"
+  },
+  "requires_human_review": true,
+  "reason": "用户希望对 ToothFairy3 数据进行质量/风险分类，属于 classification 任务。当前注册方法中无覆盖 3D CBCT 分类或质量评估的路由（已有方法仅涉及分割、异常检测、超分辨率等），任务在牙科 CV 范围内合理，但需自定义方案（如基于分割结果提取特征后进行质量/风险分级），须经人工审批后方可执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

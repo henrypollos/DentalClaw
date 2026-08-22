@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "private_2d_segmentation_train",
+    "status": "verified"
+  },
+  "requires_human_review": false,
+  "reason": "请求匹配已验证的私有 2D 牙齿分割训练方法。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

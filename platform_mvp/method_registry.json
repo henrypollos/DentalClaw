@@ -1,0 +1,427 @@
+{
+  "version": "2026-07-09-mvp",
+  "purpose": "Offline capability registry for the DentalClaw platform MVP. It intentionally limits scope to CV tasks and pre-approved methods.",
+  "scope_policy": {
+    "allowed_domain": "dental_cv",
+    "allowed_modes": [
+      "inference",
+      "private_train"
+    ],
+    "unsupported_policy": "reject_or_explain",
+    "method_selection_policy": "prefer an offline preselected method; online search is a future extension only after this table cannot answer the request"
+  },
+  "methods": [
+    {
+      "id": "tdd_2d_segmentation_infer_report",
+      "display_name": "TDD 2D tooth binary segmentation inference and report",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "TDD",
+        "Dataset501_TDDTeethBinary2D"
+      ],
+      "task_family": "segmentation",
+      "task_variant": "tooth_binary",
+      "modality": "2d",
+      "allowed_modes": [
+        "inference"
+      ],
+      "framework": "nnunetv2",
+      "method": "nnU-Net v2 with existing DentalClaw TDD binary checkpoint",
+      "entrypoint": "mvp_fullflow/run_mvp_fullflow.py",
+      "existing_assets": {
+        "dataset_root": "artifacts/datasets/nnUNet/nnUNet_raw/Dataset501_TDDTeethBinary2D",
+        "dataset_spec": "artifacts/results/specs/dataset_spec_501_binary.json",
+        "task_spec": "artifacts/results/specs/task_spec_501_binary.json",
+        "checkpoint": "artifacts/training_runs/trial_501_binary_baseline/best_model/checkpoint_best.pth",
+        "successful_fullflow_run": "artifacts/mvp_runs/tdd_binary_fullflow_20260709_085641"
+      },
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "dataset.qc_read",
+        "model.checkpoint_select",
+        "experiment.inference",
+        "clinical_report.generate",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "manifest.json",
+        "mvp_summary.md",
+        "inference/inference_summary.json",
+        "report_case_<case_id>/report.html",
+        "report_case_<case_id>/overlay.png"
+      ],
+      "limitations": [
+        "Uses an existing checkpoint rather than launching a new training job.",
+        "This is the first executable platform route and is used as the reportable smoke test."
+      ],
+      "required_annotation_type": "pixel_mask",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "mean_dice",
+        "iou"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "annotation_integrity",
+        "split_leakage_check"
+      ],
+      "contraindications": [
+        "bbox_only_annotations",
+        "case_level_labels",
+        "3d_volumes",
+        "training_requests"
+      ]
+    },
+    {
+      "id": "private_2d_segmentation_train",
+      "display_name": "Private 2D dental image segmentation training",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "Private2D"
+      ],
+      "task_family": "segmentation",
+      "task_variant": "private_2d_mask_segmentation",
+      "modality": "2d",
+      "allowed_modes": [
+        "private_train"
+      ],
+      "framework": "nnunetv2",
+      "method": "DentalClaw spec-driven nnU-Net v2 training",
+      "entrypoint": "agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py",
+      "precheck_entrypoint": "platform_mvp/validate_private2d_package.py",
+      "input_contract": "platform_mvp/private_data_contract.json",
+      "required_inputs": [
+        "private image directory",
+        "private mask directory or annotation export",
+        "dataset spec",
+        "task spec",
+        "budget spec"
+      ],
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "platform.private2d_input_precheck",
+        "data.private_dataset_register",
+        "dataset.qc_run",
+        "dataset.export_to_nnunet",
+        "experiment.training",
+        "experiment.best_model_select",
+        "experiment.inference",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "dataset registration record",
+        "QC report",
+        "training run directory",
+        "best checkpoint",
+        "inference summary",
+        "report summary"
+      ],
+      "limitations": [
+        "The adapter is defined for the platform MVP, but this route is not executed until a private dataset package is supplied."
+      ],
+      "required_annotation_type": "pixel_mask",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "mean_dice",
+        "iou"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "annotation_integrity",
+        "annotation_completeness",
+        "split_leakage_check"
+      ],
+      "contraindications": [
+        "bbox_only_annotations",
+        "case_level_labels",
+        "unpaired_images_labels"
+      ]
+    },
+    {
+      "id": "toothfairy3_3d_segmentation_infer_or_train",
+      "display_name": "ToothFairy3 3D CBCT segmentation",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "ToothFairy3"
+      ],
+      "task_family": "segmentation",
+      "task_variant": "cbct_structure_segmentation",
+      "modality": "3d",
+      "allowed_modes": [
+        "inference",
+        "train",
+        "private_train"
+      ],
+      "framework": "nnunetv2_or_monai",
+      "method": "3D segmentation pipeline after CBCT QC",
+      "entrypoint": "agents/data_curator/skills/core/cbct_qc/scripts/audit_cbct_dataset.py",
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "dataset.cbct_qc",
+        "dataset.prepare_3d_specs",
+        "experiment.training_or_inference",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "CBCT QC report",
+        "3D segmentation mask",
+        "Dice/HD95 summary when labels exist",
+        "visual review package"
+      ],
+      "limitations": [
+        "Included to match the teacher-requested 3D CV scope; it is not the first executable route."
+      ],
+      "required_annotation_type": "pixel_mask",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "mean_dice",
+        "mean_hd95",
+        "iou"
+      ],
+      "required_qc_gates": [
+        "volume_completeness",
+        "label_value_validation",
+        "metal_artifact_check",
+        "fov_check",
+        "split_leakage_check"
+      ],
+      "contraindications": [
+        "bbox_only_annotations",
+        "case_level_labels",
+        "2d_images"
+      ]
+    },
+    {
+      "id": "dental_anomaly_detection",
+      "display_name": "Dental anomaly detection",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "Private2D",
+        "TDD"
+      ],
+      "task_family": "anomaly_detection",
+      "task_variant": "image_or_case_level_anomaly",
+      "modality": "2d",
+      "allowed_modes": [
+        "inference",
+        "train",
+        "private_train"
+      ],
+      "framework": "pytorch_sklearn_baseline",
+      "method": "ResNet18-ImageNet features + IsolationForest unsupervised anomaly detection",
+      "entrypoint": "platform_mvp/run_anomaly_detection_mvp.py",
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "dataset.label_availability_check",
+        "experiment.anomaly_detection",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "case-level anomaly score",
+        "visual anomaly map if model supports it",
+        "AUROC/F1 summary when labels exist"
+      ],
+      "limitations": [
+        "Current codebase does not expose a maintained anomaly detection entrypoint; the platform must reject execution until the adapter is bound."
+      ],
+      "required_annotation_type": "image_level_label_optional",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "image_level_flag_summary"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "duplicate_check"
+      ],
+      "contraindications": [
+        "pixel_mask_required_tasks",
+        "3d_volumes",
+        "case_level_diagnosis"
+      ]
+    },
+    {
+      "id": "dental_2d_super_resolution",
+      "display_name": "Dental 2D image super-resolution",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "Private2D",
+        "TDD"
+      ],
+      "task_family": "super_resolution",
+      "task_variant": "2d_image_restoration",
+      "modality": "2d",
+      "allowed_modes": [
+        "inference"
+      ],
+      "framework": "pil_numpy_baseline",
+      "method": "Synthetic low-resolution degradation with bicubic interpolation baseline",
+      "entrypoint": "platform_mvp/run_super_resolution_mvp.py",
+      "existing_assets": {
+        "default_input_dir": "artifacts/datasets/nnUNet/nnUNet_raw/Dataset501_TDDTeethBinary2D/imagesTs"
+      },
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "data.image_qc",
+        "experiment.super_resolution",
+        "image_quality.evaluate",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "super-resolved images",
+        "super_resolution_summary.json",
+        "super_resolution_summary.md",
+        "comparison images",
+        "PSNR/SSIM for synthetic paired degradation"
+      ],
+      "limitations": [
+        "This is an executable platform MVP baseline, not a learned super-resolution model.",
+        "Low-resolution inputs are synthetically generated from available TDD images."
+      ],
+      "required_annotation_type": "none_required",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "psnr",
+        "ssim"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "resolution_check"
+      ],
+      "contraindications": [
+        "3d_volumes",
+        "segmentation_requests",
+        "mask_required_tasks"
+      ]
+    },
+    {
+      "id": "tta_ensemble_inference",
+      "display_name": "TTA + Ensemble inference enhancement",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "TDD",
+        "Dataset501_TDDTeethBinary2D"
+      ],
+      "task_family": "segmentation",
+      "task_variant": "tta_ensemble",
+      "modality": "2d",
+      "allowed_modes": [
+        "inference"
+      ],
+      "framework": "nnunetv2",
+      "method": "Test-time augmentation (flip/rotate) + multi-model majority-vote ensemble",
+      "entrypoint": "platform_mvp/tta_ensemble.py",
+      "existing_assets": {
+        "model_folders": [
+          "artifacts/training_runs/trial_501_binary_baseline/exp_001/nnUNet_results_snapshot/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d"
+        ],
+        "default_checkpoint": "checkpoint_best.pth"
+      },
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "model.checkpoint_select",
+        "experiment.tta_ensemble_inference",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "tta_ensemble/summary.json",
+        "tta_ensemble/model_1/tta/*_tta.png",
+        "ensemble/masks/*_ensemble.png"
+      ],
+      "limitations": [
+        "Requires nnUNet model folder with fold_X/checkpoint_best.pth structure.",
+        "TTA increases inference time by ~3x (orig+hflip+vflip)."
+      ],
+      "required_annotation_type": "pixel_mask",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "mean_dice",
+        "iou"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "model_availability",
+        "split_leakage_check"
+      ],
+      "contraindications": [
+        "training_requests",
+        "3d_volumes",
+        "bbox_only_annotations"
+      ]
+    },
+    {
+      "id": "agent_run_tdd_detection_traced_py",
+      "display_name": "Agent discovered: No registry match for detection mode, so this is an external proposal from codeb",
+      "domain": "dental_cv",
+      "task_family": "auto",
+      "datasets": [
+        "auto"
+      ],
+      "modality": "auto",
+      "allowed_modes": [
+        "auto"
+      ],
+      "status": "planned_adapter",
+      "entrypoint": "run_tdd_detection_traced.py",
+      "framework": "auto",
+      "auto_registered": true,
+      "agent_discovered_at": "2026-08-18T07:07:27-04:00",
+      "limitations": [
+        "Auto-registered from Agent repeated discoveries. Pending manual review."
+      ]
+    },
+    {
+      "id": "agent_platform_mvp_run_anomaly_detection_mvp_py",
+      "display_name": "Agent discovered: No registry match for a ToothFairy3 quality/risk classification task, so this is",
+      "domain": "dental_cv",
+      "task_family": "auto",
+      "datasets": [
+        "auto"
+      ],
+      "modality": "auto",
+      "allowed_modes": [
+        "auto"
+      ],
+      "status": "planned_adapter",
+      "entrypoint": "platform_mvp/run_anomaly_detection_mvp.py",
+      "framework": "auto",
+      "auto_registered": true,
+      "agent_discovered_at": "2026-08-18T09:34:55-04:00",
+      "limitations": [
+        "Auto-registered from Agent repeated discoveries. Pending manual review."
+      ]
+    },
+    {
+      "id": "agent_agents_data_curator_skills_core_cbct_qc_scripts_au",
+      "display_name": "Agent discovered: No registry match for a ToothFairy3 usable/needs_manual_review classification ta",
+      "domain": "dental_cv",
+      "task_family": "auto",
+      "datasets": [
+        "auto"
+      ],
+      "modality": "auto",
+      "allowed_modes": [
+        "auto"
+      ],
+      "status": "planned_adapter",
+      "entrypoint": "agents/data_curator/skills/core/cbct_qc/scripts/audit_cbct_dataset.py",
+      "framework": "auto",
+      "auto_registered": true,
+      "agent_discovered_at": "2026-08-18T09:35:53-04:00",
+      "limitations": [
+        "Auto-registered from Agent repeated discoveries. Pending manual review."
+      ]
+    }
+  ]
+}

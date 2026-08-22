@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求是将 Private2D 数据集的 bbox 标注导出为 COCO 检测格式，并在缺少检测框标注时报告缺陷。这属于数据工程/格式转换任务，注册方法中无任何一条覆盖数据导出或格式转换功能。平台代码资产中包含数据质检脚本，可据此构建外部方案（读取 Private2D 标注 → 校验 bbox 完整性 → 转换为 COCO JSON），但须经人工批准后方可执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

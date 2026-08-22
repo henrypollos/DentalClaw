@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "requires_approval"
+  },
+  "requires_human_review": true,
+  "reason": "注册表中无方法覆盖「私有 2D mask 自动转检测框并训练 detector」的流程（private_2d_segmentation_train 仅做分割训练，dental_anomaly_detection 为异常检测而非 mask→bbox 检测训练）；但该任务合理，可基于现有 YOLO 检测模块与数据质检脚本提出外部方案，须经人工批准后方可执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

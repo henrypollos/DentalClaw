@@ -1,0 +1,16 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "detection",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "该请求是对 TDD 数据集 teeth_bbox.json 检测框标注进行数据质检（越界、重复、病例泄漏检查），属于数据质量审计任务，非训练也非推理。已验证方法注册表中无匹配的数据质检路由，但代码资产中包含数据质检脚本，任务合理可行，因此作为外部方案提交，需人工批准后执行。"
+}

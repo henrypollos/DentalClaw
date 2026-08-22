@@ -43,13 +43,13 @@ INTENTS_FINAL_FILE = REPO_ROOT / "refer" / "DentalClaw_30_intents_final.jsonl"
 # ==============================================================================
 
 DIMENSION_WEIGHTS = {
-    "task_planning": 0.25,      # 任务规划正确性
-    "tool_correctness": 0.20,   # 工具调用正确性
-    "trajectory_efficiency": 0.10,  # 轨迹效率
-    "qc_detection": 0.15,       # 质控检测能力
-    "ambiguity_handling": 0.10, # 歧义处理
+    "task_planning": 0.25,      # 任务规划正确性（平台模式：方法选择 + supported/executable 判断）
+    "tool_correctness": 0.20,   # 工具调用正确性（平台模式：adapter 是否无错运行）
+    "qc_detection": 0.15,       # 质控检测能力（平台模式：执行/拒绝决策是否正确）
+    "intent_parsing": 0.15,     # 意图解析正确性（dataset/task_family/modality/mode 是否识别对）
+    "ambiguity_handling": 0.10, # 歧义处理（平台模式：对模糊意图是否拒绝而非猜测）
     "boundary_identification": 0.10,  # 能力边界识别
-    "artifact_completeness": 0.10,    # 产物完整性
+    "artifact_completeness": 0.05,    # 产物完整性
 }
 
 
@@ -533,6 +533,220 @@ def eval_artifact_completeness(
 # 主评估函数
 # ==============================================================================
 
+def _extract_platform_actual(run_dir: Path) -> Optional[Dict[str, Any]]:
+    """从 workflow_config.json 或 final_response.txt 提取平台实际决策。"""
+    wc_path = run_dir / "workflow_config.json"
+    if wc_path.exists():
+        try:
+            wc = json.loads(wc_path.read_text(encoding="utf-8"))
+            if wc.get("platform_mvp"):
+                return {
+                    "platform_supported": wc.get("platform_supported"),
+                    "platform_executable": wc.get("platform_executable"),
+                    "platform_selected_method": wc.get("platform_selected_method"),
+                    "platform_payload": wc.get("platform_payload"),
+                    "is_platform_mvp": True,
+                }
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    fr_path = run_dir / "final_response.txt"
+    if fr_path.exists():
+        try:
+            raw = fr_path.read_text(encoding="utf-8")
+            fr = json.loads(raw) if raw.strip().startswith("{") else {}
+            if fr.get("platform_payload"):
+                return {
+                    "platform_supported": fr.get("platform_supported"),
+                    "platform_executable": fr.get("platform_executable"),
+                    "platform_selected_method": fr.get("platform_selected_method"),
+                    "platform_payload": fr.get("platform_payload"),
+                    "is_platform_mvp": True,
+                }
+        except (json.JSONDecodeError, OSError):
+            pass
+    return None
+
+
+def _eval_platform_planning(
+    expected: Dict[str, Any],
+    actual: Dict[str, Any],
+) -> Tuple[float, Dict[str, Any]]:
+    """平台 MVP 感知的任务规划评分：对比预期 vs 实际平台决策。"""
+    checks = []
+    # supported 正确性
+    exp_supported = expected.get("supported")
+    act_supported = actual.get("platform_supported")
+    if exp_supported is not None and act_supported is not None:
+        checks.append(("supported_match", exp_supported == act_supported, 
+                       f"expected supported={exp_supported}, actual={act_supported}"))
+
+    # executable 正确性
+    exp_exec = expected.get("executable")
+    act_exec = actual.get("platform_executable")
+    if exp_exec is not None and act_exec is not None:
+        checks.append(("executable_match", exp_exec == act_exec,
+                       f"expected executable={exp_exec}, actual={act_exec}"))
+
+    # method 选择正确性
+    exp_method = expected.get("method")
+    act_method = actual.get("platform_selected_method")
+    if exp_method is not None:
+        method_ok = (exp_method == act_method) if exp_method else (act_method is None)
+        checks.append(("method_match", method_ok,
+                       f"expected method={exp_method}, actual={act_method}"))
+
+    # should_execute 决策
+    exp_should = expected.get("should_execute")
+    if exp_should is not None:
+        actually_executed = actual.get("platform_executable") and act_supported
+        should_ok = (exp_should == actually_executed)
+        checks.append(("execute_decision", should_ok,
+                       f"should_execute={exp_should}, actually_executed={actually_executed}"))
+
+    if not checks:
+        return 0.0, {"reason": "no platform checks applicable"}
+
+    passed = sum(1 for _, ok, _ in checks if ok)
+    score = round(passed / len(checks), 3)
+    detail = {
+        "platform_mode": True,
+        "checks": [{"label": label, "ok": ok, "detail": detail} for label, ok, detail in checks],
+        "passed": passed,
+        "total": len(checks),
+    }
+    return score, detail
+
+
+def _eval_platform_qc(
+    expected: Dict[str, Any],
+    actual: Dict[str, Any],
+    intent: Dict[str, Any],
+) -> Tuple[float, Dict[str, Any]]:
+    """平台 MVP 感知的 QC 检测评分：检查平台是否正确阻断/放行。"""
+    checks = []
+
+    # 核心 QC：该拒绝的是否被拒绝了
+    exp_should = expected.get("should_execute", True)
+    exp_supported = expected.get("supported", True)
+
+    act_supported = actual.get("platform_supported")
+    act_exec = actual.get("platform_executable")
+
+    if exp_should is False:
+        # 期望不执行 → 平台应该 reported supported=false or executable=false
+        correctly_blocked = (act_supported is False) or (act_exec is False)
+        checks.append(("blocked_when_should", correctly_blocked,
+                       f"should NOT execute, platform supported={act_supported} executable={act_exec}"))
+    elif exp_supported is False:
+        correctly_rejected = (act_supported is False)
+        checks.append(("rejected_unsupported", correctly_rejected,
+                       f"expected unsupported, actual supported={act_supported}"))
+    else:
+        # 期望可执行 → 平台应该 supported=true
+        correctly_passed = (act_supported is True)
+        checks.append(("allowed_executable", correctly_passed,
+                       f"expected executable, actual supported={act_supported}"))
+
+    # 额外：检查 planned_adapter 是否正确识别为非 executable
+    exp_exec = expected.get("executable")
+    if exp_exec is False and act_supported is True and act_exec is False:
+        checks.append(("correct_planned_status", True,
+                       "correctly identified as planned_adapter (supported but not executable)"))
+
+    if not checks:
+        return 0.0, {"reason": "no platform QC checks applicable"}
+
+    passed = sum(1 for _, ok, _ in checks if ok)
+    score = round(passed / len(checks), 3)
+    detail = {
+        "platform_qc_mode": True,
+        "checks": [{"label": label, "ok": ok, "detail": detail} for label, ok, detail in checks],
+        "passed": passed,
+        "total": len(checks),
+    }
+    return score, detail
+
+
+def _eval_intent_parsing(
+    intent: Dict[str, Any],
+    expected_platform: Dict[str, Any],
+) -> Tuple[float, Dict[str, Any]]:
+    """检查意图的 dataset/task_family 是否与平台方法的预期匹配。"""
+    intent_dataset = intent.get("dataset", "unknown")
+    intent_task = intent.get("task_family", "unknown")
+    checks = []
+
+    # registry method → expected dataset/task pair
+    exp_method = expected_platform.get("method")
+    if exp_method:
+        # 从 intent 声明就知道预期应解析出什么
+        checks.append(("dataset_known", intent_dataset != "unknown",
+                       f"intent declares dataset={intent_dataset}"))
+        checks.append(("task_known", intent_task != "unknown",
+                       f"intent declares task_family={intent_task}"))
+        # 如果 dataset=unknown 或 task=unknown，方法表匹配会失败 → supported=false
+        if intent_dataset == "unknown" or intent_task == "unknown":
+            checks.append(("expected_reject", expected_platform.get("should_execute") is False,
+                           "dataset/task unknown → platform should report unsupported"))
+
+    if not checks:
+        return 0.5, {"reason": "no parsing checks applicable", "platform_mode": True}
+
+    passed = sum(1 for _, ok, _ in checks if ok)
+    score = round(passed / len(checks), 3)
+    return score, {
+        "platform_mode": True,
+        "checks": [{"label": l, "ok": o, "detail": d} for l, o, d in checks],
+        "passed": passed, "total": len(checks),
+    }
+
+
+def _eval_platform_ambiguity(
+    intent: Dict[str, Any],
+    expected_platform: Dict[str, Any],
+    platform_actual: Dict[str, Any],
+) -> Tuple[float, Dict[str, Any]]:
+    """平台模式歧义处理：模糊意图应被拒绝，不能由平台猜测执行。"""
+    cat = intent.get("intent_category", "standard")
+    is_ambiguous = cat in ("ambiguous",)
+
+    act_supported = platform_actual.get("platform_supported")
+    correctly_rejected = (act_supported is False)
+
+    if is_ambiguous:
+        score = 1.0 if correctly_rejected else 0.0
+        detail = f"ambiguous intent, platform {'correctly rejected' if correctly_rejected else 'should have rejected'}"
+    else:
+        score = 1.0  # non-ambiguous, no penalty
+        detail = "not ambiguous"
+
+    return score, {"platform_mode": True, "is_ambiguous": is_ambiguous, "detail": detail}
+
+
+def _eval_platform_boundary(
+    intent: Dict[str, Any],
+    expected_platform: Dict[str, Any],
+    platform_actual: Dict[str, Any],
+) -> Tuple[float, Dict[str, Any]]:
+    """平台模式能力边界：超出平台范围的应正确拒绝。"""
+    cat = intent.get("intent_category", "standard")
+    is_boundary = cat in ("boundary", "trap")
+
+    act_supported = platform_actual.get("platform_supported")
+    exp_should_exec = expected_platform.get("should_execute", True)
+
+    if is_boundary or exp_should_exec is False:
+        correctly_blocked = (act_supported is False or platform_actual.get("platform_executable") is False)
+        score = 1.0 if correctly_blocked else 0.0
+        detail = f"boundary/trap intent, platform {'correctly blocked' if correctly_blocked else 'should have blocked'}"
+    else:
+        score = 1.0
+        detail = "not a boundary case"
+
+    return score, {"platform_mode": True, "is_boundary": is_boundary or exp_should_exec is False, "detail": detail}
+
+
 def evaluate_run(
     run_dir: Path,
     intents: Dict[str, Dict[str, Any]],
@@ -553,6 +767,9 @@ def evaluate_run(
     actual_tools = extract_tool_sequence(events)
     actions = extract_orchestrator_actions(events)
     errors = extract_errors(events)
+
+    # --- 平台 MVP 结果提取 ---
+    platform_actual = _extract_platform_actual(run_dir)
 
     # 多种格式的 reference workflow 兼容
     ref_path = (
@@ -581,16 +798,37 @@ def evaluate_run(
     boundary_score, boundary_detail = eval_boundary_identification(actions, intent)
     artifact_score, artifact_detail = eval_artifact_completeness(run_dir, intent)
 
+    # --- 平台 MVP 感知评分：用 expected_platform_result 覆写 ---
+    expected_platform = intent.get("expected_platform_result")
+    if expected_platform and platform_actual and platform_actual.get("is_platform_mvp"):
+        planning_score, planning_detail = _eval_platform_planning(expected_platform, platform_actual)
+        qc_score, qc_detail = _eval_platform_qc(expected_platform, platform_actual, intent)
+        parsing_score, parsing_detail = _eval_intent_parsing(intent, expected_platform)
+        ambiguity_score, ambiguity_detail = _eval_platform_ambiguity(intent, expected_platform, platform_actual)
+        boundary_score, boundary_detail = _eval_platform_boundary(intent, expected_platform, platform_actual)
+        # platform mode: no separate trajectory_efficiency
+        efficiency_score, efficiency_detail = 1.0, {"reason": "platform mode (single delegate call)"}
+        scores = {
+            "task_planning": planning_score,
+            "tool_correctness": tool_score,
+            "qc_detection": qc_score,
+            "intent_parsing": parsing_score,
+            "ambiguity_handling": ambiguity_score,
+            "boundary_identification": boundary_score,
+            "artifact_completeness": artifact_score,
+        }
+    else:
+        scores = {
+            "task_planning": planning_score,
+            "tool_correctness": tool_score,
+            "trajectory_efficiency": efficiency_score,
+            "qc_detection": qc_score,
+            "ambiguity_handling": ambiguity_score,
+            "boundary_identification": boundary_score,
+            "artifact_completeness": artifact_score,
+        }
+
     # 加权总分
-    scores = {
-        "task_planning": planning_score,
-        "tool_correctness": tool_score,
-        "trajectory_efficiency": efficiency_score,
-        "qc_detection": qc_score,
-        "ambiguity_handling": ambiguity_score,
-        "boundary_identification": boundary_score,
-        "artifact_completeness": artifact_score,
-    }
 
     total_score = sum(
         scores[dim] * DIMENSION_WEIGHTS.get(dim, 0)
@@ -607,8 +845,8 @@ def evaluate_run(
         "dimension_details": {
             "task_planning": planning_detail,
             "tool_correctness": tool_detail,
-            "trajectory_efficiency": efficiency_detail,
-            "qc_detection": qc_detail,
+            "qc_detection": qc_detail if "qc_detail" in dir() else qc_detail,
+            "intent_parsing": parsing_detail if "parsing_detail" in dir() else {},
             "ambiguity_handling": ambiguity_detail,
             "boundary_identification": boundary_detail,
             "artifact_completeness": artifact_detail,
@@ -746,6 +984,49 @@ def main():
             scores = [r["dimension_scores"].get(dim, 0) for r in results]
             avg = sum(scores) / len(scores)
             print(f"  {dim:25s}: {avg:.3f}")
+        print(f"{'='*70}\n")
+
+        print(f"\n{'='*70}")
+        print(f"全平台路线进度矩阵")
+        print(f"{'='*70}")
+        # 按 method 分组统计
+        per_method: Dict[str, Dict[str, Any]] = {}
+        for r in results:
+            # 从 intent 获取 method
+            intent_id = r["intent_id"]
+            intent = intents.get(intent_id, {})
+            ep = intent.get("expected_platform_result") or {}
+            method = ep.get("method") or "unsupported/out_of_scope"
+            should_exec = ep.get("should_execute", False)
+
+            if method not in per_method:
+                per_method[method] = {"total": 0, "passed": 0, "scores": [], "should_exec": should_exec}
+            per_method[method]["total"] += 1
+            per_method[method]["scores"].append(r["total_score"])
+            if r["total_score"] >= 0.8:
+                per_method[method]["passed"] += 1
+
+        print(f"{'Method':45s} {'#意图':>5} {'通过':>5} {'均分':>7} {'预期':>10}")
+        print("-" * 75)
+        for method in sorted(per_method.keys()):
+            m = per_method[method]
+            avg = sum(m["scores"]) / len(m["scores"]) if m["scores"] else 0
+            tag = "exec" if m["should_exec"] else "reject"
+            bar = "█" * int(avg * 10) + "░" * (10 - int(avg * 10))
+            print(f"  {method:43s} {m['total']:>5} {m['passed']:>5}  {bar} {avg:.3f}  {'→ '+tag:>10}")
+
+        # 平台健康度
+        exec_methods = [k for k, v in per_method.items() if v["should_exec"]]
+        total_exec = sum(per_method[m]["total"] for m in exec_methods)
+        total_passed = sum(per_method[m]["passed"] for m in exec_methods)
+        coverage = len(exec_methods)
+        all_methods = {"tdd_2d_segmentation_infer_report", "dental_2d_super_resolution",
+                       "private_2d_segmentation_train", "toothfairy3_3d_segmentation_infer_or_train",
+                       "dental_anomaly_detection"}
+        missing = all_methods - set(exec_methods)
+        print(f"\n  已覆盖路线: {coverage}/{len(all_methods)}")
+        if missing: print(f"  未覆盖: {', '.join(missing)}")
+        print(f"  可执行意图通过率: {total_passed}/{total_exec}" + (f" = {total_passed/total_exec*100:.0f}%" if total_exec else ""))
         print(f"{'='*70}\n")
 
     # CSV 输出

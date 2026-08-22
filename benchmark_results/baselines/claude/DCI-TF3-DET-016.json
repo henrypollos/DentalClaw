@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "detection",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_review"
+  },
+  "requires_human_review": true,
+  "reason": "请求为从 ToothFairy3 3D 分割标签中导出牙齿检测框数据集（DCI-TF3-DET-016），属于标签转换/数据集制备任务，与注册表中的 6 条方法（均为分割推理/训练、异常检测、超分、TTA 集成）均不匹配，无自动可执行路由。但任务本身在牙科 CV 范围内且路线可行：可基于 3D 连通域分析（如 cc3d/scipy label）将分割掩码转为 3D 检测框，或按层/投影生成 2D 检测框数据集，并复用平台 YOLO 检测模块与数据质检脚本；需人工批准后执行，故 outcome=external_proposal。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求在 TDD 数据集上训练 FDI 32 类牙位分割模型，任务合理且属于牙科 CV 范畴，但注册表中 tdd_2d_segmentation_infer_report 仅支持二值分割推理，无匹配的 32 类分割训练路由。可基于已有 nnU-Net v2 脚本适配多类训练，需人工审批后执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

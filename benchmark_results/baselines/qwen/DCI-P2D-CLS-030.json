@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "unknown",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "数据质检/标注质量评估不在注册方法列表中，但平台具备数据质检脚本，可据此设计外部方案"
+  },
+  "requires_human_review": true,
+  "reason": "用户请求对 Private2D 数据集的标注进行质量评估（判断哪些可用、哪些需复核），属于数据质检任务。注册方法中无匹配项，但代码资产中包含数据质检脚本，可提出外部方案，需人工批准后执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

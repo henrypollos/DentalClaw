@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "用户要求在 ToothFairy3 上训练 3D 牙齿检测模型并报告 mAP。注册方法中 toothfairy3_3d_segmentation_infer_or_train 仅支持分割任务，dental_anomaly_detection 仅支持 2D 异常检测，均无法匹配 3D 检测需求。该任务合理（可从分割标注推导 3D bbox），但无现成注册路由，需外部方案（如基于 YOLO 检测模块适配 3D 或从分割 mask 生成检测标签），须经人工批准。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

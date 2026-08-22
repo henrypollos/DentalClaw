@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "requires_human_approval"
+  },
+  "requires_human_review": true,
+  "reason": "TDD牙齿二值分割训练任务合理，但现有注册方法仅支持TDD分割推理与报告，不支持训练。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

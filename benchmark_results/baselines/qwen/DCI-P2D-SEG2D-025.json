@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求是将私有 2D 数据整理为 DentalClaw canonical case 格式并导出分割训练格式，属于数据预处理/格式转换任务。虽然下游目标是分割训练，但注册方法中无任何数据格式整理或导出的路由。任务合理且在牙科 CV 范围内，建议作为外部方案提交人工审批。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

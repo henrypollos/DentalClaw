@@ -1,0 +1,16 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求为 TDD 2D 牙齿二值分割训练，注册表中 tdd_2d_segmentation_infer_report 仅覆盖推理（inference），private_2d_segmentation_train 仅适用于 Private2D 数据集，无精确匹配 TDD+训练 的注册方法。任务本身合理，可基于已有 nnU-Net v2 脚本构建训练流水线（含 90/10 训练/测试划分），但需人工批准后执行。"
+}

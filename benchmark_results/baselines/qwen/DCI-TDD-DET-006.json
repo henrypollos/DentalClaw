@@ -1,0 +1,16 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_approval"
+  },
+  "requires_human_review": true,
+  "reason": "请求是将 TDD 的 teeth_bbox.json 转换为 COCO 格式以供牙齿检测模型训练使用，属于数据预处理/格式转换任务。注册方法中无匹配项（现有方法均为分割推理/训练、异常检测、超分辨率等，不含检测数据准备流程），但该任务合理且平台代码资产中有 YOLO 检测模块和数据质检脚本可支撑。建议编写脚本将 teeth_bbox.json 转为 COCO detection 格式（含 images、annotations、categories 字段），需人工批准后执行。"
+}

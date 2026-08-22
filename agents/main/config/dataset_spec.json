@@ -1,0 +1,13 @@
+{
+  "root": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw",
+  "imagesTr": "Dataset501_TDDTeethBinary2D/imagesTr",
+  "labelsTr": "Dataset501_TDDTeethBinary2D/labelsTr",
+  "imagesTs": "Dataset501_TDDTeethBinary2D/imagesTs",
+  "extra": {
+    "dataset_id": 501,
+    "dataset_name": "Dataset501_TDDTeethBinary2D",
+    "modality": "CT",
+    "num_classes": 1,
+    "description": "TDD Teeth Binary Segmentation Dataset"
+  }
+}

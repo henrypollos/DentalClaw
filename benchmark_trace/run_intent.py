@@ -40,6 +40,7 @@ from benchmark_trace.trace_recorder import (
     end_run,
     _safe_value,
 )
+from benchmark_trace.platform_planner import build_execution_plan
 
 INTENTS_FILE = REPO_ROOT / "benchmark_intents" / "intents.jsonl"
 
@@ -53,6 +54,34 @@ def load_intents() -> List[Dict[str, Any]]:
             if line:
                 intents.append(json.loads(line))
     return intents
+
+
+def select_experiment_intents(
+    intents: List[Dict[str, Any]],
+    max_per_category: int = 2,
+) -> List[Dict[str, Any]]:
+    """选择一个小型、分类别平衡的实验集，便于先做可复现的自动化验证。"""
+    categories = ["standard", "ambiguous", "boundary", "trap"]
+    counts = {category: 0 for category in categories}
+    selected: List[Dict[str, Any]] = []
+
+    for intent in intents:
+        category = intent.get("intent_category") or "standard"
+        if category not in counts:
+            continue
+        if counts[category] >= max_per_category:
+            continue
+        selected.append(intent)
+        counts[category] += 1
+
+    if len(selected) < 4:
+        for intent in intents:
+            if intent not in selected:
+                selected.append(intent)
+            if len(selected) >= max_per_category * len(categories):
+                break
+
+    return selected
 
 
 def find_intent(intent_id: str) -> Optional[Dict[str, Any]]:
@@ -618,6 +647,21 @@ def main():
         action="store_true",
         help="列出所有可用意图",
     )
+    parser.add_argument(
+        "--experiment-suite",
+        action="store_true",
+        help="仅运行一个小型代表性实验集（按 standard/ambiguous/boundary/trap 分类别抽样）",
+    )
+    parser.add_argument(
+        "--plan",
+        help="输入一条自然语言请求，输出平台执行计划（不执行任务）",
+    )
+    parser.add_argument(
+        "--max-per-category",
+        type=int,
+        default=2,
+        help="每个类别最多抽取的意图数量（默认 2）",
+    )
 
     args = parser.parse_args()
 
@@ -625,6 +669,11 @@ def main():
     dry_run = not args.no_dry_run
 
     # --list 模式
+    if args.plan:
+        plan = build_execution_plan(args.plan)
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        return
+
     if args.list:
         intents = load_intents()
         print(f"\n可用意图 ({len(intents)} 条):")
@@ -650,6 +699,7 @@ def main():
         return
 
     # 收集要运行的意图
+    all_intents = load_intents()
     intents_to_run = []
     if args.intent_id:
         intent = find_intent(args.intent_id)
@@ -659,7 +709,12 @@ def main():
             print(f"错误: 未找到意图 {args.intent_id}")
             sys.exit(1)
     elif args.all:
-        intents_to_run = load_intents()
+        intents_to_run = all_intents
+    elif args.experiment_suite:
+        intents_to_run = select_experiment_intents(
+            all_intents,
+            max_per_category=args.max_per_category,
+        )
     else:
         intents_to_run = filter_intents(
             task_family=args.task_family,
@@ -670,6 +725,18 @@ def main():
     if not intents_to_run:
         print("没有匹配的意图。使用 --list 查看可用意图。")
         sys.exit(1)
+
+    if args.experiment_suite:
+        category_counts: Dict[str, int] = {}
+        for intent in intents_to_run:
+            category = intent.get("intent_category") or "standard"
+            category_counts[category] = category_counts.get(category, 0) + 1
+        print(f"\n实验套件模式：从 {len(all_intents)} 条意图中抽取 {len(intents_to_run)} 条代表性样本")
+        print("实验流程：")
+        print("  1. Phase 1: 先做 dry-run 路径验证，检查规划和调用顺序")
+        print("  2. Phase 2: 如环境稳定，再补做真实运行验证")
+        print("  3. Phase 3: 用评估脚本汇总不同类别的表现")
+        print(f"  类别分布: {category_counts}")
 
     print(f"\n准备运行 {len(intents_to_run)} 个意图 (dry_run={dry_run})")
     print(f"Trace 目录: {args.trace_dir}")
@@ -692,6 +759,11 @@ def main():
     failed = sum(1 for r in results if r["status"] == "failed")
     print(f"\n{'='*70}")
     print(f"批量运行完成: {completed} 成功, {failed} 失败 / 共 {len(results)}")
+    print("实验流程建议:")
+    print("  1. 先运行 --experiment-suite 做小型代表性集 dry-run")
+    print("  2. 观察规划/路径/工具调用是否符合预期")
+    print("  3. 仅在环境稳定时再补真实运行")
+    print("  4. 用 eval_intents.py 汇总每个类别的得分")
     print(f"{'='*70}")
 
 

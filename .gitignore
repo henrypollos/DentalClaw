@@ -1,20 +1,33 @@
-# Large data & artifacts
-/data/
-/artifacts/
+# ===== 数据与产物(不进 git) =====
+data/
+artifacts/
+demo_output*/
+workspace/
+refer/
+benchmark_runs/
 
-# Experiment outputs / datasets (CBCT image dumps, etc.)
-/agents/data_curator/experiments/
+# ===== agents/data_curator 实验产物(代码保留) =====
+agents/data_curator/experiments/
+agents/data_curator/reports/
+agents/data_curator/exports/
+agents/data_curator/memory/
+agents/data_curator/canonical/
+agents/data_curator/intake/
+agents/data_curator/.openclaw/
 
-# Generated demo outputs
-/demo_output/
-/demo_output_tta_ensemble1/
-
-# Python
+# ===== Python =====
 __pycache__/
-*.py[cod]
-*$py.class
-.ipynb_checkpoints/
+*.pyc
 
-# OS / editor cruft
-.DS_Store
-Thumbs.db
+# ===== 模型权重与编译产物 =====
+*.pt
+*.onnx
+paper_revision/*.pdf
+
+# ===== 历史调试脚本(A2:仅在 archive tag) =====
+compare_one_intent.py
+DIRECTORY_PLAN.md
+
+# ===== 虚拟环境与编译产物 =====
+.venv/
+DentalClaw.pdf

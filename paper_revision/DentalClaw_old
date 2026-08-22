@@ -1,0 +1,453 @@
+
+\documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage{caption}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{stfloats}
+\usepackage{subcaption}
+\usepackage{threeparttable}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{tabularx}
+\usepackage[hyphens]{url}
+\usepackage[colorlinks,breaklinks]{hyperref}
+\usepackage{tikz}
+\usepackage{placeins}
+
+\newcommand{\cmark}{\ding{51}}
+
+\usetikzlibrary{shapes, arrows.meta, positioning, fit, calc}
+\usepackage{rotating}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{DentalClaw: A Modular Platform for Standardized and Auditable Dental Imaging Artificial Intelligence Workflows}
+
+%% Abstract
+\begin{abstract}
+\textit{Objectives:} Dental imaging artificial intelligence (AI) research is increasingly important in digital dentistry, but many dentists and clinical researchers face technical barriers in dataset preparation, model execution, evaluation, and reproducible reporting. This study aimed to develop and validate DentalClaw, a natural-language-driven platform that converts user research intent into standardized, executable, and reviewable dental imaging AI workflows.\\
+\textit{Methods:} DentalClaw was implemented as a modular platform integrating natural-language task orchestration, dataset curation, quality checking, train--test split verification, model execution, standardized evaluation, and structured reporting. Large-language-model-guided orchestration was used to translate user instructions into executable workflows, while deterministic modules performed data processing, training, inference, evaluation, and logging. Workflow validation was conducted on two representative tasks: 2D panoramic radiograph segmentation and 3D cone-beam computed tomography (CBCT) segmentation. An exploratory private panoramic radiograph object-detection workflow was also included to assess extensibility to clinical data and lesion-focused refinement.\\
+\textit{Results:} DentalClaw completed end-to-end workflows for both 2D panoramic radiograph and 3D CBCT segmentation tasks, from dataset preparation to model training, inference, evaluation, and structured reporting. Compared with manually assembled workflows, the platform reduced manual coordination during dataset preparation and result organization while producing comparable task-level segmentation results. It also generated reproducible artifacts, including workflow metadata, split files, prediction outputs, evaluation tables, and review-oriented reports. These results support the feasibility of natural-language-guided orchestration for standardized and traceable dental imaging AI experimentation.\\
+\textit{Conclusions:} DentalClaw demonstrated the feasibility of natural-language-guided orchestration for standardized and auditable dental imaging AI workflows. By integrating dataset preparation, model execution, evaluation, reporting, and exploratory private-data refinement into a unified workflow, the platform may reduce manual coordination burden and improve the reproducibility and reviewability of dental AI experimentation.\\
+\textit{Clinical Significance:} DentalClaw may help dentists and clinical researchers participate more directly in panoramic radiograph and CBCT AI studies by lowering technical barriers while preserving traceable and reviewable workflow outputs.
+\end{abstract}
+
+\begin{keyword}
+Dental informatics \sep Artificial intelligence \sep Digital dentistry \sep Quality control \sep Workflow automation \sep Cone-beam computed tomography \sep Panoramic radiography
+\end{keyword}
+
+\end{frontmatter}
+
+
+\section{Introduction}
+
+\begin{figure*}[t]
+\centering
+  \includegraphics[width=\textwidth]{Multi-agent system architecture of DentalClaw.pdf}
+\caption{Multi-agent system architecture of DentalClaw. DentalClaw is an agentic and modular framework that orchestrates the end-to-end dental AI workflow from heterogeneous data intake to structured outputs. Public or private datasets and user task instructions are first processed by a central coordinator, which determines the workflow stage and schedules three downstream agents. The Data Curation Agent standardizes input datasets through import, parsing, case structuring, metadata extraction, and quality control. The Experimentation Agent converts curated data into executable workflows for task configuration, training, inference, and standardized evaluation. The Reporting Agent transforms model outputs into aggregated metrics, visualizations, failure analyses, and structured reports suitable for research interpretation and clinical review. All agents operate on shared platform services, including storage, experiment registry, model and skill libraries, audit logging, and human review support. The final outputs include visualizations, checkpoints, trained models, and structured reports.}
+\label{fig:system_overview}
+\end{figure*}
+
+The digital transformation of dentistry has led to the increasing use of imaging data in diagnosis, treatment planning, intervention, and follow-up~\cite{Horner2012,Kapila2015,Assiri2020,Chogle2020}. Periapical and panoramic radiographs, cone-beam computed tomography (CBCT), intraoral scans, and intraoral photographs now play a central role in contemporary dental care and research~\cite{Horner2012,Kapila2015,Shujaat2021,Lahoud2022}. In parallel, artificial intelligence (AI), particularly deep learning-based computer vision, has shown considerable promise for automating clinically relevant tasks such as anatomical segmentation, lesion detection, tooth identification, disease classification, and outcome prediction~\cite{Schwendicke2020,Wang2021,Shaheen2021,Cui2022,Yeshua2023,Fu2024}. These advances have raised expectations that dental AI may improve diagnostic consistency, reduce clinician workload, and support precision dentistry at scale~\cite{Schwendicke2020,Schwendicke2022BigData}.
+
+However, the translation of dental AI from proof-of-concept studies to reproducible research workflows remains limitation. The bottleneck is often not the lack of capable models, but the fragmented and technically demanding workflow required to use them reliably~\cite{Schwendicke2021Checklist,Polizzi2023,Dot2024DentalSegmentator}. Dental AI experiments typically involve heterogeneous data ingestion, annotation harmonization, case structuring, dataset partitioning, preprocessing, model configuration, metric calculation, and result reporting. These steps are often implemented through task-specific scripts or locally improvised pipelines, making results difficult to reproduce, compare, and audit across studies.
+
+This problem is amplified by the heterogeneity of dental imaging data. Differences in acquisition devices, file formats, voxel spacing, image quality, field of view, and artifact profiles are common across centres and modalities~\cite{Nemtoi2013,Shujaat2021,Dot2024DentalSegmentator}. Annotation practices also vary in naming conventions, anatomical granularity, and quality control procedures~\cite{Polizzi2023,Zheng2024,Schwendicke2021Checklist}. In addition, inappropriate dataset splitting, including patient-level leakage or insufficient separation between internal and external validation cohorts, can lead to overoptimistic performance estimates~\cite{Schwendicke2021Checklist,Polizzi2023}. These issues increase the technical burden for dental researchers and weaken the reliability of downstream AI experiments.
+
+Existing solutions address only part of this workflow problem. Some studies have released pretrained models or task-specific software tools for selected dental imaging applications~\cite{Shaheen2021,Cui2022,Dot2024DentalSegmentator}, while general medical imaging and machine learning platforms can support individual stages of model development~\cite{Isensee2021nnUNet,Fedorov2012Slicer,Wasserthal2023}. Nevertheless, task-specific tools often have limited generalizability across modalities and datasets, whereas general-purpose platforms may require substantial computational expertise and do not necessarily provide dental-specific data governance, leakage-aware splitting, standardized evaluation, or clinician-readable reporting.
+
+To address this gap, we developed DentalClaw, a natural-language-driven and auditable workflow platform for dental imaging AI research. As shown in Fig.~\ref{fig:system_overview}, DentalClaw is organized around data curation, experiment execution, and structured reporting. The platform does not aim to introduce a new segmentation backbone. Instead, it aims to convert user research intent into standardized, executable, and reviewable workflows, while delegating data processing, model execution, evaluation, and logging to deterministic modules.
+
+The main aim of this study was to propose and evaluate DentalClaw, a natural-language-driven platform for standardized dental imaging AI workflows. The platform was evaluated on representative 2D panoramic radiograph and 3D CBCT segmentation tasks, with a focus on workflow completion, automation efficiency, reproducibility, and structured reporting.
+\begin{figure*}[b!]
+    \centering
+    \includegraphics[width=\textwidth]{Overall workflow of DentalClaw.pdf} 
+    
+    \caption{\textbf{Overall workflow and modular architecture of the DentalClaw platform.} 
+    The platform orchestrates the end-to-end dental AI pipeline through an LLM/VLM-driven central \cite{Yao2022ReAct,Schick2023Toolformer} engine that delegates tasks to three specialized agents. 
+    \textbf{(Top) Data curation and preparation:} Heterogeneous inputs (images, annotations, metadata) are standardized through automated case structuring, dataset checking, anomaly flagging, and train-test split verification, yielding prepared datasets and workflow summaries. 
+    \textbf{(Bottom Left) Model development and validation:} Executable workflows automate experiment planning, model training (e.g., U-Net \cite{Ronneberger2015}, nnU-Net \cite{Isensee2021}), and standardized metric evaluation, producing comprehensive outputs such as Model Cards \cite{Mitchell2019ModelCards} and clinical summaries. 
+    \textbf{(Bottom Right) Clinical and research use:} A user-facing interactive interface enables researchers and clinicians to review workflow records, inspect multi-modal segmentation results (2D and 3D), and facilitate reproducible research-oriented deployment.}
+    \label{fig:framework}
+\end{figure*}
+
+\section{Materials and methods}
+
+\subsection{Study design and platform overview}
+This study was designed to develop and perform a workflow validation of DentalClaw, a natural-language-driven platform for lowering the technical barrier of dental imaging artificial intelligence (AI) research, built on OpenClaw \cite{openclaw}. The aim was not to introduce a new task-specific segmentation backbone, but to determine whether a clinician-facing platform could reduce the technical burden of dental AI experimentation by converting natural-language research requests into executable and reviewable workflows. In this context, DentalClaw was designed to address a common practical gap in dental AI research: clinicians and dental researchers may understand the research question and desired task, but often lack the computational expertise required to prepare datasets, configure experiments, launch training pipelines, and organize outputs reproducibly.
+
+DentalClaw adopts a workflow-oriented architecture comprising a natural-language task orchestration layer, a reusable skill layer, and shared platform services for case representation, experiment tracking, audit logging, and human review. Instead of requiring users to assemble scripts manually for each experiment, the platform interprets task instructions expressed in natural language and translates them into standardized workflow steps, including data ingestion, dataset preparation, preprocessing, model execution, evaluation, and structured reporting. Major workflow events, configuration choices, validation outcomes, and generated outputs are stored in machine-readable form to support repeatability and retrospective review.
+
+For the present study, DentalClaw was deployed on a server equipped with an NVIDIA GeForce RTX 3090 GPU. The platform used the Qwen API \cite{qwen2.5} as the reasoning backend of the OpenClaw-based runtime. In this setting, the large language model was responsible for interpreting user research instructions in the context of injected workflow skills, tool schemas,and runtime metadata, and for coordinating the selection and sequencing of available platform actions. The actual data processing, dataset checking, training, evaluation, and reporting stepswere executed by deterministic, versioned modules, with replayable configurations and audit logs retained for reproducibility and retrospective review by users with limited programming experience.
+
+
+
+
+\subsection{Datasets and representative workflows}
+
+Two public datasets and one private dataset were used for workflow validation. The Tufts Dental Database (TDD) \cite{panetta2022tufts} was used for 2D panoramic radiograph segmentation. Its panoramic images and tooth-level annotations were reformatted into a 32-class tooth segmentation task, with each class corresponding to an individual tooth label. After automated auditing and eligibility checking, 968 of 1051 cases were retained. This dataset was used for both panoramic workflow validation and the skill-based configuration case study.
+
+ToothFairy \cite{ToothFairyDataset1, ToothFairyDataset2, ToothFairyDataset3} was used for 3D CBCT segmentation. Together, the TDD and ToothFairy datasets represent two common dental imaging scenarios with different dimensionality, data organization, preprocessing requirements, metadata structures, and model execution logic.
+
+In addition, a private labeled panoramic radiograph dataset was used for downstream lesion detection validation. It included 290 panoramic radiographs collected during routine clinical care at our hospital between 2012 and 2024 under ethical approval PKUSSIRB-2025,107,012. Each image was annotated with bounding boxes for pulp, root canal fillings, fillings, and periapical lesions by clinical experts, and images with poor quality, severe artifacts, incomplete dentition coverage, or uncommon anatomical conditions that could compromise annotation reliability were excluded. The radiographs were acquired using a Planmeca dental panoramic X-ray system and stored as 8-bit grayscale JPEG images. The cohort had a mean age of 35.6 years, with a standard deviation of 15.2 years and a range of 16 to 80 years, and the gender distribution was 51\% male and 49\% female.
+
+
+\subsection{Workflow execution and automated dataset preparation}
+
+All input datasets were transformed into a canonical case-level representation to support consistent downstream processing across modalities. This standardization step was particularly important in a natural-language-driven research platform, because users were not required to manually configure low-level preprocessing logic or dataset checks for each experiment. Each case record contained references to image data, annotation files when available, task labels, modality information, metadata fields relevant to acquisition and preprocessing, and workflow status indicators. This representation enabled 2D panoramic radiographs and 3D CBCT volumes to be managed under a common framework while preserving modality-specific attributes required for task execution.
+
+Before model development, DentalClaw applied structured dataset checking and preparation procedures as built-in workflow safeguards intended to make user-initiated experiments more reliable and reviewable. These procedures included completeness checks for missing images, absent annotations, malformed label files, and file-level corruption; image--annotation consistency checks; annotation integrity checks for empty masks, duplicated labels, and invalid label values; label normalization for dental numbering or class schema; plausibility and topology-aware checks; metadata parsing for acquisition-related descriptors such as voxel spacing and dimensionality; and split verification for duplicated identifiers, repeated cases, or other indicators of potential train--test leakage. For each flagged issue, the platform recorded the issue category, affected case, and downstream handling decision, including automatic normalization, exclusion from downstream use, or flagging for manual review.
+
+DentalClaw then generated a task-specific execution plan including preprocessing rules, training configuration, split assignment, output directories, and evaluation settings. The appropriate workflow skills for preprocessing, model training, inference, metric computation, and report rendering were subsequently invoked in a reproducible order. Intermediate outputs were stored together with execution logs and workflow summaries.
+
+\subsection{Validation workflows and outcome measures}
+
+The validation strategy comprised two complementary components: (1) successful translation of representative natural-language research requests into executable 2D and 3D dental imaging workflows; and (2) structured output generation for workflow review and result traceability.
+
+Two representative task workflows were executed through the same platform logic. In the panoramic workflow, panoramic images and annotations were imported, checked, assigned to a 2D task-specific configuration, and processed through automated preprocessing, training, inference, and metric computation. In the CBCT workflow, volumetric image data, annotations, and metadata were ingested and checked before task-specific preprocessing, model execution, inference, and aggregation of case-level results. In both workflows, structured summaries of preparation findings, workflow status, and predictions were generated automatically. The 3D visualizations and surface renderings of the segmentation masks were generated using 3D Slicer (version 5.10.0) \cite{Fedorov2012}. The aim of these workflows was not only to obtain segmentation performance estimates, but also to assess whether DentalClaw could convert research intent into executable workflows and generate review-oriented outputs suitable for inspection by dentists and clinical researchers.
+
+Evaluation was performed at two levels. First, workflow execution endpoints included successful interpretation of representative natural-language task requests, successful completion of major workflow stages, number of imported and retained cases, dominant preparation findings, runtime of major workflow stages, and successful generation of structured outputs. Second, task-level performance for the two representative segmentation workflows was summarized using standard overlap- and boundary-based metrics, including Dice \cite{Dice1945} similarity coefficient, and distance-based measures where appropriate. These task-level results were interpreted as supportive indicators of end-to-end workflow feasibility rather than as the primary basis for claiming state-of-the-art segmentation performance.
+
+\subsection{Skill-based configuration case studies}
+
+To further evaluate whether DentalClaw could encode and reuse practical model-configuration knowledge within traceable workflows, we conducted two skill-based configuration case studies covering both 2D panoramic radiograph segmentation and 3D CBCT segmentation. These experiments were not designed to establish new state-of-the-art segmentation models. Instead, they examined whether common but practically important configuration strategies could be formalized as reusable DentalClaw skills and executed under the same audit, logging, and reporting framework.
+
+The first case study focused on the TDD-derived 32-class panoramic tooth segmentation task. In this 2D workflow, DentalClaw represented model-tuning strategies as reusable skills, including intensity augmentation, optimizer selection, learning-rate scheduling, and test-time augmentation. All configuration trials used the same audited dataset, predefined train/validation/test split, and evaluation pipeline. DentalClaw recorded the selected configuration, execution logs, validation metrics, test metrics, prediction outputs, and generated reports for each trial. The best-performing configuration was selected based on validation performance and then evaluated on the held-out test set.
+
+The second case study focused on 3D CBCT segmentation. In this workflow, DentalClaw represented multi-model fusion as a reusable skill rather than as an ad hoc post-processing step. The fusion skill coordinated the outputs of multiple segmentation models under a predefined inference and fusion protocol, and recorded the participating models, fusion settings, intermediate predictions, final segmentation outputs, evaluation metrics, and structured reports. This case study was used to assess whether DentalClaw could support reusable skill execution not only for parameter-level model tuning in 2D images, but also for model-level orchestration and fusion in 3D volumetric segmentation.
+
+\subsection{Statistical analysis}
+
+Results were summarized descriptively. Workflow-level outcomes included input and eligible cases, completion status, preparation findings, generated outputs, and stage runtime. Segmentation performance was reported using the metrics generated by the evaluation pipeline. No inferential statistical testing was performed because this study focused on workflow feasibility, automation efficiency, and output completeness.
+
+
+
+\section{Results}
+\subsection{End-to-end workflow execution, automation efficiency, and reproducibility}
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Complete training.png}
+    \caption{DentalClaw completes model training and sends a report.}
+    \label{fig:complete_training}
+\end{figure*}
+
+DentalClaw was validated on two representative public datasets covering two methodologically distinct 
+dental imaging scenarios: the TDD dataset for 2D panoramic radiograph segmentation and the ToothFairy dataset for 3D CBCT segmentation. In both settings, the platform completed the full workflow chain from dataset ingestion and automated dataset preparation to preprocessing, model training, inference, evaluation, and structured output generation. Despite substantial differences in data organization, preprocessing requirements, and model execution logic between the two tasks, DentalClaw preserved a unified workflow framework while adapting automatically to modality-specific characteristics of panoramic radiographs and volumetric CBCT scans.
+
+A key advantage of DentalClaw was that these workflows could be executed with minimal manual coordination. Rather than relying on fragmented scripts and repeated user intervention at each stage, the platform standardized dataset handling, preparation logic, model execution, and result aggregation within a single orchestrated pipeline. This reduced the dependence on manually assembled procedures and enabled the user to obtain execution-ready results through a more consistent and reproducible process.
+
+In addition to completing the computational pipeline, DentalClaw generated structured user-facing outputs after workflow execution, summarizing task configuration, dataset status, training records, evaluation results, and review-relevant findings in a unified format. A representative example is shown in Fig.~\ref{fig:complete_training}. Instead of returning isolated model files, intermediate folders, or console logs alone, the platform produced a reviewable workflow artifact that consolidated the key information needed for result interpretation and downstream checking. Quantitative workflow-level results, including imported cases, retained cases, preparation outcomes, and generated outputs, are summarized in Table~\ref{tab:workflow_validation}.
+
+
+\begin{table*}[!t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\caption{End-to-end workflow completion and efficiency comparison. The manually operated script baseline used the same predefined workflow and did not involve hyperparameter tuning or model selection.}
+\label{tab:workflow_validation}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{
+>{\raggedright\arraybackslash}p{2.5cm}
+>{\centering\arraybackslash}p{1.5cm}
+>{\raggedright\arraybackslash}p{2.8cm}
+>{\centering\arraybackslash}p{1.4cm}
+>{\raggedright\arraybackslash}X
+>{\raggedright\arraybackslash}X
+}
+\toprule
+Task & Cases input / eligible\tnote{a} & Main preparation findings\tnote{b} & Completion & DentalClaw & Manually operated scripts\tnote{c} \\
+\midrule
+
+Panoramic segmentation
+& 1051 / 968
+& Missing masks; image--label mismatch
+& Completed
+& \begin{tabular}[t]{@{}l@{}}
+audit+prep: 14 min \\
+train: 6 h 52 min \\
+infer+eval+report: 31 min \\
+outputs: manifest, split file, \\
+predictions, metrics, report
+\end{tabular}
+& \begin{tabular}[t]{@{}l@{}}
+audit+prep: 3 h 26 min \\
+train: 6 h 58 min \\
+infer+eval+organization: 2 h 18 min \\
+outputs: ad hoc logs/scripts, \\
+checkpoints, predictions, metrics
+\end{tabular} \\
+
+\addlinespace
+
+CBCT multiclass segmentation
+& 63 / 43
+& Metal artifacts; FOV anomalies; inconsistent volume usability
+& Completed
+& \begin{tabular}[t]{@{}l@{}}
+audit+prep: 21 min \\
+train: 19 h 36 min \\
+infer+eval+report: 1 h 44 min \\
+outputs: manifest, split file, \\
+volumes, metrics, report
+\end{tabular}
+& \begin{tabular}[t]{@{}l@{}}
+audit+prep: 6 h 12 min \\
+train: 19 h 49 min \\
+infer+eval+organization: 3 h 11 min \\
+outputs: ad hoc logs/scripts, \\
+checkpoints, volumes, metrics
+\end{tabular} \\
+
+\bottomrule
+\end{tabularx}
+
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item[a] Eligible cases are cases passing dataset audit and preprocessing eligibility checks.
+\item[b] Dominant preparation-related findings are reported rather than all raw audit flags.
+\item[c] The manually operated script baseline refers to a human operator executing the same predefined workflow using local scripts and manually organizing intermediate and final outputs. The comparison was designed to assess workflow completion, automation efficiency, and output organization, not hyperparameter tuning or model optimization.
+\end{tablenotes}
+\end{threeparttable}
+\end{table*}
+
+
+Across both representative workflows,  the platform reduced the need for extensive manual intervention during dataset preparation, workflow coordination, and result organization. By standardizing intermediate artifacts and final outputs, including cleaned manifests, split files, prediction results, metric summaries, and structured reports, DentalClaw supported reproducible and execution-ready dental AI experimentation across heterogeneous 2D and 3D imaging tasks.
+
+
+
+
+\subsection{Structured reporting and review-oriented outputs}
+
+Beyond workflow execution itself, DentalClaw generated structured outputs intended to support result review, workflow traceability, and experiment comparison. For each validated task, the platform exported workflow metadata, preparation summaries, model configuration records, quantitative evaluation tables, prediction files, and case-level notes in a unified output format. These outputs were designed to move beyond raw model predictions and provide a review-oriented representation of the completed workflow.
+
+A representative report generated by DentalClaw is shown in Fig.~\ref{fig:report_figure}. The report was organized around three layers of information: (1) workflow-level metadata describing the executed task and dataset context, (2) quantitative results summarizing model performance and generated outputs, and (3) case-level notes highlighting review-relevant findings and failure-prone cases. In this way, the final report preserved not only what the model produced, but also how the experiment was configured and which intermediate outputs were generated during execution.
+
+This reporting capability was observed in both the 2D panoramic and 3D CBCT workflows, indicating that DentalClaw can standardize not only task execution but also result presentation across modalities. Such outputs may facilitate experiment tracking, workflow comparison, and expert review in future dental imaging studies.
+
+\begin{figure*}[htbp!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{report_figure.png}
+    \caption{A representative structured report generated by DentalClaw. The report integrates workflow metadata, quantitative evaluation metrics, and case-level visual review panels, facilitating direct clinical inspection and traceability of the completed experiment.}
+    \label{fig:report_figure}
+    \vspace{1em}
+\end{figure*}
+
+\subsection{Expert-informed configuration trials across imaging modalities}
+
+To further evaluate whether DentalClaw could encode and reuse clinical-grade model-configuration knowledge within a traceable workflow, we conducted skill-based configuration studies on both 2D panoramic radiographs (TDD dataset) and 3D CBCT volumes (ToothFairy dataset). These trials examined how DentalClaw's modular orchestration of ``skills'' can lower technical barriers while achieving competitive performance within the evaluated workflows.
+
+\subsubsection{Trajectory validation and user comparison on 2D panoramic radiographs}
+
+In the TDD-derived 32-class panoramic segmentation task, we assessed the platform's ability to orchestrate a progression of expert skills. These skills were inspired by recurring practices in large-scale medical image analysis competitions \cite{wang2024stsmiccai2023challenge, wang2025miccaists2024challenge}. Starting from a U-Mamba baseline, DentalClaw sequentially invoked these reusable skills to refine the experimental plan under the same audit and logging framework. As shown in Table~\ref{tab:ablation}, the performance improved from a Mean Dice of 0.6163 to 0.6937, with Mean HD95 reducing from 83.15~mm to 38.54~mm.
+
+To highlight the platform's utility in bridging the expertise gap, we compared the automated results with configurations manually selected by three users with varying technical backgrounds (Student A, Student B, and an AI researcher). As summarized in Table~\ref{tab:expertise}, user-selected configurations yielded diverse outcomes; however, the DentalClaw skill-based workflow (Exp6) outperformed all manual configurations, including those of the AI researcher. Figure~\ref{fig:expertise_masks} provides qualitative evidence that DentalClaw's automated orchestration produces cleaner boundaries and more consistent tooth numbering, demonstrating that pre-encoded expert knowledge can effectively substitute for intensive manual trial-and-error.
+
+\begin{table*}[!t]
+\centering
+\small
+\caption{Expert-informed configuration trajectory executed by DentalClaw on a 32-class panoramic dental X-ray dataset.}
+\label{tab:ablation}
+\begin{tabularx}{\textwidth}{lXcc}
+\toprule
+Experiment & Key Modification & Mean Dice $\uparrow$ & Mean HD95 $\downarrow$ \\
+\midrule
+Baseline & Default U-Mamba \cite{Ma2024UMamba} (no extra optimisations) & 0.6163 & 83.15 \\
+Exp1 & Gaussian noise + gamma correction (training-time) & 0.6666 & 50.42 \\
+Exp2 & Cosine annealing learning rate schedule & 0.6483 & 56.90 \\
+Exp3 & AdamW \cite{Loshchilov2017AdamW} optimizer & 0.6592 & 58.74 \\
+Exp4 & Test-time augmentation (mirror) & 0.6208 & 82.78 \\
+Exp5 & Basic combination: AdamW + TTA(mirror) & 0.6684 & 48.52 \\
+\textbf{Exp6} & \textbf{Best combination: AdamW + Cosine + TTA} & \textbf{0.6937} & \textbf{38.54} \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table}[!t]
+\centering
+\small
+\caption{User-selected vs. DentalClaw skill-based configurations under the same dental X-ray task.}
+\label{tab:expertise}
+\begin{tabularx}{\linewidth}{lXcc}
+\toprule
+Source & Configuration Type & Mean Dice $\uparrow$ & Mean HD95 $\downarrow$ \\
+\midrule
+Student A & User-selected & 0.6283 & 82.28 \\
+Student B & User-selected & 0.6546 & 56.37 \\
+AI researcher & User-selected & 0.6883 & 49.21 \\
+\textbf{DentalClaw} & \textbf{Skill-based} & \textbf{0.6937} & \textbf{38.54} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[!t]
+\centering
+\subfloat[Student A]{\includegraphics[width=0.205\textwidth]{image0.png}}
+\hfill
+\subfloat[Student B]{\includegraphics[width=0.205\textwidth]{image3.png}}
+\hfill
+\subfloat[AI researcher]{\includegraphics[width=0.205\textwidth]{image2.png}}
+\hfill
+\subfloat[Automated]{\includegraphics[width=0.205\textwidth]{image1.png}}
+\caption{Qualitative comparison of segmentation masks produced by different users vs. the automated DentalClaw trajectory.}
+\label{fig:expertise_masks}
+\end{figure}
+
+\subsubsection{Execution of multi-model fusion skills on 3D CBCT segmentation}
+
+As a second skill-based configuration case study, we evaluated whether DentalClaw could coordinate multiple predefined 3D segmentation modules within a single traceable workflow. The CBCT task involved 35 anatomical and restorative classes, including natural teeth and metallic restorations, and therefore required modality-specific preprocessing, model execution, output fusion, and post-processing. This experiment was designed to assess the platform's ability to orchestrate heterogeneous model outputs rather than to introduce a new CBCT segmentation architecture.
+
+
+
+\begin{table*}[htbp]
+\centering
+\caption{Expert-informed configuration trajectory executed by DentalClaw on a 35-class CBCT dataset.}
+\label{tab:cbct_trajectory}
+\begin{tabular}{llcccc}
+\toprule
+\multirow{2}{*}{Experiment} & \multirow{2}{*}{Key Modification} & \multicolumn{2}{c}{Teeth (1--32)} & \multicolumn{2}{c}{Restorations (33--35)} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+& & Mean Dice $\uparrow$ & Mean HD95 $\downarrow$ & Mean Dice $\uparrow$ & Mean HD95 $\downarrow$ \\
+\midrule
+Baseline & Default nnU-Net (CNN expert) & 0.7038 & 10.386 & 0.6588 & 16.484 \\
+Exp1 & SwinUNETR (Transformer expert) & 0.6508 & 15.633 & 0.7371 & 9.625 \\
+Exp2 & U-MambaBot (SSM expert) & 0.6648 & 11.886 & 0.7279 & 6.122 \\
+Exp3 & Ensemble (Majority Voting) & 0.7189 & 11.231 & 0.7508 & 5.551 \\
+Exp4 & Ensemble (Mean-Softmax) & 0.7156 & 11.080 & 0.7536 & 5.888 \\
+\textbf{Exp5} & \textbf{Best: Ensemble + TTA + Post-proc} & \textbf{0.8058} & \textbf{4.528} & \textbf{0.7653} & \textbf{5.172} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+
+
+\begin{figure*}[!t]
+\centering
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{0.95}
+
+\begin{tabular}{
+    m{0.025\textwidth}
+    >{\centering\arraybackslash}m{0.145\textwidth}
+    >{\centering\arraybackslash}m{0.145\textwidth}
+    >{\centering\arraybackslash}m{0.145\textwidth}
+    >{\centering\arraybackslash}m{0.145\textwidth}
+    >{\centering\arraybackslash}m{0.145\textwidth}
+    >{\centering\arraybackslash}m{0.145\textwidth}
+}
+& \textbf{Original}
+& \textbf{GT}
+& \textbf{nnU-Net}
+& \textbf{SwinUNETR tiny}
+& \textbf{U-MambaBot}
+& \textbf{DentalClaw-orchestrated} \\
+
+\rotatebox{90}{\textbf{Case 1}}
+& \includegraphics[width=\linewidth]{CBCT_040_L.jpg}
+& \includegraphics[width=\linewidth]{GT_040_L.jpg}
+& \includegraphics[width=\linewidth]{nnUNet_040_L.jpg}
+& \includegraphics[width=\linewidth]{SwinUNETR_040_L.jpg}
+& \includegraphics[width=\linewidth]{UMamba_040_L.jpg}
+& \includegraphics[width=\linewidth]{Post_040_L.jpg}
+\\[-1mm]
+
+\rotatebox{90}{\textbf{Case 2}}
+& \includegraphics[width=\linewidth]{CBCT_004.jpg}
+& \includegraphics[width=\linewidth]{GT_004_L.jpg}
+& \includegraphics[width=\linewidth]{nnUNet_004_L.jpg}
+& \includegraphics[width=\linewidth]{SwinUNETR_004_L.jpg}
+& \includegraphics[width=\linewidth]{UMamba_004_L.jpg}
+& \includegraphics[width=\linewidth]{Post_004_L.jpg}
+\end{tabular}
+
+\caption{
+Qualitative comparison of the 3D CBCT segmentation workflow. 
+Two representative cases are shown across the original CBCT slice, ground-truth annotation, individual segmentation models, and the DentalClaw-orchestrated final output. 
+The final output was generated through the platform-managed multi-model fusion and post-processing workflow.
+}
+\label{fig:cbct_qualitative_comparison}
+\end{figure*}
+
+In this workflow, DentalClaw executed three predefined segmentation modules with different architectural characteristics: nnU-Net\cite{Isensee2021} as a CNN-based module, SwinUNETR \cite{Hatamizadeh2022SwinUNETR} as a Transformer-based module, and U-MambaBot \cite{Ma2024UMamba} as an SSM-based module. The platform then applied predefined multi-model ensemble \cite{Ju2018EnsembleCNN} and post-processing skills, including majority voting, mean-softmax ensembling, test-time augmentation (TTA)~\cite{AutomaticBrain, Moshkov2020TTA}, and anatomy-guided refinement. All intermediate predictions, selected configurations, fusion outputs, post-processing records, and evaluation metrics were stored as part of the same workflow trace.
+
+As shown in Table~\ref{tab:cbct_trajectory}, the individual modules showed different performance patterns across natural teeth and metallic restorations. The nnU-Net baseline achieved a Mean Dice of 0.7038 for natural teeth, whereas SwinUNETR and U-MambaBot showed higher Dice values for restorations. After platform-managed fusion and anatomy-guided refinement, the final DentalClaw-orchestrated output achieved a Mean Dice of 0.8058 for natural teeth and 0.7653 for restorations, with the Mean HD95 for natural teeth decreasing from 10.386~mm in the nnU-Net baseline to 4.528~mm. Qualitative examples in Fig.~\ref{fig:cbct_qualitative_comparison} further illustrate that the fused output produced smoother surfaces and fewer visible label inconsistencies in the representative cases.
+
+These results indicate that DentalClaw can package multi-model 3D segmentation procedures into reproducible workflow skills, including model execution, fusion, post-processing, metric aggregation, and qualitative result generation. The experiment should be interpreted as a workflow orchestration case study rather than as a standalone comparison of new CBCT segmentation algorithms.
+
+
+
+\subsection{Private object detection workflow and lesion-focused refinement}
+
+To further evaluate DentalClaw on private clinical data, we conducted an object detection workflow using our own dataset of 290 dental radiographs. The dataset was annotated for four target categories: pulp, root canal fillings, fillings, and periapical lesion. DentalClaw standardized the annotation format, checked image--annotation consistency, generated a fixed train--validation--test split, and executed the detection workflow with traceable training and evaluation records. The split contained 203 training images, 58 validation images, and 29 test images. For periapical lesions, the corresponding numbers of lesion instances were 66, 19, and 10, respectively.
+
+In the initial four-class detection experiment, DentalClaw trained and evaluated a detector on the validation set. As shown in Table~\ref{tab:private_detection_four_class}, the overall mAP$_{50}$ was 0.613 and the mAP$_{50-95}$ was 0.335. The detector achieved relatively higher performance for pulp, root canal fillings, and fillings. In contrast, periapical lesion detection showed substantially lower performance, with a precision of 0.208, recall of 0.071, mAP$_{50}$ of 0.076, and mAP$_{50-95}$ of 0.025. This result indicated that the lesion category was the main bottleneck in the private detection workflow.
+
+\begin{table}[!t]
+\centering
+\caption{Validation results of the four-class object detection workflow.}
+\label{tab:private_detection_four_class}
+\footnotesize
+\begin{tabular}{lcccc}
+\hline
+Class & P & R & mAP$_{50}$ & mAP$_{50-95}$ \\
+\hline
+All & 0.6352 & 0.5991 & 0.6135 & 0.3354 \\
+Pulp & 0.8531 & 0.8557 & 0.8802 & 0.4583 \\
+Root canal fillings & 0.7182 & 0.7223 & 0.7084 & 0.390 \\
+Fillings & 0.7604 & 0.7460 & 0.7889 & 0.4676 \\
+Periapical lesion & 0.2081 & 0.0712 & 0.0764 & 0.025 \\
+\hline
+\end{tabular}
+\end{table}
+
+Based on the low performance of the lesion category and the limited number of lesion instances, DentalClaw further executed two lesion-focused experiments. Unlike the four-class detector, these follow-up experiments treated periapical lesion as the only target category. The first experiment used a single-class lesion detector as the baseline. The second experiment increased the detector input size during training and inference to preserve more local image details for small lesion regions.
+
+As shown in Table~\ref{tab:private_detection_lesion}, the single-class lesion detector achieved a precision of 0.200, recall of 0.105, mAP$_{50}$ of 0.095, and mAP$_{50-95}$ of 0.062. The increased input-size setting improved the corresponding values to 0.433, 0.211, 0.167, and 0.079, respectively. Although the absolute performance remained limited, the follow-up experiments showed that DentalClaw could identify a weak target category from the initial workflow and execute targeted experimental refinements under the same standardized evaluation framework.
+
+\begin{table}[!t]
+\centering
+\caption{Validation results of lesion-focused detection experiments.}
+\label{tab:private_detection_lesion}
+\footnotesize
+\begin{tabular}{lcccc}
+\hline
+Setting & P & R & mAP$_{50}$ & mAP$_{50-95}$ \\
+\hline
+Single-class lesion detector & 0.2001 & 0.1052 & 0.0954 & 0.0623 \\
+Increased input-size detector & 0.4335 & 0.2113 & 0.1672 & 0.0793 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+
+DentalClaw as a natural-language-driven workflow platform for dental imaging AI research. The results suggest that DentalClaw can convert user research instructions into executable workflows covering dataset preparation, model training, inference, evaluation, and structured reporting. Importantly, the contribution of DentalClaw should be interpreted as workflow infrastructure rather than as a new segmentation model. Its value lies in organizing fragmented, operator-dependent steps into a standardized and reviewable process for dental AI experimentation.
+
+DentalClaw completed end-to-end workflows in two representative but methodologically different scenarios: 2D panoramic radiograph segmentation and 3D CBCT segmentation. These tasks differ in data dimensionality, file organization, preprocessing requirements, and model execution logic. The ability to handle both workflows under a shared platform structure suggests that a case-level data representation, combined with task-specific execution modules, can support standardized AI experimentation across heterogeneous dental imaging modalities.
+
+The platform also reduced manual coordination burden compared with manually assembled scripts while preserving comparable task-level segmentation performance. This finding is relevant because many practical barriers in dental AI research arise not from the absence of capable models, but from the effort required to prepare datasets, configure experiments, check data quality, run evaluation, and organize outputs reproducibly. From this perspective, DentalClaw provides a workflow standardization layer that may improve procedural efficiency and reproducibility in research settings. This interpretation is consistent with recent calls for more transparent and methodologically controlled dental AI studies~\cite{Uribe2025}.
+
+Another practical feature of DentalClaw is its structured reporting layer. Instead of returning only model checkpoints, raw predictions, or console logs, the platform generated reports containing workflow metadata, preparation summaries, quantitative results, prediction files, and case-level review information. These outputs may help researchers inspect how an experiment was configured, what data were used, and how results were produced. However, this component was evaluated only as a research reporting and traceability tool. It should not be interpreted as a validated clinical decision-support interface.
+
+Several limitations should be noted. First, although an exploratory private object-detection workflow was included, the main validation focused on representative segmentation workflows, and broader tasks such as classification, registration, multimodal fusion, and case-level decision support were not systematically evaluated. Second, although DentalClaw was designed to reduce the technical burden for dental researchers, this study did not include a formal usability study with dentists or clinical researchers. Third, the reporting component was not formally evaluated in terms of readability, usefulness, or review efficiency. Fourth, the task-level experiments were intended to demonstrate workflow feasibility rather than state-of-the-art segmentation performance across diverse external cohorts.
+
+Future work should evaluate DentalClaw on a broader range of dental imaging tasks, datasets, and institutional settings. Formal user studies are also needed to determine whether natural-language-driven workflow interaction reduces setup time, improves workflow comprehension, and enables more independent participation by dental researchers. In addition, the data preparation and reporting layers could be extended with stronger annotation auditing, leakage analysis, metadata harmonization, and interactive review functions. Any transition from research workflow support to clinical use would require prospective validation, human oversight, and regulatory consideration.
+
+
+
+\section{Conclusions}
+DentalClaw demonstrated the feasibility of natural-language-guided orchestration for standardized dental imaging AI workflows. By integrating dataset ingestion, quality auditing, model execution, evaluation, and structured reporting into a traceable workflow, the platform reduced manual coordination burden and improved the reproducibility and reviewability of dental AI experimentation. These findings support DentalClaw as a practical research infrastructure for assisting dentists and clinical researchers in conducting more standardized imaging AI studies. Future work will extend the platform to broader dental imaging tasks, multi-center datasets, and more interactive user-facing research scenarios.
+
+\newpage
+\footnotesize
+\bibliographystyle{elsarticle-num}
+\bibliography{cas-refs}
+
+\end{document}
+

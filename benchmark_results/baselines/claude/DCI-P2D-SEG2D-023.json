@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "segmentation",
+    "mode": "inference"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_review"
+  },
+  "requires_human_review": true,
+  "reason": "请求为私有 2D 数据生成临床结果报告（报告属推理后产出）。注册表中 private_2d_segmentation_train 仅支持训练，tdd_2d_segmentation_infer_report 绑定 TDD 数据集，均不能直接用于私有数据的报告生成。任务合理，可提议外部方案：先经 private_2d_segmentation_train 训练私有 2D 分割模型，再复用 TDD 报告流程的推理与报告脚本生成私有数据临床报告，须经人工批准后执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

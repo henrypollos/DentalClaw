@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "注册表中无 2D 检测训练方法（private_2d_segmentation_train 为分割任务，dental_anomaly_detection 为异常检测），任务属于牙科 CV 范围内且平台具备 YOLO 检测模块代码资产，可通过外部方案实现，但需人工批准后执行。注意：Private2D 现有标注为四类病灶 bbox，牙齿检测训练可能需补充牙齿级 bbox 标注或由 TDD 分割掩码转换生成。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

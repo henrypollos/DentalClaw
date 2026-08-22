@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "inference"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "用户请求对 Private2D 私有数据生成临床结果报告（推理+报告）。注册表中 private_2d_segmentation_train 仅支持训练，无针对 Private2D 的推理/报告方法；tdd_2d_segmentation_infer_report 仅适用于 TDD 数据集。任务合理但无匹配注册方法，建议基于 YOLO 检测模块对 Private2D 四类病灶进行推理并生成报告，需人工审批后执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

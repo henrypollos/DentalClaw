@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求涉及将私有2D数据整理为canonical case格式并导出分割训练格式，注册方法中没有直接匹配的数据整理与格式导出路由；可提出外部方案，但需人工批准后执行。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "requires_approval"
+  },
+  "requires_human_review": true,
+  "reason": "现有注册方法支持 ToothFairy3 三维分割训练，但未明确包含训练前标签值合法性检查、非法病例清单输出及发现问题时阻断训练；可基于数据质检脚本提出外部方案，需人工批准后执行。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

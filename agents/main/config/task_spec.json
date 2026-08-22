@@ -1,0 +1,15 @@
+{
+  "task_id": "teeth_binary_segmentation",
+  "modality": "CT",
+  "task_type": "segmentation",
+  "num_classes": 2,
+  "class_names": ["background", "teeth"],
+  "primary_metric": "mean_dice",
+  "extra": {
+    "model_type": "2d",
+    "trainer_class": "nnUNetTrainer_5epochs",
+    "fold": "all",
+    "target_class": "teeth_binary",
+    "description": "Binary teeth segmentation task using 2D U-Net"
+  }
+}

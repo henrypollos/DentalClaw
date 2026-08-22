@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "unknown"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "人工批准后可执行"
+  },
+  "requires_human_review": true,
+  "reason": "请求是将私有2D检测标注导出为COCO格式并进行缺失检测框缺陷检查，无匹配的已验证注册方法，但任务合理，可提出外部方案；执行前需人工批准。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

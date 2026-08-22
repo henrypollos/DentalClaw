@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "segmentation",
+    "mode": "inference"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "tdd_2d_segmentation_infer_report",
+    "status": "matched"
+  },
+  "requires_human_review": false,
+  "reason": "用户请求从 TDD 数据集中选取病例并生成牙齿相关报告，与注册方法 tdd_2d_segmentation_infer_report（TDD 2D 牙齿二值分割推理 + 报告）完全匹配，可直接执行。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

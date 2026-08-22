@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "segmentation",
+    "mode": "inference"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "tdd_2d_segmentation_infer_report",
+    "status": "verified"
+  },
+  "requires_human_review": false,
+  "reason": "请求与 TDD 2D 牙齿二值分割推理及报告注册方法匹配。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

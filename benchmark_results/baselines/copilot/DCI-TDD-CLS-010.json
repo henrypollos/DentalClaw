@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "classification",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "requires_human_approval"
+  },
+  "requires_human_review": true,
+  "reason": "TDD 图像质量分类训练不匹配已注册方法；需先核验质量标签清单完整性，标签不完整时停止训练。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-27T03:14:52+00:00",
+  "generated_at": "2026-07-25T11:12:45+00:00",
   "links": [
     {
       "dataset_id": 501,
@@ -47,6 +47,18 @@
       "dataset_id": 501,
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "model_path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
+      "model_source": "artifacts"
+    },
+    {
+      "dataset_id": 501,
+      "dataset_folder": "Dataset501_TDDTeethBinary2D",
+      "model_path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth",
+      "model_source": "artifacts"
+    },
+    {
+      "dataset_id": 501,
+      "dataset_folder": "Dataset501_TDDTeethBinary2D",
+      "model_path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth",
       "model_source": "artifacts"
     },
     {

@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "classification",
+    "mode": "inference"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求是对 ToothFairy3 病例进行病例级二分类，现有注册方法中无匹配的分类路由；任务合理，但需人工批准外部方案。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

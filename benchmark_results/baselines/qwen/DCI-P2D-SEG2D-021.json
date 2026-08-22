@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "private_2d_segmentation_train",
+    "status": "matched"
+  },
+  "requires_human_review": false,
+  "reason": "请求为使用私有 2D 全景片数据（imagesTr/labelsTr）训练牙齿分割模型并用 imagesVal/labelsVal 验证，与注册方法 private_2d_segmentation_train（segmentation, 2d, private_train）完全匹配。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

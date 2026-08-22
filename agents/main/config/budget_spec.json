@@ -1,0 +1,7 @@
+{
+  "max_epochs": 50,
+  "early_stopping_patience": 10,
+  "hyperparameter_trials": 5,
+  "gpus": [0],
+  "description": "Limited budget for initial training run"
+}

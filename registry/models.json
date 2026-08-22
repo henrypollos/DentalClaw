@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-27T03:14:52+00:00",
-  "count": 10,
+  "generated_at": "2026-07-25T11:12:45+00:00",
+  "count": 12,
   "items": [
     {
       "source": "artifacts",
@@ -81,6 +81,26 @@
       "dataset_id": 501,
       "status": "completed",
       "last_modified": "2026-04-14T11:37:20+00:00"
+    },
+    {
+      "source": "artifacts",
+      "model_name": "checkpoint_best",
+      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth",
+      "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth",
+      "dataset_folder": "Dataset501_TDDTeethBinary2D",
+      "dataset_id": 501,
+      "status": "completed",
+      "last_modified": "2026-07-11T04:31:38+00:00"
+    },
+    {
+      "source": "artifacts",
+      "model_name": "checkpoint_final",
+      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth",
+      "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth",
+      "dataset_folder": "Dataset501_TDDTeethBinary2D",
+      "dataset_id": 501,
+      "status": "completed",
+      "last_modified": "2026-07-11T04:32:26+00:00"
     },
     {
       "source": "artifacts",

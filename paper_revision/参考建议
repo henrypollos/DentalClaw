@@ -1,0 +1,1132 @@
+我认真看了一遍。这一版**比你之前那版明显进步**，尤其是把文章从“DentalClaw 是一个万能智能平台”往“workflow orchestration / platform validation”方向收了，这是正确的。
+
+但如果站在 **Journal of Dentistry 的 Reviewer #4/#5** 的角度，我现在不会建议你直接投稿。不是因为英语问题，而是还有几个**逻辑和方法学层面的硬伤**。其中有几个甚至会让审稿人觉得你只是“改了措辞，但没有真正解决上一轮的核心质疑”。
+
+另外先回答你上一条关于“6页”的疑问：你现在的
+
+```latex
+\documentclass[final,5p,times,twocolumn]{elsarticle}
+```
+
+这里的 **`5p` 不是“5页限制”**，更不是“只能5/6页”。Elsevier 的 `elsarticle` 文档里，`5p` 指的是一种 **双栏版式/页面尺寸模型**；官方文档明确把它描述为 double-column style，并不是 manuscript page limit。([CTAN][1])
+
+---
+
+# 一、最重要的问题：你现在还是把“0.977”说得太重
+
+这是我认为目前**最危险的问题**。
+
+你现在写：
+
+> “The intent-to-workflow evaluation achieved an overall score of 0.977”
+
+然后：
+
+> “The decision pipeline also showed strong reliability on the tested intent set, with an overall score of 0.977.”
+
+问题在于，**0.977 并不是通常意义上的 accuracy / reliability coefficient / validation metric**。
+
+你的方法实际是：
+
+* 自己设计 11 个 intent
+* 自己定义六个维度
+* 自己赋权
+* 自己设定 ≥0.70 为 passing
+* 最终算一个 weighted average
+
+所以它实际上更像：
+
+> **a study-defined weighted decision score**
+
+而不是：
+
+> **decision accuracy = 97.7%**
+
+更不能直接推出：
+
+> **strong reliability**
+
+这是 R4 很容易继续攻击的地方。
+
+尤其你自己 Methods 里写的是：
+
+> “Each intent received a score computed as a weighted combination...”
+
+那审稿人很自然会问：
+
+**这些权重凭什么是 0.35 / 0.20 / 0.15 / 0.15 / 0.10 / 0.05？**
+
+为什么 planning 权重是 QC blocking 的 1.75 倍？
+
+为什么 external proposal quality 和 intent parsing 权重一样？
+
+为什么 pass threshold 是 0.70？
+
+有没有专家共识？
+
+有没有 inter-rater agreement？
+
+有没有已有 benchmark 支撑？
+
+现在没有。
+
+### 所以我建议你做一个原则性的修改：
+
+不要再叫：
+
+> intent-to-workflow decision accuracy
+
+也不要反复强调：
+
+> reliability
+
+更稳的是：
+
+> **intent-to-workflow decision evaluation**
+
+以及：
+
+> **overall weighted decision score of 0.977**
+
+同时明确这是：
+
+> **a prespecified, study-defined composite score**
+
+这样就不会把一个自定义指标伪装成标准验证指标。
+
+---
+
+# 二、更严重的问题：你现在仍然没有真正证明“intent → workflow 正确”
+
+这其实是 R4 上一轮的核心。
+
+你现在写：
+
+> “A decision was considered correct only when the selected route matched the intended dataset, task family, modality, and execution mode...”
+
+这个定义有一个潜在的**循环论证**：
+
+你需要先知道什么是“intended workflow”。
+
+也就是说：
+
+> 用户输入 → Gold standard workflow → DentalClaw workflow
+
+这个 gold standard 到底是谁定义的？
+
+目前 Methods 没说。
+
+你之前审稿意见里 R4 要求的恰恰是：
+
+> appropriate workflow
+> appropriate analysis strategy
+> appropriate reference standard
+> appropriate validation strategy
+
+而你现在验证的主要仍然是：
+
+> “它有没有选到我们已经注册好的 route”
+
+这其实更接近：
+
+> **registry route selection**
+
+而不是完整意义上的：
+
+> **intent-to-methodological-workflow validation**
+
+这两者差很多。
+
+比如：
+
+> “I want to build a model with TDD.”
+
+你现在可以判断：
+
+> clarification
+
+这很好。
+
+但是一个真正的方法学问题可能是：
+
+> “I want to compare tooth segmentation performance on TDD.”
+
+DentalClaw 是否知道应该：
+
+* patient-level split
+* 避免 leakage
+* segmentation metric
+* reference standard
+* test-set isolation
+* appropriate preprocessing
+
+才真正回应了 R4。
+
+所以你现在实际上已经把问题从：
+
+> **平台能不能执行 workflow？**
+
+推进到了：
+
+> **平台能不能正确选择 workflow？**
+
+但还没有真正推进到：
+
+> **平台能不能选择“方法学上恰当”的 workflow？**
+
+这是目前最大的科学性缺口。
+
+---
+
+# 三、你现在的标题仍然有一点“过度承诺”
+
+你现在标题：
+
+> **DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments**
+
+其中：
+
+> **Standardized**
+
+问题不大。
+
+但：
+
+> **Auditable**
+
+需要证据。
+
+你现在实际上证明了：
+
+* 有 manifest
+* 有 split file
+* 有 logs
+* 有 outputs
+* 有 report
+* 有 workflow metadata
+
+这些证明的是：
+
+> **traceability / logging / provenance**
+
+但还不完全等于：
+
+> **auditability**
+
+真正强的 auditability 通常至少需要证明：
+
+> 一个独立审阅者只根据 audit trail，可以重建“发生了什么”。
+
+或者至少：
+
+> configuration / input / decision / execution / output 都可回溯。
+
+你现在没有做这种 replay / independent reconstruction experiment。
+
+所以在现阶段：
+
+**traceable > auditable**
+
+是更稳妥的逻辑。
+
+你完全可以保留 “auditable”，但一定要在 Methods/Results 真正设计一个 audit replay experiment。
+
+否则 R5#6 还会抓：
+
+> “可复现性/可审计性的 claim 没有实证。”
+
+这正是他们上一轮已经明确提出的问题。
+
+---
+
+# 四、你甚至把一个“没有做实验”的东西写成了“reproducibility”
+
+你 Results 小标题现在是：
+
+> **Workflow completion and reproducibility**
+
+但是这一节实际上证明的是：
+
+> workflow completion + execution traceability
+
+你并没有真正做：
+
+* repeated execution
+* same configuration repeated N times
+* output consistency
+* metric variance
+* replay
+* independent reconstruction
+
+所以这个小标题本身就有点过度。
+
+### 建议至少改成：
+
+> **Workflow completion and execution traceability**
+
+或者：
+
+> **Workflow completion and traceable execution**
+
+否则审稿人会说：
+
+> “You claim reproducibility, but where is the reproducibility experiment?”
+
+这会非常直接。
+
+---
+
+# 五、你的“manual workflow comparison”还是没有解决 R5#4
+
+你现在表格写：
+
+> “manual baseline”
+
+然后：
+
+> “The baseline followed the same predefined task...”
+
+但是 R5 上一轮明确要求：
+
+> who/how many people performed the manual workflows, their level of expertise.
+
+你现在仍然没有回答：
+
+* 几个人？
+* 什么背景？
+* 研究生/工程师/博士？
+* 是否熟悉 nnU-Net？
+* 是否同一个人做？
+* 是否给两种方法同样的信息？
+* 是否存在 learning effect？
+* 是否重复？
+
+所以这个问题**实际上还没解决**。
+
+而你现在还有一句：
+
+> “DentalClaw reduced time spent on dataset preparation and result organization”
+
+这种句子会让审稿人进一步问：
+
+> **n=?**
+> **statistical analysis?**
+> **single run?**
+> **which operator?**
+
+因此，如果目前确实只有一个人、一次流程，就不要把它写成“efficiency validation”。
+
+更稳的是：
+
+> “In the documented benchmark runs, DentalClaw required less operator coordination for dataset preparation and result organization...”
+
+强调这是：
+
+> **workflow demonstration**
+
+而不是：
+
+> **human-factor experiment**
+
+---
+
+# 六、目前“降低技术门槛”的 claim 仍然没有证据
+
+你 Abstract：
+
+> “DentalClaw lowers the technical barrier for dental researchers...”
+
+Introduction：
+
+> “clinician-facing workflow platform”
+
+Methods：
+
+> “The agent decision pipeline...”
+
+Discussion：
+
+> “real-world dental AI research is usually limited...”
+
+但你没有：
+
+* dentist
+* dental researcher
+* clinical researcher
+* novice user
+* SUS
+* task completion rate
+* task time
+* workload
+
+这正是 R5#2 和 R5#8 的原问题。
+
+所以这里必须非常谨慎。
+
+### 目前应该把：
+
+> lowers the technical barrier
+
+改成：
+
+> **has the potential to lower the technical barrier**
+
+甚至更保守：
+
+> **is designed to reduce the coordination burden associated with multi-step dental AI experiments**
+
+后者最好，因为这是设计目标，不是假装已经证明了用户效果。
+
+---
+
+# 七、“clinician-facing”现在最好删除
+
+这是一个很明显的 R4 雷区。
+
+你现在：
+
+> “a clinician-facing workflow platform”
+
+而 R4 上一轮恰恰批评：
+
+* clinical review
+* clinical impact
+* clinical summary
+* clinical impression
+
+这些词太强。
+
+你现在 Figure caption 又写：
+
+> “clinician-facing interpretation”
+
+这很危险。
+
+因为你的研究对象实际上是：
+
+> **dental AI researchers / clinicians who conduct research**
+
+而不是：
+
+> **clinical decision makers**
+
+建议统一：
+
+> clinician-facing
+
+→
+
+> **researcher-oriented**
+
+或者：
+
+> **clinically interpretable for research review**
+
+更稳。
+
+---
+
+# 八、Abstract 里的 Clinical Significance 也要特别谨慎
+
+你现在：
+
+> “By standardizing workflow execution and traceability, DentalClaw lowers the technical barrier for dental researchers...”
+
+这里至少有两个问题：
+
+### 问题 1
+
+降低技术门槛没有 user study。
+
+### 问题 2
+
+Clinical Significance 这个段落容易强化“临床应用价值”。
+
+而你的论文目前其实是：
+
+> **research infrastructure / workflow platform validation**
+
+所以我会建议把意义定位成：
+
+> improving methodological transparency and workflow traceability in dental AI research
+
+而不是：
+
+> lowering clinical technical barriers
+
+---
+
+# 九、你有一个明确的引用错误
+
+这个是我看到的**比较确定的专业错误**。
+
+你写：
+
+> “General medical imaging frameworks such as nnU-Net and MONAI provide strong model-development primitives~\cite{Isensee2021nnUNet,Fedorov2012Slicer}”
+
+这里引用：
+
+* `Isensee2021nnUNet` → nnU-Net ✅
+* `Fedorov2012Slicer` → **3D Slicer** ❌
+
+这篇不是 MONAI。
+
+所以：
+
+> **MONAI 没有被正确引用。**
+
+这属于非常容易被审稿人或者编辑发现的 citation mismatch。
+
+应该给 MONAI 正式论文/官方对应引用，并把 Slicer 单独写出来。
+
+例如逻辑上应该是：
+
+> nnU-Net, MONAI, and 3D Slicer provide...
+
+分别对应：
+
+* nnU-Net reference
+* MONAI reference
+* 3D Slicer reference
+
+这个一定要改。
+
+---
+
+# 十、你的 Introduction 逻辑已经比较好，但“已有工具定位”还不够严谨
+
+现在：
+
+> “DentalClaw addresses a complementary need...”
+
+这是对的。
+
+但是你接着说：
+
+> “General medical imaging frameworks such as nnU-Net and MONAI provide strong model-development primitives... while dental-specific tools often target a narrow task...”
+
+问题在于，这个论证还是太“概括”。
+
+Reviewer #5 明确点名：
+
+> MONAI
+
+所以你最好不要仅仅说：
+
+> 我们是 orchestration layer
+
+而是明确拆成：
+
+| Capability                         | nnU-Net | MONAI     | 3D Slicer | DentalClaw |
+| ---------------------------------- | ------- | --------- | --------- | ---------- |
+| Model development                  | ✓       | ✓         | ✓         | △          |
+| Dataset QC                         | △       | △         | △         | ✓          |
+| Natural-language intent parsing    | —       | —/limited | —         | ✓          |
+| Workflow routing                   | —       | △         | —         | ✓          |
+| Dental-specific method constraints | —       | —         | —         | ✓          |
+| Audit trail                        | △       | △         | △         | ✓          |
+
+当然这张表里的内容必须基于实际功能和文献，而不是为了突出 DentalClaw 随便打勾。
+
+---
+
+# 十一、你的“literature search”设计其实可能反过来损害复现性
+
+你现在说：
+
+> “task-aware academic search was generated... queried against Europe PMC and arXiv.”
+
+这听起来很先进，但对于这篇论文反而有一个问题：
+
+**实时搜索结果不是稳定的。**
+
+今天搜索和三个月后搜索可能完全不同。
+
+如果 literature search 只是：
+
+> 给 LLM 提供建议
+
+那它最好不要被包装成核心 validation mechanism。
+
+至少应该保存：
+
+* search query
+* timestamp
+* returned papers
+* selected references
+* ranking/retrieval rule
+* model version
+
+否则 reviewer 会问：
+
+> How is this reproducible?
+
+所以如果它并不影响最终 workflow execution，我甚至建议把它降为：
+
+> auxiliary decision support
+
+而不是核心 pipeline。
+
+---
+
+# 十二、DeepSeek V4 Pro 必须写得比现在更具体
+
+你现在：
+
+> “DeepSeek V4 Pro as the primary reasoning backend.”
+
+对于 reproducibility 来说明显不够。
+
+至少应该包含：
+
+* exact model identifier
+* provider/API
+* access date/version
+* temperature
+* top-p（如果使用）
+* max tokens
+* system prompt version
+* tool schema version
+* retry policy
+* fallback policy
+
+因为你文章的“智能部分”就是 LLM。
+
+如果 LLM 是：
+
+> changing API
+
+那么“可复现”自然会被质疑。
+
+你上一轮 R5#3 已经明确要求：
+
+> prompt design / hallucination / error handling / failure cases. 
+
+目前这版依旧基本没有这些内容。
+
+---
+
+# 十三、LLM 的核心方法学细节仍然明显不够
+
+现在你告诉审稿人：
+
+> structured fields
+> registry lookup
+> literature search
+> synthesize
+> use_registry / external_proposal / reject
+
+但仍然没告诉他们：
+
+**LLM 怎么被约束？**
+
+例如：
+
+> System prompt 是什么结构？
+
+> 是否使用 JSON schema？
+
+> 输出格式错误怎么办？
+
+> tool hallucination 怎么处理？
+
+> registry 不存在的时候怎么办？
+
+> LLM 选错 dataset 怎么办？
+
+> LLM 选择不存在的 model 怎么办？
+
+> 重试几次？
+
+> deterministic validator 在哪里？
+
+这部分实际上应该成为你这篇文章的方法学亮点。
+
+现在还是写得太像：
+
+> “LLM 说了算，只不过最后我们把结果写下来。”
+
+这正是 R4 最担心的。
+
+---
+
+# 十四、“deterministic modules”这个词用得很好，但你没有把它真正利用起来
+
+这是我觉得你现在最值得加强的一点。
+
+你写：
+
+> “the agent decides which workflow should be attempted, while the deterministic runner executes only the validated route”
+
+这个架构思想其实非常好。
+
+它可以直接回应 R4：
+
+> LLM error propagation
+
+真正好的逻辑应该是：
+
+**LLM = proposal**
+
+↓
+
+**Schema validation**
+
+↓
+
+**Registry validation**
+
+↓
+
+**QC / methodological guardrails**
+
+↓
+
+**Human approval if external**
+
+↓
+
+**Deterministic execution**
+
+这叫：
+
+> **fail-safe / layered validation**
+
+如果你能把这个讲清楚，文章会明显比现在强。
+
+目前你只是“描述了架构”，还没有把它升华成“validation principle”。
+
+---
+
+# 十五、security 基本仍然没有解决
+
+R5#9 已经非常明确：
+
+> security concerns associated with OpenClaw or autonomous agent architectures. 
+
+而你现在正文几乎没有。
+
+尤其你现在还新增了：
+
+> DeepSeek V4 Pro
+
+并且有：
+
+> private dataset
+
+那么审稿人一定会问：
+
+### 医学数据有没有发送给外部 API？
+
+必须明确。
+
+尤其需要说明：
+
+* 原始影像是否发送？
+* patient information 是否发送？
+* metadata 是否发送？
+* prompt 是否包含 patient identifiers？
+* API 是否被用于 private dataset？
+* 数据是否脱敏？
+* agent 是否有 shell access？
+* agent 能不能任意执行代码？
+* tool access 如何限制？
+* execution sandbox 怎么做？
+* audit logs 中有没有 PHI？
+
+这个是**必须补**的。
+
+特别是：
+
+> “private dataset”
+
+和
+
+> “external LLM API”
+
+同时存在时，如果完全不解释，会比原稿更容易被抓。
+
+---
+
+# 十六、数据集部分仍然不能达到医学论文的严谨程度
+
+你现在只说：
+
+> TDD 1051 → 968
+
+> ToothFairy 63 → 43
+
+但是没有解释：
+
+### TDD
+
+为什么 83 例被排除？
+
+排除标准是什么？
+
+### ToothFairy
+
+为什么 20 例不能使用？
+
+具体原因？
+
+### 更关键：
+
+有没有：
+
+> patient-level split?
+
+这个是 R4 特别强调的 methodological appropriateness。
+
+如果同一个 patient 的多张图同时出现在 train/test：
+
+**这是非常严重的问题。**
+
+因此必须明确写：
+
+> dataset splitting was performed at the patient level...
+
+当然前提是你们实际上确实这么做了。
+
+---
+
+# 十七、Ground truth 还是没解决
+
+R1 上一轮明确说：
+
+> ground truth 不清。
+
+而现在还是只有：
+
+> annotations
+
+但没有：
+
+* 谁标的
+* 标注协议
+* reference standard
+* public dataset 的原始标注来源
+* private dataset 有几位 annotators
+* 是否有 adjudication
+* QC
+
+医学 AI 论文这里非常重要。
+
+尤其 private dataset：
+
+> “annotations for pulp, restorations, and periapical lesions”
+
+这句话远远不够。
+
+---
+
+# 十八、你的 Results 有一句会让审稿人非常敏感
+
+你写：
+
+> “This result is important because...”
+
+然后：
+
+> “suggests that DentalClaw provided a consistent execution framework without sacrificing modality-specific adaptation.”
+
+这个推断有点过。
+
+你只有：
+
+* 2D
+* 3D
+* 少量任务
+
+不能说：
+
+> consistent framework
+
+问题不大，但最好写成：
+
+> “demonstrated feasibility of applying the workflow abstraction to two representative imaging settings”
+
+会更严谨。
+
+即：
+
+**不要从 2 个实例推导 platform generality。**
+
+---
+
+# 十九、你对 manual baseline 的时间比较其实有一个很重要的问题
+
+比如：
+
+DentalClaw：
+
+> train 6 h 52 min
+
+Manual：
+
+> train 6 h 58 min
+
+这个很有趣。
+
+但整个“时间优势”主要来自：
+
+> preparation + inference + organization
+
+而训练时间差异非常小。
+
+所以你实际上应该把重点放在：
+
+> **coordination overhead**
+
+而不是：
+
+> **total runtime**
+
+否则审稿人可能反驳：
+
+> “The platform does not make model training faster.”
+
+而且它本来就不应该训练更快。
+
+你的真正贡献应该是：
+
+> reduces non-computational coordination burden
+
+这个定位会好很多。
+
+---
+
+# 二十、你现在的 Conclusion 比较安全，但仍然有一处稍微偏强
+
+你写：
+
+> “The findings support the feasibility of this workflow-oriented approach...”
+
+这个没问题。
+
+但是：
+
+> “standardized and auditable”
+
+还是比你的证据强一点。
+
+如果不补 audit/replay：
+
+可以写：
+
+> standardized and traceable
+
+会更符合证据。
+
+---
+
+# 二十一、你的 LaTeX 还有几个值得注意的问题
+
+### 1. `caption` + `subcaption`
+
+你同时：
+
+```latex
+\usepackage{caption}
+\usepackage{subcaption}
+```
+
+通常没问题，但如果你没有真正使用 subfigure/subcaption，可以删掉。
+
+### 2. `\newpage` 放在 bibliography 前
+
+你现在：
+
+```latex
+\section{Conclusion}
+...
+\newpage
+\footnotesize
+\bibliographystyle{elsarticle-num}
+```
+
+没有必要强制换页。
+
+这种手动分页在 journal submission 里一般不建议，除非为了特定版式。
+
+### 3. `final`
+
+投稿稿件通常不需要自己人为锁成 `final` 来模拟最终排版。`elsarticle` 的 class options 主要是版式设置。Elsevier 自己的说明也明确把这些 class 用作投稿格式工具，而不是页数限制工具。([www.elsevier.com][2])
+
+### 4. `5p` + `twocolumn`
+
+这个组合本身没问题，就是双栏 5p 模型。再次强调：
+
+**5p ≠ 5 pages。** ([CTAN][1])
+
+---
+
+# 二十二、语言层面没有大量“语法错误”，但有一些典型论文式过度表达
+
+例如：
+
+### ①
+
+> “This result is important because...”
+
+论文里没有错，但属于比较主观的 rhetorical wording。
+
+更科学：
+
+> “This finding indicates...”
+
+---
+
+### ②
+
+> “strong reliability”
+
+不建议。
+
+因为你没有 reliability analysis。
+
+---
+
+### ③
+
+> “meaningful in the context of dental AI workflow automation”
+
+稍微有宣传味。
+
+更好：
+
+> “These findings demonstrate the feasibility of conservative workflow routing in the evaluated setting.”
+
+---
+
+### ④
+
+> “without sacrificing modality-specific adaptation”
+
+证据不够。
+
+---
+
+### ⑤
+
+> “lowers the technical barrier”
+
+没有 usability experiment。
+
+---
+
+### ⑥
+
+> “clinician-facing”
+
+目前不应该这么写。
+
+---
+
+### ⑦
+
+> “expert review”
+
+如果实际上没有专家真的做 review，也不要这么写。
+
+可以改：
+
+> **review-oriented output**
+
+---
+
+# 二十三、如果让我按照“再次被 Reviewer #4 打回”的风险排序
+
+我会这样排：
+
+| 优先级   | 问题                                                    | 风险 |
+| ----- | ----------------------------------------------------- | -- |
+| 🔴 P0 | 0.977 被包装成 decision accuracy / reliability            | 极高 |
+| 🔴 P0 | intent→workflow 没有真正 gold standard / expert reference | 极高 |
+| 🔴 P0 | reproducibility claim 没有 replay/repetition experiment | 极高 |
+| 🔴 P0 | LLM prompt / error / hallucination / guardrail 不透明    | 极高 |
+| 🔴 P0 | security / external API / private data 没解释            | 极高 |
+| 🔴 P1 | usability claim 没有 user study                         | 高  |
+| 🔴 P1 | manual baseline 没有 operator information               | 高  |
+| 🔴 P1 | ground truth / split / QC 信息不足                        | 高  |
+| 🟠 P1 | MONAI citation/novelty 对比不严谨                          | 高  |
+| 🟠 P1 | auditable 仍可能比证据强                                     | 中高 |
+| 🟠 P2 | clinical-facing / Clinical Significance 过强            | 中高 |
+| 🟡 P2 | 部分英语表达略宣传化                                            | 中  |
+| 🟡 P3 | LaTeX / 排版细节                                          | 低  |
+
+---
+
+# 二十四、我最建议你现在进行的“战略性修改”
+
+这版论文**不要继续简单润色英语**。
+
+现在应该把整个论文的证据链改成：
+
+> **User intent**
+>
+> ↓
+>
+> **LLM proposal**
+>
+> ↓
+>
+> **Schema + registry validation**
+>
+> ↓
+>
+> **Methodological/QC guardrails**
+>
+> ↓
+>
+> **Human review for unsupported routes**
+>
+> ↓
+>
+> **Deterministic execution**
+>
+> ↓
+>
+> **Audit/replay**
+
+然后分别给出证据：
+
+| Claim                 | Evidence                      |
+| --------------------- | ----------------------------- |
+| 能执行 workflow          | 2D + 3D end-to-end            |
+| 能正确路由                 | intent test                   |
+| 能识别 unsupported tasks | boundary/trap test            |
+| 能避免错误传播               | guardrail / failure injection |
+| 能复现                   | replay / repeated-run test    |
+| 能审计                   | independent reconstruction    |
+| 降低门槛                  | usability study               |
+| 不牺牲性能                 | current segmentation results  |
+
+这才真正对应 R4 说的：
+
+> “reliably generates appropriate, reproducible, auditable, and methodologically defensible workflows”
+
+而你当前稿件实际上只有前面三四项中的一部分。
+
+---
+
+## 最后给你一个总体评价
+
+**这版不是“写得差”，恰恰相反，它的叙事已经比上一版成熟很多。**
+
+真正的问题是：
+
+> **你已经把措辞收窄了，但证据体系还没有完全跟着收窄后的定位升级。**
+
+现在最大危险不是英文，而是审稿人看完以后说：
+
+> “You changed the wording from a general platform to a validation framework, but the validation is still based on 11 hand-crafted intents and a self-defined weighted score.”
+
+这个批评一旦出现，R4 的核心意见基本又回来了。
+
+我尤其建议你优先处理 **“0.977 到底是什么” + “gold standard 从哪里来” + “reproducibility/auditability 到底有没有被真正验证”** 这三个问题。它们比继续润色 Introduction 重要得多。
+
+另外，`elsarticle` 的 `5p` 只是双栏页面版式，不代表 5 页或 6 页限制；这一点可以放心。([CTAN][1])
+
+[1]: https://tug.ctan.org/macros/latex2e/contrib/elsarticle/doc/elsdoc.pdf?utm_source=chatgpt.com "QUICK LINKS"
+[2]: https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/latex-instructions?utm_source=chatgpt.com "LaTeX instructions for authors| Elsevier"

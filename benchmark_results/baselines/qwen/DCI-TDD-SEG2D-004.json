@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "segmentation",
+    "mode": "inference"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "tdd_2d_segmentation_infer_report",
+    "status": "matched"
+  },
+  "requires_human_review": false,
+  "reason": "请求明确使用 TDD 数据集上已有的二值分割模型进行测试集推理，并输出 Dice、IoU、HD95 及叠加图，与注册方法 tdd_2d_segmentation_infer_report（TDD 2D 牙齿二值分割推理 + 报告）完全匹配。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

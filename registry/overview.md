@@ -1,8 +1,8 @@
 # DentalClaw Registry Overview
 
-- Generated at: `2026-06-27T03:14:52+00:00`
+- Generated at: `2026-07-25T11:12:45+00:00`
 - Available datasets: 1
-- Known models: 10
+- Known models: 12
 - QC reports: 1
 - QC failures: 0
 - Running tasks: 0
@@ -26,6 +26,8 @@
 - `checkpoint_final` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_final.pth` | test_dice=None | test_iou=None | curve=`n/a`
 - `checkpoint_best` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_best.pth` | test_dice=None | test_iou=None | curve=`n/a`
 - `checkpoint_final` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_final.pth` | test_dice=None | test_iou=None | curve=`n/a`
+- `checkpoint_best` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth` | test_dice=None | test_iou=None | curve=`n/a`
+- `checkpoint_final` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth` | test_dice=None | test_iou=None | curve=`n/a`
 - `checkpoint_best` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_best.pth` | test_dice=None | test_iou=None | curve=`n/a`
 - `checkpoint_final` | source=artifacts | path=`artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_final.pth` | test_dice=None | test_iou=None | curve=`n/a`
 

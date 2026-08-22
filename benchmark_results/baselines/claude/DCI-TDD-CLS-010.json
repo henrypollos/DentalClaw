@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "classification",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "pending_human_approval"
+  },
+  "requires_human_review": true,
+  "reason": "请求为利用 TDD 图像质量标签训练可用/需复核二分类器（含训练前核验质量标签清单、不完整即停止的前置条件），属 classification/train 任务。注册方法表中 6 项方法仅覆盖分割、异常检测与超分辨率，无分类训练类方法，无直接匹配；但任务处于牙科 CV 范围内且路线合理（影像质检分类），故转外部方案，须经人工审核批准后方可执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}

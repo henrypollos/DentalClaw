@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "unknown",
+    "mode": "inference"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求是对私有2D病例标注可用性进行质量审核，现有注册方法中没有对应的标注质检或病例筛选路由；可提出外部质检方案，但需人工批准后执行。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

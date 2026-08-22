@@ -1,0 +1,16 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "TDD 数据集包含 teeth_bbox.json 检测框标注，任务为训练牙齿检测模型并评估 mAP，属于合理需求。但注册方法中无 2D 检测训练路由（现有方法均为分割/异常检测/超分），平台代码资产中有 YOLO 检测模块可供外部方案使用，需人工批准后执行。"
+}

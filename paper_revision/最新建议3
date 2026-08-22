@@ -1,0 +1,1045 @@
+我把这篇论文按“**正式科研论文，尤其是医学影像 / AI / Journal of Dentistry 这类期刊论文**”的标准通读了一遍，也检查了实际 PDF 的排版，而不只是看文字内容。
+
+我的总体判断是：
+
+> **这篇论文的英文科研写作已经明显达到“可投稿/可返修”的水平，语言本身不是主要短板；它真正需要继续打磨的是“学术措辞的严谨程度、术语边界、结果表述的证据强度，以及部分方法学描述的一致性”。**
+>
+> 如果单独评价英文论文写作，我会给 **8.0～8.5/10**；如果按较严格的 SCI 审稿标准评价“语言 + 规范性 + 科学论证”，大约 **7.5～8/10**。
+>
+> **不是那种“英语不像论文”的稿子，已经有比较明显的正式论文气质。** 但距离“很成熟、很难被语言和规范性挑刺”的版本，还有一轮精修。
+
+下面我具体说。
+
+---
+
+# 一、先说最重要的：这篇论文“像不像真正的科研论文”？
+
+我的答案是：**很像，而且结构已经比较成熟。**
+
+从整体结构看：
+
+**Abstract → Introduction → Materials and methods → Results → Discussion → Conclusion → Code availability → References → Supplementary Materials**
+
+非常标准。
+
+而且不是简单地“套模板”，它已经形成了比较明确的科研叙事：
+
+> 问题提出
+> → 现有 workflow 碎片化
+> → DentalClaw 的定位
+> → 方法与安全机制
+> → 代表性任务验证
+> → intent-to-workflow evaluation
+> → baseline / assistant comparison
+> → limitations
+> → conclusion
+
+这个逻辑是成立的。
+
+尤其值得肯定的是，你们已经非常刻意地把 DentalClaw 从“临床 AI 系统”往“**research workflow platform**”上收，这一点在论文语言里已经体现得比较明显。
+
+例如：
+
+> “The study supports the platform as a workflow orchestration and validation framework rather than as a new segmentation model or as a standalone clinical decision-support system.”
+
+这句话就非常像成熟论文里的**scope clarification**。
+
+Discussion 里面又再次强调：
+
+> “DentalClaw should be interpreted as a workflow infrastructure layer rather than as a new segmentation model”
+
+这实际上是在主动防止审稿人误解贡献。
+
+这类写法是专业的。
+
+---
+
+# 二、英文语言水平：总体是好的，而且明显不是“AI味很重”的初稿
+
+我把它分成几个方面看。
+
+## 1. 学术语气：很好
+
+全文基本没有明显的：
+
+* 口语化表达
+* 博客式表达
+* marketing language
+* “we are proud to...”
+* “very powerful”
+* “highly effective”
+* “revolutionary”
+* “significantly improves”但没有统计支持
+
+这是非常好的。
+
+比如你们写：
+
+> “The objective of this study was to assess whether a researcher-oriented workflow platform could reduce the coordination burden…”
+
+而不是：
+
+> “We developed a powerful platform that can greatly improve…”
+
+前一种明显更符合论文。
+
+
+
+---
+
+# 三、最大的优点：基本掌握了“科研论文应该克制”的语气
+
+这是我认为这篇论文比较成熟的地方。
+
+比如 Results 中没有写：
+
+> DentalClaw dramatically improved the performance...
+
+而是：
+
+> “These outcomes indicate that the executed workflows produced plausible, reviewable performance results rather than silently failing…”
+
+
+
+Discussion 也没有直接说：
+
+> DentalClaw is superior to other assistants.
+
+而是：
+
+> “The decision pipeline achieved 0.958…”
+
+然后继续解释：
+
+> “Because one used the same reasoning backend as the platform, the gap cannot be attributed to model capability alone…”
+
+
+
+这就很像科研写作。
+
+---
+
+# 四、但是，“专业”不等于“完全严谨”，这里有几个地方审稿人很可能会抓
+
+这比单纯改英语重要得多。
+
+## 1. “reduced coordination effort”证据略弱
+
+Abstract：
+
+> “the platform reduced coordination effort during dataset preparation and result organization…”
+
+
+
+这个句子语言上完全没问题。
+
+**问题是科学论证强度稍微超过证据。**
+
+因为后面你们自己又承认：
+
+> “the comparison is reported as a workflow demonstration rather than a controlled human-factor experiment.”
+
+
+
+而 manual comparison 其实只有非常有限的 workload/time comparison。
+
+所以：
+
+> **reduced coordination effort**
+
+会让审稿人问：
+
+> How was coordination effort measured?
+
+严格来说，你们测到的是：
+
+* audit+prep time
+* infer+eval+organization time
+* overall workflow time
+
+而不是“coordination effort”本身。
+
+### 更严谨的措辞
+
+可以考虑：
+
+> “reduced manual coordination time during dataset preparation and result organization”
+
+或者更保守：
+
+> “was associated with less manual coordination during dataset preparation and result organization”
+
+后者尤其稳。
+
+---
+
+# 五、Abstract 里有一个比较典型的问题：Results 太“拥挤”
+
+Abstract 的 Results 其实塞了很多东西：
+
+> workflow completion
+> standardized outputs
+> manual comparison
+> decision score
+> three assistants
+> no silent execution
+
+
+
+所以读起来虽然专业，但信息密度很高。
+
+特别是：
+
+> “higher than three general-purpose assistants (0.889–0.893) on the same requests and rubric”
+
+这是一个很强的比较性表述。
+
+问题不在英语，而在：
+
+**你们这个 comparison 本质上是 single-run decision-level comparison，而且 assistants 的 system prompt 并没有被完全控制。**
+
+你们自己在 Supplementary Methods 已经承认：
+
+> “the assistants’ system prompts were not controlled.”
+
+
+
+所以 Abstract 可以稍微弱化。
+
+例如：
+
+> “exceeding the scores obtained by three general-purpose assistants (0.889–0.893) under the same rubric”
+
+比：
+
+> “higher than…”
+
+更加中性。
+
+再进一步，可以直接强调：
+
+> “in this single-run decision-level comparison”
+
+不过 Abstract 会变长。
+
+---
+
+# 六、Introduction 写得比较好，但有几个地方略带“宣传式 framing”
+
+例如：
+
+> “These issues matter most when clinicians or dental researchers understand the clinical objective but lack the engineering infrastructure…”
+
+
+
+这句话没有语法问题，但从科学语言角度略微带有“目标用户画像”的感觉。
+
+更加学术的表达可以是：
+
+> “These issues may be particularly relevant for researchers who have domain expertise but limited access to engineering infrastructure…”
+
+这样更客观。
+
+---
+
+# 七、Introduction 中“six capabilities”这一段略像产品介绍
+
+这里是我认为全文比较明显的一处：
+
+> “Concretely, the platform provides six capabilities: natural-language intent parsing; matching against an offline registry…”
+
+
+
+这段内容本身没问题，但：
+
+> **“provides six capabilities”**
+
+比较像 software paper / product paper。
+
+如果投非常偏医学的期刊，有时候会希望它更加“scientific contribution oriented”。
+
+比如：
+
+> “The platform incorporates six functional components…”
+
+会更学术。
+
+类似：
+
+> “The execution layer contains deterministic modules…”
+
+就非常好。
+
+所以全文应该统一往：
+
+**component / module / mechanism / protocol**
+
+靠，而少用：
+
+**capability / feature**
+
+---
+
+# 八、Methods 是目前最专业的一部分之一
+
+这一部分我给比较高评价。
+
+特别是这一句：
+
+> “Because the reasoning agent is an external and potentially untrusted component, the platform treats its output as input to be validated rather than as code to be executed.”
+
+
+
+这是很好的科研系统描述。
+
+它没有宣传“我们的 agent 很聪明”，而是在解释：
+
+**agent 在系统中的 epistemic / execution boundary 是什么。**
+
+这是很专业的。
+
+同样：
+
+> “the agent operates in a decision-only mode; all execution is delegated to local, versioned modules…”
+
+
+
+这种写法很符合 agent system / trustworthy AI / workflow automation 类论文。
+
+---
+
+# 九、但 Methods 的术语需要再统一一次
+
+这里有一个比较值得注意的问题：
+
+你们同时使用了：
+
+* natural-language reasoning layer
+* reasoning agent
+* decision layer
+* agent decision pipeline
+* agent
+* platform
+* coordinator
+* execution layer
+* deterministic runner
+
+这些概念本身都有意义，但目前存在一点**层级边界模糊**。
+
+例如：
+
+> “The agent decides which workflow should be attempted, while the deterministic runner executes only the validated route…”
+
+
+
+这是清楚的。
+
+但是全文读下来会出现：
+
+**agent = decision layer = reasoning layer = coordinator？**
+
+还是：
+
+**coordinator > agent > decision layer？**
+
+如果审稿人认真读 architecture，可能会要求你定义这些概念。
+
+### 建议
+
+第一次出现的时候明确：
+
+> The reasoning agent constitutes the decision layer of the platform, whereas the deterministic execution layer is responsible for workflow execution.
+
+之后就尽量固定使用：
+
+* **decision layer**
+* **execution layer**
+* **platform**
+
+不要来回切换。
+
+---
+
+# 十、“academic search”这个词，我认为不够专业
+
+Methods：
+
+> “a task-aware academic search was generated and queried against Europe PMC and arXiv”
+
+
+
+“academic search”不是错，但它比较泛。
+
+更专业的说法应该类似：
+
+> “a task-aware literature search query”
+
+或者：
+
+> “a task-aware literature retrieval step”
+
+因为你实际做的是：
+
+**literature retrieval**
+
+而不是“academic search”这种比较宽泛的概念。
+
+---
+
+# 十一、Scientific writing 中，“plausible”是一个可以重点考虑修改的词
+
+Results：
+
+> “produced plausible, reviewable performance results…”
+
+
+
+“plausible”本身没有错误。
+
+但论文里：
+
+> plausible performance results
+
+属于比较主观的评价词。
+
+审稿人容易问：
+
+> Plausible according to what criterion?
+
+如果你不能定义“plausible”，可以换成：
+
+> “valid and reviewable outputs”
+
+或者：
+
+> “consistent and reviewable outputs”
+
+或者更简单：
+
+> “reviewable performance results”
+
+---
+
+# 十二、“safe”这种词需要谨慎
+
+你们写：
+
+> “safe, since no proposal is executed without explicit approval”
+
+
+
+这是一个重要问题。
+
+从系统机制上来说，你确实可以说：
+
+> prevented automatic execution
+
+但直接说：
+
+> safe
+
+稍微过头。
+
+因为后面你们自己承认：
+
+> prompt-injection
+> supply-chain risks
+> no independent security evaluation
+
+
+
+所以更学术的表达应该：
+
+> “lower-risk under the current execution policy”
+
+或者：
+
+> “preventing automatic execution of the proposal”
+
+这比：
+
+> “safe”
+
+严谨很多。
+
+---
+
+# 十三、“no incorrect workflow was silently executed”是很好的表达
+
+这个我反而建议保留。
+
+Abstract：
+
+> “no incorrect workflow was silently executed.”
+
+
+
+这句话非常适合你们论文。
+
+因为你们真正能证明的是：
+
+**系统没有在 unsupported situation 下偷偷跑错误 workflow。**
+
+而不是：
+
+**系统永远不会做错。**
+
+所以它属于很好的 scope-controlled claim。
+
+---
+
+# 十四、Discussion 的语言整体非常成熟
+
+这部分是全文最接近期刊正式风格的部分。
+
+尤其是 limitations：
+
+> “First, the evaluation used representative tasks, a study-defined intent set, and prespecified dimension weights rather than a standardized public benchmark…”
+
+
+
+这个结构很好。
+
+你们不是把 limitations 写成：
+
+> “Our study has some limitations.”
+
+然后随便列几个。
+
+而是：
+
+**limitation → why it matters → implication → future work**
+
+这就是正常的科研讨论逻辑。
+
+---
+
+# 十五、但是 Discussion 里有一个地方需要非常谨慎
+
+> “the gap cannot be attributed to model capability alone”
+
+
+
+严格来说是合理的，但我建议进一步弱化。
+
+因为你比较的是：
+
+* DentalClaw = DeepSeek V4 Pro + registry + deterministic policy
+* Claude Code = DeepSeek V4 Pro backend + its own system behavior
+
+因此这个结果只能说明：
+
+> **相同 underlying backend 并不能完全解释性能差异。**
+
+但不能进一步推导：
+
+> deterministic registry 是唯一原因。
+
+更稳妥：
+
+> “the observed difference suggests that factors beyond the underlying reasoning model, including registry constraints and clarification policies, contributed to the performance gap.”
+
+这在逻辑上更严密。
+
+---
+
+# 十六、比较方法本身是论文最大的规范性风险之一
+
+这不是语言问题，而是审稿层面的关键点。
+
+你们比较：
+
+> Copilot
+> Qwen
+> Claude Code
+
+而且：
+
+> “each in a fresh single-turn conversation”
+
+> “system prompts were not controlled”
+
+> “each request was issued once”
+
+
+
+这意味着它更适合称为：
+
+> **descriptive comparison**
+
+而不是：
+
+> **benchmark**
+
+你们其实已经写得很诚实：
+
+> “No inferential statistics were applied…”
+
+
+
+这是正确的。
+
+所以我建议你们全文尽量避免出现让人感觉这是：
+
+**严格、可推广的 agent benchmark**
+
+的措辞。
+
+目前总体控制得还可以。
+
+---
+
+# 十七、评价体系的语言也需要更加严格
+
+这里：
+
+> “The weights were specified a priori by the study team…”
+
+
+
+这是可以的。
+
+但同时它意味着：
+
+**这个 scoring system 是 study-defined，而不是 externally validated。**
+
+你们后面已经主动承认：
+
+> “not independently validated by external experts against a formal rubric.”
+
+
+
+这一点非常重要。
+
+我甚至认为：
+
+> **这段 limitation 是你们论文能够站得住的关键。**
+
+因为如果没有这个自我限定，0.958 这个数字会显得过于“自证”。
+
+---
+
+# 十八、论文中一个很明显的问题：部分结果措辞在“工程论文”和“医学论文”之间摇摆
+
+比如：
+
+> “skill-based configurations”
+
+> “trajectory”
+
+> “coordination layer”
+
+> “deterministic runner”
+
+这些对 AI / agent / software paper 很自然。
+
+但是：
+
+> “clinical results report”
+
+> “clinically sourced images”
+
+> “clinical objective”
+
+又有医学论文的语言。
+
+这种混合不是错误。
+
+但是考虑到你之前审稿意见里已经明确指出**DentalClaw 是 researcher-oriented，而不是 clinical decision-support system**，我建议全文做一轮非常彻底的 vocabulary cleanup。
+
+例如 Abstract 里的：
+
+> “Clinical Significance”
+
+这一栏本身就值得谨慎。
+
+不是说一定要删，而是需要让其内容明确强调：
+
+> **research workflow / reproducibility / traceability**
+
+而不是：
+
+> clinical decision / clinical diagnosis / treatment.
+
+目前内容其实已经偏 researcher-oriented 了，所以问题主要是**栏目名与定位之间存在轻微张力**。
+
+---
+
+# 十九、References 的规范性，目前比正文差一些
+
+这个地方我建议重点检查。
+
+从 PDF 看，参考文献格式总体能读，但存在一些明显不够统一的地方。
+
+例如：
+
+> “MONAI: An open-source framework for deep learning in healthcare (2022). arXiv:2211.02701.”
+
+
+
+还有：
+
+> “OpenClaw Contributors, Openclaw, open-source AI assistant and agent runtime. Accessed 2026-04-14 (2026).”
+
+
+
+以及后面的：
+
+> `2024) 1–17doi:https://...`
+
+
+
+这种显然需要检查排版/参考文献生成格式。
+
+尤其如果准备正式投稿，建议**全部交给期刊指定 citation style 自动生成**，不要手工维护。
+
+---
+
+# 二十、还有一个值得检查的地方：标题
+
+现在标题：
+
+> **DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments**
+
+
+
+整体很好。
+
+但是：
+
+> **Standardized and Auditable**
+
+属于两个非常明确的 claim。
+
+“auditable”你们确实有日志、plan、execution trace 支撑。
+
+“standardized”你们也有 registry / canonical representation / standard output。
+
+所以总体可以成立。
+
+但标题已经把 contribution 定义得很清楚了：
+
+> **workflow platform**
+
+这是好事。
+
+我反而建议不要再往标题中加：
+
+* intelligent
+* autonomous
+* clinical
+* advanced
+* efficient
+* powerful
+
+之类的词。
+
+现在这个标题是克制的。
+
+---
+
+# 二十一、从“科研英语句法”上看，有没有明显问题？
+
+### 大体没有严重语法错误。
+
+我没有看到那种会让英文母语审稿人产生：
+
+> “This was clearly written by a non-native author.”
+
+的严重问题。
+
+但存在一些可以进一步提升“native academic writing quality”的细节：
+
+### ① 高频重复
+
+全文反复出现：
+
+* workflow
+* platform
+* representative
+* structured
+* review-oriented
+* deterministic
+* validated
+* auditable
+* execution
+
+这些词本身都是关键词，所以不能简单删。
+
+但有些段落重复度略高。
+
+例如：
+
+> workflow
+> workflow
+> workflow
+> workflow
+
+连续多句都会出现。
+
+适当替换成：
+
+* pipeline
+* execution path
+* procedure
+* route
+* system
+* process
+
+可以提高行文自然度。
+
+不过**不要为了词汇变化强行替换术语**。科研论文里术语一致性比“词汇丰富”更重要。
+
+---
+
+# 二十二、一个非常明显的风格问题：“review-oriented”出现得太频繁
+
+例如：
+
+* review-oriented reports
+* review-oriented outputs
+* review-friendly summary
+* case-level notes
+* downstream review
+
+这些概念在论文中非常重要。
+
+但现在已经出现到可以被看出是“核心宣传词”的程度。
+
+建议保留：
+
+> audit trail
+> traceability
+> reproducibility
+
+而适当减少：
+
+> review-oriented
+
+因为：
+
+**auditable / traceable / reproducible**
+
+是更标准的 scientific methodology vocabulary。
+
+---
+
+# 二十三、Supplementary Materials 写得其实很好
+
+这一部分我反而觉得比较专业。
+
+尤其：
+
+> “The manual arm was performed by the AI researcher on the study team…”
+
+以及明确说明：
+
+> “rather than a controlled human-factor experiment.”
+
+
+
+这是非常好的 methodological honesty。
+
+另外训练配置也比较完整：
+
+* optimizer
+* learning rate
+* augmentation
+* patch size
+* batch size
+* normalization
+* architecture
+* software environment
+
+
+
+对于 reproducibility 来说是加分项。
+
+---
+
+# 二十四、从 PDF 视觉规范上看：整体也比较像正式论文
+
+我实际渲染了一页 PDF 看排版。
+
+首页整体是典型的 journal-style 两栏布局：
+
+* 标题居中
+* Abstract
+* Keywords
+* Introduction
+* 双栏正文
+* Figure caption
+* References
+* Supplementary
+
+视觉上没有明显的学生论文/课程作业感。
+
+所以：
+
+> **从排版 + 语言 + 章节组织来看，这不是“像学生写的论文”。**
+
+已经比较接近正式投稿稿件。
+
+---
+
+# 二十五、如果我是审稿人，我会怎么评价这篇论文的“语言”？
+
+大概会是：
+
+> **The manuscript is generally well written and logically organized. The language is clear and appropriate for a scientific audience. However, several claims regarding efficiency, safety, and comparative performance should be further qualified to match the scope of the evaluation. Terminology describing the agent, decision layer, and execution layer should also be made more consistent throughout the manuscript.**
+
+我觉得这基本就是目前最准确的评价。
+
+也就是说：
+
+### ❌ 我不会说：
+
+“英文需要重写。”
+
+### ❌ 我也不会说：
+
+“语言存在大量不专业表达。”
+
+### ✅ 我会说：
+
+**“语言基本合格甚至较好，但需要进行一轮 scientific claim polishing。”**
+
+这两者差别非常大。
+
+---
+
+# 二十六、按维度给你一个评分
+
+| 维度            |           评分 | 评价                              |
+| ------------- | -----------: | ------------------------------- |
+| 英语语法          |     **9/10** | 基本没有严重问题                        |
+| 学术语气          |   **8.5/10** | 比较成熟、克制                         |
+| 术语专业性         |     **8/10** | 总体好，但 agent/platform/layer 等需统一 |
+| 结构规范性         |     **9/10** | 非常标准                            |
+| 方法描述规范性       |   **8.5/10** | 比较完整                            |
+| Results 表述严谨性 |   **7.5/10** | 个别 claim 略强                     |
+| Discussion    |   **8.5/10** | limitation 写得很好                 |
+| 可重复性描述        |   **8.5/10** | supplementary 比较充分              |
+| 引用/参考文献规范     |     **7/10** | 建议统一检查格式                        |
+| 医学期刊风格适配      |     **8/10** | 整体合适，但应继续淡化 clinical framing    |
+| **综合**        | **8～8.5/10** | 已达到正式投稿稿件水平                     |
+
+---
+
+# 二十七、我认为现在最值得改的，不是“英语”，而是这 6 个点
+
+按照优先级排序：
+
+### 第一优先级：把所有“证据强度 > 实验强度”的句子降一级
+
+重点检查：
+
+> reduced coordination effort
+> safe
+> plausible
+> superior / higher than
+> demonstrated feasibility
+> clinically relevant
+> extensibility
+
+不是都要删，而是把语气控制到**证据刚好支撑的程度**。
+
+---
+
+### 第二优先级：统一核心术语
+
+尤其统一：
+
+**platform / coordinator / agent / reasoning layer / decision layer / execution layer / deterministic runner**
+
+最好建立一个明确层级。
+
+---
+
+### 第三优先级：全文继续清理 clinical wording
+
+特别是：
+
+* Clinical Significance
+* clinical objective
+* clinical results report
+* clinically relevant
+* clinical care
+
+并不是不能出现。
+
+而是要保证它们都在：
+
+> **data context**
+
+而不是：
+
+> **system purpose**
+
+的语境下出现。
+
+---
+
+### 第四优先级：减少“review-oriented”的重复使用
+
+用：
+
+> reproducible
+> traceable
+> auditable
+> structured
+> retrospective reconstruction
+
+来承担更多学术表达。
+
+---
+
+### 第五优先级：谨慎处理 0.958 与其他 assistant 的比较
+
+一定把它定义成：
+
+> study-defined
+> prespecified
+> single-run
+> decision-level
+> descriptive comparison
+
+而不要让读者误以为：
+
+> 这是一个可以泛化到 agent 能力排名的 benchmark。
+
+---
+
+### 第六优先级：References 做一次最终格式审查
+
+这一块是最容易出现“正文很好，但编辑部技术退修”的地方。
+
+---
+
+# 二十八、最后给你一个很重要的判断
+
+结合你这篇 DentalClaw 现在的状态，我认为：
+
+> **你们现在已经不需要“大改英文”，而需要做的是“期刊级 scientific polishing”。**
+
+这意味着不要让 Copilot / DeepSeek 再把整篇论文重新润色一遍。
+
+那种操作反而容易造成：
+
+* 术语变化
+* contribution 被夸大
+* researcher-oriented 又变回 clinical
+* workflow / platform 的概念边界被破坏
+* 方法学表述变得更“AI腔”
+
+现在更适合做的是**逐句精修高风险句子**。
+
+尤其是我上面指出的：
+
+> **Abstract + Introduction + Methods 2.1–2.5 + Results 3.2 + Discussion**
+
+这几个区域优先级最高。
+
+而且从你这版稿子的内容来看，**目前真正可能影响审稿结果的已经不是“英语写得像不像论文”，而是“审稿人会不会认为你们的 0.958、coordination reduction、安全性和 comparative claim 被表述得过强”。**
+
+这一点，比单纯把句子改得更漂亮重要得多。

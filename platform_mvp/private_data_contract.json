@@ -1,0 +1,44 @@
+{
+  "version": "2026-07-09-private2d-contract",
+  "purpose": "Minimal input contract for private 2D dental image segmentation training in the DentalClaw platform MVP.",
+  "supported_modes": {
+    "private_train": {
+      "required": ["images", "masks_or_labels"],
+      "optional": ["metadata", "split_file"],
+      "terminal_policy_if_missing_labels": "stop_without_training",
+      "reason": "Supervised segmentation training requires paired image-mask labels."
+    },
+    "inference_or_qc": {
+      "required": ["images"],
+      "optional": ["metadata", "checkpoint"],
+      "terminal_policy_if_missing_labels": "allow_qc_or_inference_only",
+      "reason": "Images-only packages can be audited or inferred with a registered model, but cannot produce supervised training metrics."
+    }
+  },
+  "accepted_image_extensions": [".dcm", ".dicom", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".nii", ".nii.gz"],
+  "accepted_mask_extensions": [".png", ".tif", ".tiff", ".nii", ".nii.gz", ".npy"],
+  "canonical_layout": {
+    "images": "images/",
+    "masks": "masks/",
+    "metadata": "metadata.json",
+    "split_file": "splits.json"
+  },
+  "also_detected_layouts": [
+    {
+      "name": "flat_dicom_images_only",
+      "description": "DICOM files stored directly under the dataset root. This is valid for audit/inference planning, but not sufficient for supervised training."
+    },
+    {
+      "name": "nnunet_like",
+      "description": "imagesTr/labelsTr and optional imagesTs/labelsTs."
+    }
+  ],
+  "minimum_validation_checks": [
+    "image_count_positive",
+    "private_train_requires_label_count_positive",
+    "paired_case_count_positive_for_private_train",
+    "report_unmatched_images",
+    "report_unmatched_masks",
+    "do_not_start_training_when_labels_are_missing"
+  ]
+}

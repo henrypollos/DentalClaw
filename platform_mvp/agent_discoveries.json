@@ -1,0 +1,82 @@
+{
+  "discoveries": {
+    "agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py": {
+      "count": 2,
+      "display_name": "TDD Auto-train",
+      "intents": [
+        {
+          "intent": "用 TDD 训练分割模型",
+          "timestamp": "2026-08-01T23:19:51-04:00"
+        },
+        {
+          "intent": "用 TDD 训练分割模型",
+          "timestamp": "2026-08-01T23:19:51-04:00"
+        }
+      ]
+    },
+    "run_tdd_detection_traced.py": {
+      "count": 8,
+      "display_name": "No registry match for detection mode, so this is an external proposal from codeb",
+      "intents": [
+        {
+          "intent": "把私有 2D segmentation mask 自动转成检测框并训练 detector。",
+          "timestamp": "2026-08-18T07:18:59-04:00"
+        },
+        {
+          "intent": "把 TDD 的 teeth_bbox.json 整理成 COCO 牙齿检测数据集，供检测模型训练使用。",
+          "timestamp": "2026-08-18T09:29:58-04:00"
+        },
+        {
+          "intent": "基于 TDD bbox 标注训练一个牙齿检测模型，并报告验证集 mAP。",
+          "timestamp": "2026-08-18T09:30:29-04:00"
+        },
+        {
+          "intent": "用私有 2D 数据训练牙齿检测模型。",
+          "timestamp": "2026-08-18T09:38:18-04:00"
+        },
+        {
+          "intent": "把私有 2D segmentation mask 自动转成检测框并训练 detector。",
+          "timestamp": "2026-08-18T09:39:56-04:00"
+        }
+      ]
+    },
+    "platform_mvp/export_toothfairy3_detection.py": {
+      "count": 1,
+      "display_name": "方法表无匹配；用户请求从 ToothFairy3 的 3D 标签导出牙齿检测框属于从分割 mask 生成检测标注的转换任务。可利用代码库中已有 ToothFai",
+      "intents": [
+        {
+          "intent": "从 ToothFairy3 3D 标签中导出牙齿检测框数据集。",
+          "timestamp": "2026-08-18T07:12:21-04:00"
+        }
+      ]
+    },
+    "platform_mvp/run_anomaly_detection_mvp.py": {
+      "count": 2,
+      "display_name": "No registry match for a ToothFairy3 quality/risk classification task, so this is",
+      "intents": [
+        {
+          "intent": "帮我对 ToothFairy3 做质量分类，看看哪些病例风险比较高。",
+          "timestamp": "2026-08-18T07:13:42-04:00"
+        },
+        {
+          "intent": "帮我对 ToothFairy3 做质量分类，看看哪些病例风险比较高。",
+          "timestamp": "2026-08-18T09:34:55-04:00"
+        }
+      ]
+    },
+    "agents/data_curator/skills/core/cbct_qc/scripts/audit_cbct_dataset.py": {
+      "count": 2,
+      "display_name": "No registry match for a ToothFairy3 usable/needs_manual_review classification ta",
+      "intents": [
+        {
+          "intent": "将 ToothFairy3 病例分成 usable 和 needs_manual_review，并输出病例级分类结果。",
+          "timestamp": "2026-08-18T07:15:01-04:00"
+        },
+        {
+          "intent": "将 ToothFairy3 病例分成 usable 和 needs_manual_review，并输出病例级分类结果。",
+          "timestamp": "2026-08-18T09:35:53-04:00"
+        }
+      ]
+    }
+  }
+}

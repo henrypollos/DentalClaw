@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "segmentation",
+    "mode": "train"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "toothfairy3_3d_segmentation_infer_or_train",
+    "status": "matched"
+  },
+  "requires_human_review": false,
+  "reason": "请求核心任务为在 ToothFairy3 全量 CBCT 上训练 3D 分割模型，与注册方法 toothfairy3_3d_segmentation_infer_or_train 完全匹配。附带的 QC 条件（发现需人工复核或阻断病例时停止并输出清单）属于平台已有数据质检脚本可覆盖的标准训练流程 safeguard，不改变路由判定。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

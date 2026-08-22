@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "classification",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "请求为基于 TDD 图像质量标签训练可用/需复核二分类器，属于 classification 任务。当前注册方法中无任何分类训练路由（仅覆盖分割、异常检测、超分辨率），故无法直接匹配。任务本身在牙科影像 QC 范畴内合理，建议作为外部方案提交人工审批；同时需注意 TDD 数据集已标注信息仅描述了像素级分割标注，质量标签是否存在及完整性需人工核验后方可继续。",
+  "model": "Qwen3.8-Max",
+  "date": "2026-08-21"
+}

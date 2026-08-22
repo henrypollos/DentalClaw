@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "Private2D",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "proposed"
+  },
+  "requires_human_review": true,
+  "reason": "可基于私有 2D segmentation mask 自动生成检测框并训练 detector，但已验证方法注册表中没有完全匹配的通用检测器训练路由，需要人工批准外部方案。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

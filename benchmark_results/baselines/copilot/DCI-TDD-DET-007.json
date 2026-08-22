@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "TDD",
+    "task_family": "detection",
+    "mode": "train"
+  },
+  "outcome": "external_proposal",
+  "supported": true,
+  "executable": false,
+  "selected_method": {
+    "id": "agent_external_suggestion",
+    "status": "requires_human_approval"
+  },
+  "requires_human_review": true,
+  "reason": "TDD 提供 teeth_bbox.json 检测框标注，训练牙齿检测模型并报告验证集 mAP 是合理任务，但当前注册表没有对应的牙齿检测训练方法。",
+  "model": "GPT-5.6 Luna",
+  "date": "2026-08-21"
+}

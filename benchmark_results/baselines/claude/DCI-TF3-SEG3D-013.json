@@ -1,0 +1,18 @@
+{
+  "intent": {
+    "dataset": "ToothFairy3",
+    "task_family": "segmentation",
+    "mode": "inference"
+  },
+  "outcome": "use_registry",
+  "supported": true,
+  "executable": true,
+  "selected_method": {
+    "id": "toothfairy3_3d_segmentation_infer_or_train",
+    "status": "registered"
+  },
+  "requires_human_review": false,
+  "reason": "请求使用已有 ToothFairy3 3D 分割模型对验证/测试 CBCT 做推理评估，与注册方法 toothfairy3_3d_segmentation_infer_or_train（segmentation, 3d, inference/train）完全匹配，可直接自动执行。",
+  "model": "deepseek-v4-pro (Claude Code harness)",
+  "date": "2026-08-21"
+}
