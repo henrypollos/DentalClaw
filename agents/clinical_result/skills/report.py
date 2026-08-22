@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 
 ARTIFACT_ROOT = Path("/data/data2/yiyang/DentalClaw/artifacts")
-DEFAULT_CLINICAL_WORKSPACE = ARTIFACT_ROOT / "results" / "reports" / "clinical_result_workspace"
+DEFAULT_CLINICAL_WORKSPACE = ARTIFACT_ROOT / "results" / "reports" / "dentalclaw_result_workspace"
 
 
 def _ensure_under_artifacts(path: Path, label: str) -> Path:
@@ -30,14 +30,13 @@ def _now_utc() -> str:
     return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _risk_level(foreground_pixels: int) -> Tuple[str, str]:
+def _extent_level(foreground_pixels: int) -> str:
+    """Segment coverage described as an extent, not a clinical risk grade."""
     if foreground_pixels <= 0:
-        return "Low", "🟢"
+        return "None"
     if foreground_pixels < 100_000:
-        return "Moderate", "🟠"
-    if foreground_pixels < 1_000_000:
-        return "High", "🔴"
-    return "High", "🔴"
+        return "Moderate"
+    return "Extensive"
 
 
 def _make_overlay(image: Optional[np.ndarray], mask: np.ndarray, alpha: float = 0.45) -> np.ndarray:
@@ -194,11 +193,10 @@ def _render_markdown(case_id: str,
                      notes: List[str],
                      input_rel: Optional[str],
                      overlay_rel: str) -> str:
-    risk = summary["risk_level"]
-    risk_emoji = "🟢" if risk == "Low" else "🟠" if risk == "Moderate" else "🔴"
+    extent = summary.get("extent_level", "Unknown")
 
     lines = [
-        "# Clinical Radiographic Report (AI-assisted)",
+        "# DentalClaw Workflow Report (AI-assisted segmentation)",
         "",
         "## 🧾 Case Information",
         _to_md_table([
@@ -209,7 +207,7 @@ def _render_markdown(case_id: str,
         "",
         "## 🧭 Workflow Metadata",
         _to_md_table([
-            ("Pipeline", workflow_meta.get("pipeline_name", "clinical_result_pipeline")),
+            ("Pipeline", workflow_meta.get("pipeline_name", "dentalclaw_result_pipeline")),
             ("Run Time (UTC)", workflow_meta.get("run_time_utc", _now_utc())),
             ("Input Image", workflow_meta.get("image_path", "n/a")),
             ("Output Directory", workflow_meta.get("out_dir", "n/a")),
@@ -239,7 +237,7 @@ def _render_markdown(case_id: str,
         _to_md_table([
             ("Foreground pixel count", f'{summary["foreground_pixels"]:,}'),
             ("Present labels", ", ".join(map(str, summary["present_labels"])) if summary["present_labels"] else "None"),
-            ("Risk level", f"{risk_emoji} {risk}"),
+            ("Segmentation extent", extent),
         ]),
         "",
         "## 🤖 Quantitative Output Summary",
@@ -276,14 +274,14 @@ def _render_markdown(case_id: str,
     lines += [f"- {n}" for n in notes] if notes else ["- None"]
     lines += [
         "",
-        "## 🧠 Clinical Impression",
-        summary["clinical_conclusion"],
+        "## 🧠 Review Summary",
+        summary.get("review_note", ""),
         "",
-        "## 📋 Recommendations",
+        "## 📋 Suggested Review Points",
     ]
     recs = workflow_meta.get("recommendations") or [
         "Review segmentation boundaries for over-segmentation or omission.",
-        "Compare the result against the raw image and clinical context.",
+        "Compare the result against the raw image.",
         "Prioritize manual review when the predicted foreground is extensive.",
     ]
     lines += [f"- {r}" for r in recs]
@@ -293,15 +291,15 @@ def _render_markdown(case_id: str,
         _to_md_table([
             ("Case ID", case_id),
             ("Foreground pixels", f'{summary["foreground_pixels"]:,}'),
-            ("Risk level", f"{risk_emoji} {risk}"),
-            ("Conclusion", summary["clinical_conclusion"]),
+            ("Segmentation extent", extent),
+            ("Review note", summary.get("review_note", "")),
         ]),
         "",
         "## 🖼 Figure",
         "The overlay image is attached separately.",
         "",
         "## ⚠️ Disclaimer",
-        "This result is for clinical review support only and should not replace the clinician's final judgment.",
+        "This report is generated automatically by the DentalClaw workflow platform to support research documentation and downstream review.",
         "",
     ]
     return "\n".join(lines)
@@ -336,9 +334,8 @@ def _render_html(case_id: str,
         out.append("</table>")
         return "\n".join(out)
 
-    risk = summary.get("risk_level", "Unknown")
-    risk_color = "#10b981" if risk == "Low" else "#f59e0b" if risk == "Moderate" else "#ef4444"
-    risk_badge = f"{'🟢' if risk == 'Low' else '🟠' if risk == 'Moderate' else '🔴'} {esc(risk)}"
+    extent = summary.get("extent_level", "Unknown")
+    extent_badge = f"{esc(extent)}"
 
     fg = summary.get("foreground_pixels", summary.get("positive_pixels", 0))
     labels = summary.get("present_labels", [])
@@ -391,7 +388,7 @@ def _render_html(case_id: str,
     notes_html = "".join(f"<li>{esc(n)}</li>" for n in notes) if notes else "<li>None</li>"
     recs = workflow_meta.get("recommendations") or [
         "Review segmentation boundaries for over-segmentation or omission.",
-        "Compare the result against the raw image and clinical context.",
+        "Compare the result against the raw image.",
         "Prioritize manual review when the predicted foreground is extensive.",
     ]
     rec_html = "".join(f"<li>{esc(r)}</li>" for r in recs)
@@ -433,26 +430,26 @@ def _render_html(case_id: str,
 
     # ----- final report -----
     case_id = summary.get("case_id", "")
-    risk = summary.get("risk_level", "")
+    extent = summary.get("extent_level", "")
     pixels = summary.get("foreground_pixels", 0)
     labels = summary.get("present_labels", [])
 
     label_str = ", ".join(map(str, labels)) if labels else "None"
 
-    clinical_impression_text = f"""
+    review_summary_text = f"""
     For case <b>{esc(case_id)}</b>, the AI-assisted segmentation identified
     a total of <b>{format(int(pixels), ",")}</b> foreground pixels involving
     anatomical labels <b>{esc(label_str)}</b>.
 
-    The overall risk stratification is assessed as <b>{esc(str(risk))}</b>.
+    The segmentation extent is classified as <b>{esc(str(extent))}</b>.
     The extent and distribution of the segmented regions suggest that the
     findings should be interpreted together with the panoramic radiograph
-    and the clinical context.
+    and the original image.
 
     Because this analysis was performed on a full panoramic image, the result
     may be influenced by scale differences between the training setting and
     the current input. Careful verification of anatomical boundaries is
-    recommended to ensure that clinically relevant regions are not over- or
+    recommended to ensure that relevant regions are not over- or
     under-segmented.
     """
 
@@ -472,7 +469,7 @@ def _render_html(case_id: str,
 
     extra_recs = list(workflow_meta.get("recommendations", []))
     extra_recs.append(
-        "Correlate segmentation results with anatomical landmarks and adjacent structures to ensure clinical consistency."
+        "Correlate segmentation results with anatomical landmarks and adjacent structures to ensure anatomical consistency."
     )
     extra_recs.append(
         "If discrepancies are observed, consider re-evaluation using alternative preprocessing strategies or model configurations."
@@ -485,8 +482,8 @@ def _render_html(case_id: str,
       <div class="panel-title">Final Report</div>
       <div class="panel-body">
         <div class="report-block">
-          <div class="report-title">Clinical Impression</div>
-          <div class="report-text">{clinical_impression_text}</div>
+          <div class="report-title">Review Summary</div>
+          <div class="report-text">{review_summary_text}</div>
         </div>
 
         <div class="report-block">
@@ -495,15 +492,14 @@ def _render_html(case_id: str,
         </div>
 
         <div class="report-block">
-          <div class="report-title">Recommendations</div>
+          <div class="report-title">Suggested Review Points</div>
           <ul class="tight-list">{rec_html}</ul>
         </div>
 
         <div class="report-block">
           <div class="report-title">Disclaimer</div>
           <div class="report-text">
-            This report is generated by an AI-assisted system and is intended for clinical decision support only.
-            Final diagnosis should be made by a qualified dental professional.
+            This report is generated automatically by the DentalClaw workflow platform to support research documentation and downstream review.
           </div>
         </div>
       </div>
@@ -515,7 +511,7 @@ def _render_html(case_id: str,
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clinical Report — {esc(case_id)}</title>
+<title>DentalClaw Workflow Report — {esc(case_id)}</title>
 <style>
 :root {{
   --bg: #f4f6f8;
@@ -711,11 +707,11 @@ body {{
 <body>
   <div class="page">
     <header class="hero">
-      <div class="kicker">DentalClaw Clinical Report</div>
-      <h1>AI-assisted dental panoramic analysis</h1>
+      <div class="kicker">DentalClaw Workflow Report</div>
+      <h1>AI-assisted panoramic segmentation workflow</h1>
       <div class="meta">
         <span>Case: {esc(case_id)}</span>
-        <span>Risk: {risk_badge}</span>
+        <span>Segmentation extent: {extent_badge}</span>
         <span>Foreground pixels: {fmt_int(fg)}</span>
       </div>
     </header>
@@ -762,7 +758,7 @@ body {{
                 <tr><th>Field</th><th>Value</th></tr>
                 <tr><td>Foreground pixels</td><td>{fmt_int(fg)}</td></tr>
                 <tr><td>Present labels</td><td>{esc(", ".join(map(str, labels)) if labels else "None")}</td></tr>
-                <tr><td>Risk level</td><td>{risk_badge}</td></tr>
+                <tr><td>Segmentation extent</td><td>{extent_badge}</td></tr>
               </table>
             </div>
           </section>
@@ -799,7 +795,7 @@ body {{
     </main>
 
     <div class="footer">
-      This report is for clinical decision support only and does not replace professional judgment.
+      Generated automatically by the DentalClaw workflow platform to support research documentation and downstream review.
     </div>
   </div>
 </body>
@@ -848,11 +844,11 @@ def clinical_report_export(
 
     foreground_pixels = int((mask > 0).sum())
     present_labels = [int(v) for v in np.unique(mask) if int(v) != 0]
-    risk_level, risk_emoji = _risk_level(foreground_pixels)
-    clinical_conclusion = (
-        "A substantial foreground region was detected and should be reviewed carefully."
+    extent_level = _extent_level(foreground_pixels)
+    review_note = (
+        "A substantial foreground region was detected; boundary review is recommended."
         if foreground_pixels > 0
-        else "No obvious foreground segmentation region was detected."
+        else "No foreground segmentation region was detected."
     )
 
     workflow_meta = {
@@ -932,8 +928,8 @@ def clinical_report_export(
         "case_id": case["id"],
         "foreground_pixels": foreground_pixels,
         "present_labels": present_labels,
-        "risk_level": risk_level,
-        "clinical_conclusion": clinical_conclusion,
+        "extent_level": extent_level,
+        "review_note": review_note,
         "workflow_meta": workflow_meta,
         "dataset_context": dataset_context,
         "governance_tags": governance_tags,

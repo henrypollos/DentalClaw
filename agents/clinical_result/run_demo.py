@@ -28,7 +28,7 @@ def main():
         "checkpoint_name": "checkpoint_best.pth",
     })
 
-    out_dir = Path("./demo_output")
+    out_dir = Path("./artifacts/demo_output")
 
     result = agent.run(case, out_dir=str(out_dir))
 

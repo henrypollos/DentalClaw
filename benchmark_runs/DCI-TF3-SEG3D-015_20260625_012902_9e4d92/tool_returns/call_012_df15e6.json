@@ -1,8 +1,0 @@
-{
-  "status": "dry_run_command_generated",
-  "qc_command": "python -m skills.data_governance_skill --dataset-path /data/data2/yiyang/DentalClaw/agents/data_curator/reports/cbct_qc/toothfairy3F_images_only_subset/dataset --output-dir artifacts/results/reports/datasets_qc",
-  "total_cases": 100,
-  "passed_cases": 95,
-  "manual_review_cases": 3,
-  "blocked_cases": 2
-}

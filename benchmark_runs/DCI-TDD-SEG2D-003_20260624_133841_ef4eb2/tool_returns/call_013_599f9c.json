@@ -1,7 +1,0 @@
-{
-  "status": "dry_run",
-  "training_command": "/home/yiyang/miniconda3/envs/nnunetv2/bin/python agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --budget-spec <budget_spec.json> --workspace artifacts/training_runs/<run_id> --detach",
-  "note": "Dry-run 模式：训练命令已生成，未实际执行",
-  "workspace": "artifacts/training_runs/<run_id>",
-  "next_step": "请检查训练命令和配置文件"
-}

@@ -1,6 +1,0 @@
-{
-  "status": "dry_run",
-  "inference_command": "/home/yiyang/miniconda3/envs/nnunetv2/bin/python agents/experimentation/skills/tooth_autoinfer_nnunet/scripts/run_inference.py --model-path <checkpoint> --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --output-dir artifacts/inference_runs/<run_id>",
-  "metrics": null,
-  "note": "Dry-run 模式：推理命令已生成"
-}

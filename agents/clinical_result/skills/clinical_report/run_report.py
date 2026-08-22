@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 
 ARTIFACT_ROOT = Path("/data/data2/yiyang/DentalClaw/artifacts")
-DEFAULT_CLINICAL_WORKSPACE = ARTIFACT_ROOT / "results" / "reports" / "clinical_result_workspace"
+DEFAULT_CLINICAL_WORKSPACE = ARTIFACT_ROOT / "results" / "reports" / "dentalclaw_result_workspace"
 
 
 def _ensure_under_artifacts(path: Path, label: str) -> Path:
@@ -24,14 +24,13 @@ def _ensure_under_artifacts(path: Path, label: str) -> Path:
     return resolved
 
 
-def _risk_level(foreground_pixels: int) -> Tuple[str, str]:
+def _extent_level(foreground_pixels: int) -> str:
+    """Segment coverage described as an extent, not a clinical risk grade."""
     if foreground_pixels <= 0:
-        return "Low", "🟢"
+        return "None"
     if foreground_pixels < 100_000:
-        return "Moderate", "🟠"
-    if foreground_pixels < 1_000_000:
-        return "High", "🔴"
-    return "High", "🔴"
+        return "Moderate"
+    return "Extensive"
 
 
 def _make_overlay(image: Optional[np.ndarray], mask: np.ndarray, alpha: float = 0.45) -> np.ndarray:
@@ -103,8 +102,8 @@ def _copy_image_to_output(image_path: Optional[str], out_path: Optional[Path]) -
 def _build_subreports(summary: Dict[str, Any], review_list: List[str]) -> List[Dict[str, Any]]:
     fg = summary["foreground_pixels"]
     labels = summary["present_labels"]
-    risk = summary["risk_level"]
-    conclusion = summary["clinical_conclusion"]
+    extent = summary["extent_level"]
+    note = summary["review_note"]
 
     return [
         {
@@ -118,17 +117,17 @@ def _build_subreports(summary: Dict[str, Any], review_list: List[str]) -> List[D
         {
             "title": "🧠 AI Interpretation Sub-Report",
             "body": [
-                f"Risk level: {risk}.",
-                conclusion,
-                "The result should be interpreted together with the raw panoramic image and clinical context.",
+                f"Segmentation extent: {extent}.",
+                note,
+                "The result should be interpreted together with the raw panoramic image.",
             ],
         },
         {
-            "title": "🏥 Clinical Recommendation Sub-Report",
+            "title": "🔎 Suggested Review Points",
             "body": review_list,
         },
         {
-            "title": "💊 Follow-up & Risk Management",
+            "title": "🛠 Follow-up & Data-Quality Notes",
             "body": [
                 "Prioritize manual review when the predicted foreground is extensive.",
                 "If the result remains over-segmented, adjust inference scale or use a tiling strategy.",
@@ -139,18 +138,17 @@ def _build_subreports(summary: Dict[str, Any], review_list: List[str]) -> List[D
 
 
 def _render_markdown(case_id: str, summary: Dict[str, Any], subreports: List[Dict[str, Any]], input_rel: Optional[str], overlay_rel: str) -> str:
-    risk = summary["risk_level"]
-    risk_emoji = "🟢" if risk == "Low" else "🟠" if risk == "Moderate" else "🔴"
+    extent = summary.get("extent_level", "Unknown")
 
     md = [
-        "# Clinical Result Report",
+        "# DentalClaw Workflow Report",
         "",
         "## 🧾 Case Information",
         "| Field | Value |",
         "| --- | --- |",
         f"| Case ID | {case_id} |",
         "| Report Language | English |",
-        "| Output Type | Segmentation-based clinical review |",
+        "| Output Type | Segmentation-based workflow review |",
         "",
     ]
 
@@ -167,7 +165,7 @@ def _render_markdown(case_id: str, summary: Dict[str, Any], subreports: List[Dic
         "| --- | --- |",
         f'| Foreground pixel count | {summary["foreground_pixels"]:,} |',
         f'| Present labels | {", ".join(map(str, summary["present_labels"])) if summary["present_labels"] else "None"} |',
-        f"| Risk level | {risk_emoji} {risk} |",
+        f"| Segmentation extent | {extent} |",
         "",
     ]
 
@@ -183,14 +181,14 @@ def _render_markdown(case_id: str, summary: Dict[str, Any], subreports: List[Dic
         "| --- | --- |",
         f"| Case ID | {case_id} |",
         f'| Foreground pixels | {summary["foreground_pixels"]:,} |',
-        f"| Risk level | {risk_emoji} {risk} |",
-        f'| Conclusion | {summary["clinical_conclusion"]} |',
+        f"| Segmentation extent | {extent} |",
+        f'| Review note | {summary["review_note"]} |',
         "",
         "## 🖼 Figure",
         "The overlay image is attached separately.",
         "",
         "## ⚠️ Disclaimer",
-        "This result is for clinical review support only and should not replace the clinician's final judgment.",
+        "This report is generated automatically by the DentalClaw workflow platform to support research documentation and downstream review.",
         "",
     ]
     return "\n".join(md)
@@ -200,9 +198,9 @@ def _render_html(case_id: str, summary: Dict[str, Any], subreports: List[Dict[st
     def esc(x: Any) -> str:
         return html_lib.escape("" if x is None else str(x))
 
-    risk = summary["risk_level"]
-    badge_cls = "low" if risk == "Low" else "moderate" if risk == "Moderate" else "high"
-    badge_text = f"{'🟢' if risk == 'Low' else '🟠' if risk == 'Moderate' else '🔴'} {esc(risk)}"
+    extent = summary.get("extent_level", "Unknown")
+    badge_cls = "none" if extent == "None" else "moderate" if extent == "Moderate" else "extensive"
+    badge_text = f"{esc(extent)}"
 
     left_image_html = ""
     if input_rel:
@@ -249,7 +247,7 @@ def _render_html(case_id: str, summary: Dict[str, Any], subreports: List[Dict[st
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clinical Result Report — {esc(case_id)}</title>
+<title>DentalClaw Workflow Report — {esc(case_id)}</title>
 <style>
 :root {{
   --bg: #f4f6fa;
@@ -397,11 +395,11 @@ body {{
 <body>
 <div class="page">
   <header class="hero">
-    <div class="kicker">DentalClaw Clinical Result Report</div>
+    <div class="kicker">DentalClaw Workflow Report</div>
     <h1>Input: Dental Panoramic X-ray + Inference Result</h1>
     <div class="meta">
       <span>Case: {esc(case_id)}</span>
-      <span>Risk: {badge_text}</span>
+      <span>Segmentation extent: {badge_text}</span>
       <span>Foreground pixels: {esc(f'{summary["foreground_pixels"]:,}')}</span>
     </div>
   </header>
@@ -421,7 +419,7 @@ body {{
         <div class="final-body">
           <div class="notice">
             <strong>Summary of Key Findings</strong><br>
-            {esc(summary["clinical_conclusion"])}
+            {esc(summary["review_note"])}
           </div>
 
           <div style="height:12px"></div>
@@ -429,14 +427,14 @@ body {{
           {summary_table}
 
           <div class="notice">
-            <strong>Clinical Impression</strong><br>
-            A substantial foreground region was detected. Manual review is recommended, and the result should be interpreted in the context of the raw panoramic image and clinical note.
+            <strong>Review Summary</strong><br>
+            A substantial foreground region was detected. Manual review is recommended, and the result should be interpreted together with the raw panoramic image.
           </div>
 
           <div style="height:12px"></div>
 
           <div class="notice">
-            <strong>Recommendations</strong>
+            <strong>Suggested Review Points</strong>
             <ul style="margin:10px 0 0 22px; padding:0;">{recommendations}</ul>
           </div>
 
@@ -444,7 +442,7 @@ body {{
 
           <div class="notice">
             <strong>Disclaimer</strong><br>
-            This result is for clinical review support only and should not replace the clinician's final judgment.
+            This report is generated automatically by the DentalClaw workflow platform to support research documentation and downstream review.
           </div>
         </div>
       </section>
@@ -488,27 +486,27 @@ def clinical_report_export(
 
     foreground_pixels = int((mask > 0).sum())
     present_labels = [int(v) for v in np.unique(mask) if int(v) != 0]
-    risk_level, risk_emoji = _risk_level(foreground_pixels)
+    extent_level = _extent_level(foreground_pixels)
 
     if foreground_pixels > 0:
-        clinical_conclusion = "A substantial foreground region was detected and should be reviewed carefully."
+        review_note = "A substantial foreground region was detected; boundary review is recommended."
         review_list = [
             "Review region boundaries for over-segmentation or omission.",
-            "Compare the result against the raw image and clinical context.",
+            "Compare the result against the raw image.",
             "Prioritize manual review when the predicted foreground is extensive.",
         ]
     else:
-        clinical_conclusion = "No obvious foreground segmentation region was detected."
+        review_note = "No foreground segmentation region was detected."
         review_list = [
-            "If the case is clinically suspicious, review the raw image and preprocessing steps.",
+            "If the case is potentially relevant, review the raw image and preprocessing steps.",
         ]
 
     summary = {
         "case_id": case["id"],
         "foreground_pixels": foreground_pixels,
         "present_labels": present_labels,
-        "risk_level": risk_level,
-        "clinical_conclusion": clinical_conclusion,
+        "extent_level": extent_level,
+        "review_note": review_note,
     }
 
     # Copy input image locally for the HTML report if it exists.

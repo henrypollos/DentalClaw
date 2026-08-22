@@ -1,8 +1,0 @@
-{
-  "intent_id": "DCI-TDD-SEG2D-001",
-  "pattern": "artifacts/training_runs/<run_id>/run_status.json",
-  "generated_by": "benchmark_trace.run_intent",
-  "dry_run": true,
-  "terminal_status": "completed_or_running_detached",
-  "note": "Placeholder artifact for benchmark trace evaluation; real platform runs should replace this with produced output."
-}

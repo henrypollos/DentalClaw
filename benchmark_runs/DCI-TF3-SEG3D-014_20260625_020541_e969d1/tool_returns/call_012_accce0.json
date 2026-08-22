@@ -1,8 +1,0 @@
-{
-  "status": "dry_run_command_generated",
-  "qc_command": "python agents/data_curator/skills/core/cbct_qc/scripts/audit_cbct_dataset.py --dataset-root /data/data2/yiyang/JoD/ToothFairy3_LPS --label-policy required --report-key <run_id> --output-root agents/data_curator/reports/cbct_qc/<run_id>",
-  "total_cases": 100,
-  "passed_cases": 95,
-  "manual_review_cases": 3,
-  "blocked_cases": 2
-}

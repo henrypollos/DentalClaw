@@ -1,6 +1,6 @@
 ---
 name: clinical_result_pipeline
-description: Run nnUNet-based dental panoramic analysis and generate a clinical report. The main assistant output should be the Final Report text, while the HTML report path is returned separately.
+description: Run nnUNet-based dental panoramic analysis and generate a review-oriented workflow report. The main assistant output should be the Final Report text, while the HTML report path is returned separately.
 ---
 
 # Clinical Result Pipeline
@@ -79,7 +79,7 @@ The generated HTML path should be included in the final output metadata or file 
 
 ## Report content requirements
 
-The final report should include, in a clinically phrased style:
+The final report should include, in a review-oriented style:
 
 - case information
 - workflow metadata
@@ -88,15 +88,15 @@ The final report should include, in a clinically phrased style:
 - quantitative output summary
 - model performance summary if ground truth is available
 - review-relevant findings / case notes
-- clinical impression
-- recommendations
+- review summary
+- suggested review points
 - disclaimer
 
 ## Style requirements
 
-- Keep the report clinically phrased and professional.
+- Keep the report review-oriented and professional.
 - Keep the report English-only.
-- Preserve the project focus on nnUNet-based segmentation, TTA, ensemble inference, anonymization, and clinical review support.
+- Preserve the project focus on nnUNet-based segmentation, TTA, ensemble inference, anonymization, and downstream review support.
 - Do not output training instructions unless the user explicitly asks for training.
 - Do not replace the Final Report with raw logs.
 - Do not ask for unnecessary absolute paths if the case can be resolved from the workspace.

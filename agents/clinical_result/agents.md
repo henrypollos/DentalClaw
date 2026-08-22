@@ -1,13 +1,13 @@
 # Clinical Result Agent
 
 ## Overview
-This agent transforms precomputed model predictions into clinician-friendly Chinese reports.
+This agent transforms precomputed model predictions into review-oriented Chinese reports for research workflows.
 
 ## Pipeline
 1. Base Inference (read precomputed predictions)
 2. Ensemble Merge (optional)
 3. Geometric Postprocessing
-4. Clinical Report Generation
+4. Workflow Report Generation
 
 ## Skills
 - base_inference
@@ -25,9 +25,9 @@ This agent transforms precomputed model predictions into clinician-friendly Chin
 - final mask
 - structured summary
 - review suggestions
-- Chinese natural-language clinical report
+- Chinese natural-language workflow report
 
 ## Notes
-- This agent is designed for result closure and clinical readability.
+- This agent is designed for result closure and review-oriented readability.
 - It does not expose model internals in the report.
 - `main_run.py` is not required in the OpenClaw-style workflow.

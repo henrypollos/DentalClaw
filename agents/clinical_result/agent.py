@@ -16,7 +16,7 @@ from .skills.report import clinical_report_export
 
 ARTIFACT_ROOT = Path("/data/data2/yiyang/DentalClaw/artifacts")
 ARTIFACT_REPORT_ROOT = ARTIFACT_ROOT / "results" / "reports"
-CLINICAL_WORKSPACE_ROOT = ARTIFACT_REPORT_ROOT / "clinical_result_workspace"
+CLINICAL_WORKSPACE_ROOT = ARTIFACT_REPORT_ROOT / "dentalclaw_result_workspace"
 
 
 def _ensure_under_artifacts(path: Path, label: str) -> Path:
@@ -328,7 +328,7 @@ class ClinicalResultAgent:
 
         # ---------- 构建 workflow_meta ----------
         workflow_meta = {
-            "pipeline_name": "clinical_result_pipeline",
+            "pipeline_name": "dentalclaw_result_pipeline",
             "modality": "Panoramic Dental Radiograph",
             "analysis_type": "AI-assisted segmentation and review",
             "dataset_context_name": "Dental panoramic radiograph",
@@ -347,7 +347,7 @@ class ClinicalResultAgent:
             "input_scale_mismatch_risk": True,
             "recommendations": [
                 "Review segmentation boundaries for over-segmentation or omission.",
-                "Compare the result against the raw image and clinical context.",
+                "Compare the result against the raw image.",
                 "Prioritize manual review when the predicted foreground is extensive.",
             ],
         }
