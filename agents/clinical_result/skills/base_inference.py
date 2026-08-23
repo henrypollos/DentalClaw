@@ -9,7 +9,7 @@ def base_inference(case, model=None):
     """
 
     # ⭐ 你的 predictions 目录
-    pred_dir = "/data/data2/yiyang/DentalClaw/artifacts/results/verify_run/predictions"
+    pred_dir = "$DENTALCLAW_HOME/artifacts/results/verify_run/predictions"
 
     filename = case["filename"]   # 比如 teeth_0001.png
     pred_path = os.path.join(pred_dir, filename)

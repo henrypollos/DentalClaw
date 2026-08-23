@@ -49,7 +49,7 @@
 
 ## 3. 运行方式
 
-在项目根目录 `/data/data2/yiyang/DentalClaw` 下运行：
+在项目根目录 `$DENTALCLAW_HOME` 下运行：
 
 ```bash
 sh mvp_fullflow/run_mvp_fullflow.sh
@@ -58,7 +58,7 @@ sh mvp_fullflow/run_mvp_fullflow.sh
 默认会使用：
 
 ```bash
-/home/yiyang/miniconda3/envs/nnunetv2/bin/python
+$CONDA_HOME/envs/nnunetv2/bin/python
 ```
 
 如果需要指定 Python 环境：

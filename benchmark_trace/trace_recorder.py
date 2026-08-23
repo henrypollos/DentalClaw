@@ -17,7 +17,7 @@ from typing import Any, Awaitable, Callable, Optional
 TRACE_ROOT = Path(
     os.getenv(
         "DENTALCLAW_TRACE_DIR",
-        "/data/data2/yiyang/DentalClaw/benchmark_runs",
+        "$DENTALCLAW_HOME/benchmark_runs",
     )
 )
 

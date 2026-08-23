@@ -605,7 +605,7 @@ if __name__ == "__main__":
     import sys
     
     if len(sys.argv) < 2:
-        dataset_path = "/data/data2/yiyang/TDD"
+        dataset_path = "$HOME/TDD"
     else:
         dataset_path = sys.argv[1]
     

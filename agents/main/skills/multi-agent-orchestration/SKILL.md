@@ -56,7 +56,7 @@ For a compound request:
 
 1. Restate the objective as explicit stages.
 2. Refresh the supervision registry first with:
-   - `/home/yiyang/miniconda3/envs/nnunetv2/bin/python /data/data2/yiyang/DentalClaw/agents/main/skills/supervision-registry/scripts/refresh_registry.py`
+   - `$CONDA_HOME/envs/nnunetv2/bin/python $DENTALCLAW_HOME/agents/main/skills/supervision-registry/scripts/refresh_registry.py`
 3. Assign each stage to the appropriate specialist role.
 4. For each stage, define:
    - exact input paths
@@ -112,16 +112,16 @@ Bad:
 
 Good:
 
-- "Export `/data/data2/yiyang/DentalClaw/data/TDD` with output root `/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`; the final dataset should appear under `/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw/DatasetXXX_NAME`; report the dataset id and output folder."
+- "Export `$DENTALCLAW_HOME/data/TDD` with output root `$DENTALCLAW_HOME/artifacts/datasets/nnUNet`; the final dataset should appear under `$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_raw/DatasetXXX_NAME`; report the dataset id and output folder."
 
 ## Default Artifact Roots
 
 - nnUNet raw datasets:
-  - `/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw`
+  - `$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_raw`
 - nnUNet preprocessing cache:
-  - `/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_preprocessed`
+  - `$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_preprocessed`
 - nnUNet training results:
-  - `/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results`
+  - `$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results`
 
 ## TDD 32-Class Recipe
 
@@ -134,12 +134,12 @@ Use this sequence:
 1. `data_curator`
    - use `skills/datasets/tdd-nnunet-export/`
    - call only the maintained exporter:
-     - `/data/data2/yiyang/DentalClaw/agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/export_tdd_to_nnunet.py`
+     - `$DENTALCLAW_HOME/agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/export_tdd_to_nnunet.py`
    - before launching, check whether the same export request is already running; if yes, reuse and monitor that run instead of launching a second copy
    - if a shell wrapper uses `tee`, make sure `artifacts/results/logs/` exists first
    - do not treat a `tee` or log-path failure as exporter failure if the exporter process is already running
    - when calling the exporter directly, pass:
-     - `--output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`
+     - `--output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet`
    - the exporter has built-in duplicate protection:
      - matching running-process detection
      - request-signature file locking
@@ -150,17 +150,17 @@ Use this sequence:
    - QC is enabled by default; only pass `--skip-qc` if the user explicitly says to skip, disable, or avoid QC
    - default exporter QC runs on the full exported dataset; only pass `--qc-limit N` when the user explicitly wants a sampled smoke-test QC
    - if QC is enabled, after the exporter finishes and the QC report exists, build the ready-only training subset with:
-     - `/data/data2/yiyang/DentalClaw/agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/build_ready_training_subset.py`
+     - `$DENTALCLAW_HOME/agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/build_ready_training_subset.py`
    - never call older ad hoc scripts such as:
-     - `/data/data2/yiyang/DentalClaw/agents/data_curator/tdd_to_nnuentv2_converter.py`
-     - `/data/data2/yiyang/DentalClaw/agents/data_curator/finalize_conversion.py`
-     - `/data/data2/yiyang/DentalClaw/agents/data_curator/fix_split.py`
+     - `$DENTALCLAW_HOME/agents/data_curator/tdd_to_nnuentv2_converter.py`
+     - `$DENTALCLAW_HOME/agents/data_curator/finalize_conversion.py`
+     - `$DENTALCLAW_HOME/agents/data_curator/fix_split.py`
    - do not invent a manual Universal-to-FDI mapping step in chat; rely on the exporter implementation and emitted delivery/QC reports
    - task: `teeth_32class`
    - if the user requests a holdout such as `10%`, pass `--test-ratio 0.1`
    - for direct exporter CLI calls, use the maintained flag names exactly:
-     - `--dataset-root /data/data2/yiyang/DentalClaw/data/TDD`
-     - `--output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`
+     - `--dataset-root $DENTALCLAW_HOME/data/TDD`
+     - `--output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet`
      - `--task teeth_32class`
      - `--test-ratio 0.1` when a holdout is requested
    - do not improvise old aliases such as `--class-mode` or `--holdout`
@@ -185,7 +185,7 @@ Use this sequence:
      - `dataset_spec.json`
      - `task_spec.json`
      - `budget_spec.json`
-     - a workspace directory under `/data/data2/yiyang/DentalClaw/artifacts`
+     - a workspace directory under `$DENTALCLAW_HOME/artifacts`
    - call the maintained entrypoint only with:
      - `--dataset-spec <dataset_spec.json>`
      - `--task-spec <task_spec.json>`
@@ -241,9 +241,9 @@ Use this sequence unless the user explicitly asks for a different class structur
 2. `data_curator`
    - use `skills/datasets/tdd-nnunet-export/`
    - export:
-     - `--dataset-root /data/data2/yiyang/DentalClaw/data/TDD`
+     - `--dataset-root $DENTALCLAW_HOME/data/TDD`
      - `--task teeth_binary`
-     - `--output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`
+     - `--output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet`
      - default to `--test-ratio 0.1` unless the user explicitly requests a different holdout
      - pass `--skip-qc` only when QC was explicitly disabled by the user
    - do not translate these to ad hoc names such as `--class-mode binary` or `--holdout 0.1`; those are not valid exporter flags
@@ -262,16 +262,16 @@ Use this sequence unless the user explicitly asks for a different class structur
      - read the QC report
      - do not start training until QC report generation is complete
      - build the ready-only training subset with:
-       - `/data/data2/yiyang/DentalClaw/agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/build_ready_training_subset.py --dataset-root <exported_dataset_root> --qc-report <qc_report_json> --output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`
+       - `$DENTALCLAW_HOME/agents/data_curator/skills/datasets/tdd-nnunet-export/scripts/build_ready_training_subset.py --dataset-root <exported_dataset_root> --qc-report <qc_report_json> --output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet`
      - use only the `ready` cases for training and evaluation
      - if the derived ready-only subset has zero ready training cases, stop and report the blocker instead of launching Experimentation
 3. `experimentation`
    - use `skills/tooth_autotrain_nnunet/`
    - invoke the maintained entrypoint at the absolute path:
-     - `/data/data2/yiyang/DentalClaw/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py`
+     - `$DENTALCLAW_HOME/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py`
    - do not search the repository for `run_training.py`
    - do not substitute:
-     - `/data/data2/yiyang/JoD/nnUNet/nnunetv2/run/run_training.py`
+     - `$NNUNET_HOME/nnUNet/nnunetv2/run/run_training.py`
      - `nnUNetv2_train`
      - `nnUNetv2_plan_and_preprocess`
      for the maintained DentalClaw orchestration entrypoint
@@ -281,7 +281,7 @@ Use this sequence unless the user explicitly asks for a different class structur
    - if the controller session is aborted or disappears, stop polling that dead session id and reconcile using the workspace status files plus the process table
    - helper subagents may monitor those files, but do not make a short-lived monitoring subagent the owner of the live training process
    - do not create or run ad hoc search scripts or one-shot trial shell scripts; the legacy paths under `artifacts/experiments/teeth_binary_2d/`, `agents/main/scripts/training_trial_*.sh`, and `artifacts/results/training_runs/run_baseline_*.sh` have been retired
-   - the only allowed custom file creation during experimentation is a follow-up hyperparameter-search `nnUNetTrainer` subclass under `/data/data2/yiyang/JoD/nnUNet/nnunetv2/training/nnUNetTrainer/`; do not create any other ad hoc launcher, wrapper, export helper, or manual patch script
+   - the only allowed custom file creation during experimentation is a follow-up hyperparameter-search `nnUNetTrainer` subclass under `$NNUNET_HOME/nnUNet/nnunetv2/training/nnUNetTrainer/`; do not create any other ad hoc launcher, wrapper, export helper, or manual patch script
    - point `dataset_spec.root` at the ready-only binary `DatasetXXX_*` when QC is enabled
    - if QC was skipped, point `dataset_spec.root` at the original exported binary dataset
    - use:

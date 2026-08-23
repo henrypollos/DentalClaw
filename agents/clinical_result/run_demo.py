@@ -8,8 +8,8 @@ def main():
 
     case = {
         "id": case_id,
-        "image_path": "/data/data2/yiyang/JoD/nnUNet/nnUNet_raw/Dataset106_Teeth32_Labelbox/imagesTr/teeth_0001_0000.png",
-        "label_path": "/data/data2/yiyang/JoD/nnUNet/nnUNet_raw/Dataset106_Teeth32_Labelbox/labelsTr/teeth_0001.png",
+        "image_path": "$NNUNET_HOME/nnUNet/nnUNet_raw/Dataset106_Teeth32_Labelbox/imagesTr/teeth_0001_0000.png",
+        "label_path": "$NNUNET_HOME/nnUNet/nnUNet_raw/Dataset106_Teeth32_Labelbox/labelsTr/teeth_0001.png",
     }
 
     agent = ClinicalResultAgent(config={
@@ -19,7 +19,7 @@ def main():
 
         # ✅ nnUNet trainer folder（关键）
         "model_paths": [
-            "/data/data2/yiyang/JoD/nnUNet/nnUNet_results/"
+            "$NNUNET_HOME/nnUNet/nnUNet_results/"
             "Dataset106_Teeth32_Labelbox/"
             "nnUNetTrainer__nnUNetPlans__2d"
         ],

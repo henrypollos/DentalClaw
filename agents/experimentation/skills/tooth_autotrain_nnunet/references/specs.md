@@ -26,9 +26,9 @@ For raw nnUNet datasets, point `root` directly at `nnUNet_raw/DatasetXXX_NAME`, 
 
 - `extra.target_backend`: `nnunetv2_cli`
 - `extra.nnunet_dataset_id`: the numeric `DatasetXXX` id
-- `extra.nnunet_raw`: `/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw`
-- `extra.nnunet_preprocessed`: `/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_preprocessed`
-- `extra.nnunet_results`: `/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results`
+- `extra.nnunet_raw`: `$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_raw`
+- `extra.nnunet_preprocessed`: `$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_preprocessed`
+- `extra.nnunet_results`: `$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results`
 
 For TDD binary tooth segmentation with the default `nnUNetTrainer`, use:
 

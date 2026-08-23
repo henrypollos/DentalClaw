@@ -41,7 +41,7 @@ If the user provides only a `case_id`, the skill will look for:
 - optionally `cases/{case_id}/label.png`
 
 When no `model_paths` is given, the skill automatically uses the default JoD nnUNet model located at:
-`/data/data2/yiyang/JoD/nnUNet/nnUNet_results/Dataset106_Teeth32_Labelbox/nnUNetTrainer__nnUNetPlans__2d`
+`$NNUNET_HOME/nnUNet/nnUNet_results/Dataset106_Teeth32_Labelbox/nnUNetTrainer__nnUNetPlans__2d`
 and auto-detects available folds for internal ensemble.
 
 ## Workflow

@@ -5,7 +5,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_best",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_ae741988__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_ae741988__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_ae741988__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -15,7 +15,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_final",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_ae741988__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_ae741988__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_ae741988__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -25,7 +25,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_best",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_higher_wd_32e19d0c__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_higher_wd_32e19d0c__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_higher_wd_32e19d0c__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -35,7 +35,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_final",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_higher_wd_32e19d0c__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_higher_wd_32e19d0c__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_higher_wd_32e19d0c__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -45,7 +45,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_best",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -55,7 +55,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_final",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_lower_lr_ae51d872__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -65,7 +65,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_best",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -75,7 +75,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_final",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer_DentalClawAdaptive_baseline_default_trainer_lower_lr_swap_scheduler_445bca76__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -85,7 +85,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_best",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_best.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -95,7 +95,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_final",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_0/checkpoint_final.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -105,7 +105,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_best",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_best.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,
@@ -115,7 +115,7 @@
     {
       "source": "artifacts",
       "model_name": "checkpoint_final",
-      "path": "/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
+      "path": "$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "path_relative": "artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/nnUNetTrainer__nnUNetPlans__2d/fold_all/checkpoint_final.pth",
       "dataset_folder": "Dataset501_TDDTeethBinary2D",
       "dataset_id": 501,

@@ -56,7 +56,7 @@ platform_mvp/
 - `method_registry.json`：离线方法表。它是老师说“离线建表”的最小版本，用于解决医疗用户不会选模型、不会找方法的问题。
 - `private_data_contract.json`：私有 2D 训练输入契约，定义 images、masks、metadata、split 等最小要求。
 - `run_platform_mvp.py`：平台 MVP 编排器。负责解析一句话、查表、生成 workflow，并在可执行路线下调用已有 full-flow 脚本。
-- `run_platform_mvp.sh`：运行入口。默认使用普通 `python` 启动平台编排器，委托 DentalClaw 脚本时使用 `/home/yiyang/miniconda3/envs/nnunetv2/bin/python`。
+- `run_platform_mvp.sh`：运行入口。默认使用普通 `python` 启动平台编排器，委托 DentalClaw 脚本时使用 `$CONDA_HOME/envs/nnunetv2/bin/python`。
 - `validate_private2d_package.py`：私有 2D 输入包预检查脚本，避免在缺标注时错误启动监督训练。
 - `generate_readiness_matrix.py`：生成多任务路线状态表，区分已执行、被数据阻塞、有 QC 基础、缺入口脚本等状态。
 - `generate_report_pack.py`：生成老师汇报包，把平台 demo、full-flow 证据和私有数据预检查汇总到一份 Markdown。

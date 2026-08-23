@@ -17,8 +17,8 @@ sys.path.insert(0, str(CORE_LIB))
 from tdd_common import load_cases
 from dataset_qc import run_dataset_qc, write_report_bundle
 
-dataset_root = Path('/data/data2/yiyang/DentalClaw/data/TDD')
-nnunet_raw = Path('/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw/Dataset503_TDDTeeth32Class2D')
+dataset_root = Path('$DENTALCLAW_HOME/data/TDD')
+nnunet_raw = Path('$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_raw/Dataset503_TDDTeeth32Class2D')
 dataset_id = 503
 dataset_name = 'Dataset503_TDDTeeth32Class2D'
 

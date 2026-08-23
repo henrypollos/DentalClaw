@@ -36,8 +36,8 @@ The script writes an audit bundle under the chosen output root:
 
 ```bash
 # From agents/data_curator
-/home/yiyang/miniconda3/envs/nnunetv2/bin/python skills/core/cbct_qc/scripts/audit_cbct_dataset.py \
-  --dataset-root /data/data2/yiyang/JoD/ToothFairy3_LPS \
+$CONDA_HOME/envs/nnunetv2/bin/python skills/core/cbct_qc/scripts/audit_cbct_dataset.py \
+  --dataset-root $NNUNET_HOME/ToothFairy3_LPS \
   --sample-limit 100 \
   --report-key toothfairy3_lps_cbct_qc_smoke \
   --output-root reports/cbct_qc/toothfairy3_lps_smoke

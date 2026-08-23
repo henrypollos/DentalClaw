@@ -33,8 +33,8 @@ This skill refreshes the project registry under:
 From any working directory, use the absolute script path:
 
 ```bash
-/home/yiyang/miniconda3/envs/nnunetv2/bin/python \
-  /data/data2/yiyang/DentalClaw/agents/main/skills/supervision-registry/scripts/refresh_registry.py
+$CONDA_HOME/envs/nnunetv2/bin/python \
+  $DENTALCLAW_HOME/agents/main/skills/supervision-registry/scripts/refresh_registry.py
 ```
 
 ## Main-Agent Supervision Pattern

@@ -31,7 +31,7 @@ from schemas.agent_trace import TraceRecorder, create_trace_recorder, AgentTrace
 from platform_mvp.i18n import _, detect_language
 
 DEFAULT_REGISTRY = THIS_DIR / "method_registry.json"
-DEFAULT_DENTALCLAW_PYTHON = "/home/yiyang/miniconda3/envs/nnunetv2/bin/python"
+DEFAULT_DENTALCLAW_PYTHON = "$CONDA_HOME/envs/nnunetv2/bin/python"
 
 # DeepSeek API 配置（从 OpenClaw auth 配置读取，作为 fallback）
 def _load_deepseek_api_key() -> str | None:

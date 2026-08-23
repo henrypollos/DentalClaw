@@ -460,7 +460,7 @@ def _run_experimentation_stage(
     if "train" in task:
         # 构建训练命令
         train_cmd = (
-            f"/home/yiyang/miniconda3/envs/nnunetv2/bin/python "
+            f"$CONDA_HOME/envs/nnunetv2/bin/python "
             f"agents/experimentation/skills/tooth_autotrain_nnunet/"
             f"scripts/run_training.py "
             f"--dataset-spec <dataset_spec.json> "
@@ -493,7 +493,7 @@ def _run_experimentation_stage(
     # 推理阶段
     if "inference" in task or "eval" in task:
         infer_cmd = (
-            f"/home/yiyang/miniconda3/envs/nnunetv2/bin/python "
+            f"$CONDA_HOME/envs/nnunetv2/bin/python "
             f"agents/experimentation/skills/tooth_autoinfer_nnunet/"
             f"scripts/run_inference.py "
             f"--model-path <checkpoint> "
@@ -583,7 +583,7 @@ def print_run_summary(result: Dict[str, Any]) -> None:
     run_dir = Path(
         os.getenv(
             "DENTALCLAW_TRACE_DIR",
-            "/data/data2/yiyang/DentalClaw/benchmark_runs",
+            "$DENTALCLAW_HOME/benchmark_runs",
         )
     ) / result.get("run_id", "")
     if run_dir.exists():
@@ -639,7 +639,7 @@ def main():
     )
     parser.add_argument(
         "--trace-dir",
-        default="/data/data2/yiyang/DentalClaw/benchmark_runs",
+        default="$DENTALCLAW_HOME/benchmark_runs",
         help="轨迹输出目录（默认 benchmark_runs/）",
     )
     parser.add_argument(

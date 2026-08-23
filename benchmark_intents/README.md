@@ -18,9 +18,9 @@ Run `python normalize_reference_workflows.py` from the project root after editin
 
 The set covers three dataset groups:
 
-- `TDD`: `/data/data2/yiyang/DentalClaw/data/TDD`
-- `ToothFairy3`: primarily `/data/data2/yiyang/JoD/ToothFairy3_LPS`, plus the existing ToothFairy3 images-only subset under the data curator reports.
-- `Private2D`: `/data/data2/yiyang/DentalClaw/data/2d`
+- `TDD`: `$DENTALCLAW_HOME/data/TDD`
+- `ToothFairy3`: primarily `$NNUNET_HOME/ToothFairy3_LPS`, plus the existing ToothFairy3 images-only subset under the data curator reports.
+- `Private2D`: `$DENTALCLAW_HOME/data/2d`
 
 The user request listed segmentation, detection, and classification while asking for four task classes. This benchmark uses four task families:
 

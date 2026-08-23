@@ -56,6 +56,8 @@ python platform_mvp/run_platform_mvp.py \
 
 Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes. The reasoning backend (DeepSeek V4 Pro) is configured through environment variables.
 
+Local paths in code and documentation use the placeholders `$DENTALCLAW_HOME` (repository root), `$NNUNET_HOME` (nnU-Net installation directory), and `$CONDA_HOME` (Python environment directory). Replace them with your local paths (or export the corresponding environment variables) before running workflows.
+
 ## Decision evaluation (30 prespecified intents)
 
 The intent-to-workflow decision evaluation reported in the manuscript (weighted score 0.958, 30/30 above the 0.70 pass threshold) can be rerun as follows:

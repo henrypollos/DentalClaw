@@ -10,7 +10,7 @@ from pathlib import Path
 def check_tdd_dataset():
     """检查TDD数据集的基本信息"""
     
-    dataset_root = Path("/data/data2/yiyang/DentalClaw/data/TDD")
+    dataset_root = Path("$DENTALCLAW_HOME/data/TDD")
     
     print("=== TDD 数据集检查报告 ===\n")
     

@@ -11,7 +11,7 @@ Use this skill when you need end-to-end tooth segmentation training from `Datase
 
 - `scripts/run_training.py`
   - Main entrypoint for dataset analysis, preprocessing, multi-round training, best-model selection, best-model inference, experiment memory persistence, and report generation
-  - Canonical absolute path: `/data/data2/yiyang/DentalClaw/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py`
+  - Canonical absolute path: `$DENTALCLAW_HOME/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py`
   - Required direct-CLI flags:
     - `--dataset-spec <path>`
     - `--task-spec <path>`
@@ -22,7 +22,7 @@ Use this skill when you need end-to-end tooth segmentation training from `Datase
     - `--foreground`
   - Pass `--detach` when the caller is an agent/session that may end before training finishes. This writes `launcher_status.json`, `controller_stdout.log`, and `controller_stderr.log` under the workspace and keeps the training controller alive independently of the launching chat session.
   - Canonical invocation pattern:
-    - `/home/yiyang/miniconda3/envs/nnunetv2/bin/python /data/data2/yiyang/DentalClaw/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --budget-spec <budget_spec.json> --workspace <workspace_dir> --detach`
+    - `$CONDA_HOME/envs/nnunetv2/bin/python $DENTALCLAW_HOME/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --budget-spec <budget_spec.json> --workspace <workspace_dir> --detach`
   - Do not invent ad hoc flags such as `--dataset-id`, `--dataset-root`, `--output-root`, `--plan`, `--trials`, or `--seed` when calling this maintained entrypoint directly. Those settings belong in the spec files.
 
 ## Assets

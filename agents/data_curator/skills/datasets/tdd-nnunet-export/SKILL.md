@@ -89,8 +89,8 @@ Optional environment variables for the wrapper:
 
 For direct CLI calls, prefer:
 
-- `--output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`
-- `--dataset-root /data/data2/yiyang/DentalClaw/data/TDD`
+- `--output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet`
+- `--dataset-root $DENTALCLAW_HOME/data/TDD`
 - `--task teeth_binary` for the default single-class tooth-vs-background export
 - `--test-ratio 0.1` for a 10% holdout
 
@@ -98,15 +98,15 @@ Canonical binary export example:
 
 ```bash
 python scripts/export_tdd_to_nnunet.py \
-  --dataset-root /data/data2/yiyang/DentalClaw/data/TDD \
-  --output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet \
+  --dataset-root $DENTALCLAW_HOME/data/TDD \
+  --output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet \
   --task teeth_binary \
   --test-ratio 0.1
 ```
 
 The exporter also accepts:
 
-- `--output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw`
+- `--output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_raw`
 - `--qc-limit N`
 - `--skip-qc`
 

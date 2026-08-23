@@ -25,13 +25,13 @@ Requirements:
 
 Run dataset export and QC first.
 Use the QC-filtered ready-only dataset for training.
-Put all shared deliverables, status updates, reports, logs, and training outputs under /data/data2/yiyang/DentalClaw/artifacts.
+Put all shared deliverables, status updates, reports, logs, and training outputs under $DENTALCLAW_HOME/artifacts.
 Keep agent-local workspace content only for self-review or temporary scratch material.
 Start with the default nnUNetTrainer as the baseline.
 Use fold=all and save checkpoints.
 Then run up to 5 recorded hyperparameter-search trials.
 After each completed trial, record the result, explain what was learned, decide the next trial, and continue.
-Only for follow-up hyperparameter-search trials, if needed, create a new trainer file that inherits from the previous trainer class under /data/data2/yiyang/JoD/nnUNet/nnunetv2/training/nnUNetTrainer.
+Only for follow-up hyperparameter-search trials, if needed, create a new trainer file that inherits from the previous trainer class under $NNUNET_HOME/nnUNet/nnunetv2/training/nnUNetTrainer.
 Continuously monitor the workflow until it reaches completed or failed.
 When replying in chat, summarize:
 

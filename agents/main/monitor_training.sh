@@ -3,13 +3,13 @@
 
 echo "监控TDD牙齿分割模型训练..."
 echo "训练已在后台启动，PID: $1"
-echo "模型结果将保存在: /data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D"
+echo "模型结果将保存在: $DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D"
 echo ""
 
 # 创建一个简单的监控脚本
 cat << 'EOF' > /tmp/monitor_training.sh
 #!/bin/bash
-WORK_DIR="/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/2d"
+WORK_DIR="$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results/Dataset501_TDDTeethBinary2D/2d"
 LOG_FILE="$WORK_DIR/training_log.txt"
 
 while true; do

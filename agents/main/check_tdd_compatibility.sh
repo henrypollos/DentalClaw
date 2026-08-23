@@ -5,27 +5,27 @@ echo "=== TDD 数据集检查报告 ==="
 echo ""
 
 # 检查数据集是否存在
-if [ ! -d "/data/data2/yiyang/DentalClaw/data/TDD" ]; then
+if [ ! -d "$DENTALCLAW_HOME/data/TDD" ]; then
     echo "错误: TDD数据集目录不存在"
     exit 1
 fi
 
 # 检查影像文件数量
-radiograph_count=$(ls /data/data2/yiyang/DentalClaw/data/TDD/Radiographs/ | wc -l)
+radiograph_count=$(ls $DENTALCLAW_HOME/data/TDD/Radiographs/ | wc -l)
 echo "影像文件总数: $radiograph_count"
 
 # 检查分割掩码数量
-teeth_mask_count=$(ls /data/data2/yiyang/DentalClaw/data/TDD/Segmentation/teeth_mask/ | wc -l)
+teeth_mask_count=$(ls $DENTALCLAW_HOME/data/TDD/Segmentation/teeth_mask/ | wc -l)
 echo "牙齿分割掩码总数: $teeth_mask_count"
 
-maxillomandibular_count=$(ls /data/data2/yiyang/DentalClaw/data/TDD/Segmentation/maxillomandibular/ | wc -l)
+maxillomandibular_count=$(ls $DENTALCLAW_HOME/data/TDD/Segmentation/maxillomandibular/ | wc -l)
 echo "上下颌分割掩码总数: $maxillomandibular_count"
 
 # 检查标注文件
-bbox_exists=$(if [ -f "/data/data2/yiyang/DentalClaw/data/TDD/Segmentation/teeth_bbox.json" ]; then echo "存在"; else echo "不存在"; fi)
+bbox_exists=$(if [ -f "$DENTALCLAW_HOME/data/TDD/Segmentation/teeth_bbox.json" ]; then echo "存在"; else echo "不存在"; fi)
 echo "边界框标注文件: $bbox_exists"
 
-polygon_exists=$(if [ -f "/data/data2/yiyang/DentalClaw/data/TDD/Segmentation/teeth_polygon.json" ]; then echo "存在"; else echo "不存在"; fi)
+polygon_exists=$(if [ -f "$DENTALCLAW_HOME/data/TDD/Segmentation/teeth_polygon.json" ]; then echo "存在"; else echo "不存在"; fi)
 echo "多边形标注文件: $polygon_exists"
 
 echo ""
@@ -46,11 +46,11 @@ fi
 
 # 简单测试一个图像文件和掩码文件是否存在
 sample_file="1000"
-if [ -f "/data/data2/yiyang/DentalClaw/data/TDD/Radiographs/${sample_file}.JPG" ] && [ -f "/data/data2/yiyang/DentalClaw/data/TDD/Segmentation/teeth_mask/${sample_file}.jpg" ]; then
+if [ -f "$DENTALCLAW_HOME/data/TDD/Radiographs/${sample_file}.JPG" ] && [ -f "$DENTALCLAW_HOME/data/TDD/Segmentation/teeth_mask/${sample_file}.jpg" ]; then
     echo "✓ 样本文件存在 (影像和分割掩码)"
     # 显示文件大小
-    img_size=$(ls -lh "/data/data2/yiyang/DentalClaw/data/TDD/Radiographs/${sample_file}.JPG" | awk '{print $5}')
-    mask_size=$(ls -lh "/data/data2/yiyang/DentalClaw/data/TDD/Segmentation/teeth_mask/${sample_file}.jpg" | awk '{print $5}')
+    img_size=$(ls -lh "$DENTALCLAW_HOME/data/TDD/Radiographs/${sample_file}.JPG" | awk '{print $5}')
+    mask_size=$(ls -lh "$DENTALCLAW_HOME/data/TDD/Segmentation/teeth_mask/${sample_file}.jpg" | awk '{print $5}')
     echo "  - 影像文件大小: $img_size"
     echo "  - 掩码文件大小: $mask_size"
 else

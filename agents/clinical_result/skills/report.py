@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-ARTIFACT_ROOT = Path("/data/data2/yiyang/DentalClaw/artifacts")
+ARTIFACT_ROOT = Path("$DENTALCLAW_HOME/artifacts")
 DEFAULT_CLINICAL_WORKSPACE = ARTIFACT_ROOT / "results" / "reports" / "dentalclaw_result_workspace"
 
 
@@ -951,7 +951,7 @@ def clinical_report_export(
 
     import shutil
 
-    extra_img_src = "/data/data2/yiyang/DentalClaw/agents/clinical_result/dentalclaw1.png"
+    extra_img_src = "$DENTALCLAW_HOME/agents/clinical_result/dentalclaw1.png"
     extra_img_dst = Path(out_dir) / "dentalclaw1.png"
 
     if Path(extra_img_src).exists():

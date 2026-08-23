@@ -29,7 +29,7 @@ This workspace is intended for:
 
 Dataset QC reports should be published to:
 
-- `/data/data2/yiyang/DentalClaw/artifacts/results/reports/datasets_qc`
+- `$DENTALCLAW_HOME/artifacts/results/reports/datasets_qc`
 
 Use `json + markdown` pairs so `main` can inspect both machine-readable status and a concise human summary.
 
@@ -40,8 +40,8 @@ For nnUNet export runs:
 - Do not hand-create `dataset.json`; if it is missing, the export is still incomplete or failed.
 - If the request includes a holdout split, `imagesTs/` and `labelsTs/` must both be populated before reporting export-ready status.
 - For `skills/datasets/tdd-nnunet-export/scripts/export_tdd_to_nnunet.py`, the maintained direct-CLI flags are:
-  - `--dataset-root /data/data2/yiyang/DentalClaw/data/TDD`
-  - `--output-root /data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet`
+  - `--dataset-root $DENTALCLAW_HOME/data/TDD`
+  - `--output-root $DENTALCLAW_HOME/artifacts/datasets/nnUNet`
   - `--task teeth_binary|maxillomandibular_binary|teeth_32class`
   - `--test-ratio 0.1` for a 10% holdout
 - Do not use non-existent aliases such as `--class-mode` or `--holdout`.
@@ -66,7 +66,7 @@ For nnUNet export runs:
 
 ## Current Example Dataset
 
-- Local TDD dataset root: `/data/data2/yiyang/DentalClaw/data/TDD`
+- Local TDD dataset root: `$DENTALCLAW_HOME/data/TDD`
 
 ## What Goes Here
 

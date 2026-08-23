@@ -12,7 +12,7 @@ Use this skill after canonical packaging or before TDD export to catch integrity
 - `scripts/validate_dataset.py`
   - supports `--canonical-root` or `--tdd-root`
   - writes structured `json + markdown` QC reports
-  - default report root: `/data/data2/yiyang/DentalClaw/artifacts/results/reports/datasets_qc`
+  - default report root: `$DENTALCLAW_HOME/artifacts/results/reports/datasets_qc`
 
 ## What It Checks
 

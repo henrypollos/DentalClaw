@@ -20,7 +20,7 @@ Use this skill when you already have a trained tooth segmentation checkpoint and
     - `--input-dir <path>`
     - `--gt-dir <path>`
   - Canonical invocation pattern:
-    - `/home/yiyang/miniconda3/envs/nnunetv2/bin/python /data/data2/yiyang/DentalClaw/agents/experimentation/skills/tooth_autoinfer_nnunet/scripts/run_inference.py --model-path <checkpoint> --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --output-dir <inference_dir> [--input-dir <images>] [--gt-dir <labels>]`
+    - `$CONDA_HOME/envs/nnunetv2/bin/python $DENTALCLAW_HOME/agents/experimentation/skills/tooth_autoinfer_nnunet/scripts/run_inference.py --model-path <checkpoint> --dataset-spec <dataset_spec.json> --task-spec <task_spec.json> --output-dir <inference_dir> [--input-dir <images>] [--gt-dir <labels>]`
 
 ## Notes
 

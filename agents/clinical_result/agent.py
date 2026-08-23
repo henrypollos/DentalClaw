@@ -14,7 +14,7 @@ from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
 
 from .skills.report import clinical_report_export
 
-ARTIFACT_ROOT = Path("/data/data2/yiyang/DentalClaw/artifacts")
+ARTIFACT_ROOT = Path("$DENTALCLAW_HOME/artifacts")
 ARTIFACT_REPORT_ROOT = ARTIFACT_ROOT / "results" / "reports"
 CLINICAL_WORKSPACE_ROOT = ARTIFACT_REPORT_ROOT / "dentalclaw_result_workspace"
 
@@ -34,9 +34,9 @@ def resolve_model_and_trainer(dataset_name: str = None) -> Path:
     返回默认模型的 trainer 文件夹路径。
     优先从 artifacts 中查找，否则使用 JoD 的固定路径。
     """
-    artifacts_root = Path("/data/data2/yiyang/DentalClaw/artifacts/models/nnUNet/nnUNet_results")
+    artifacts_root = Path("$DENTALCLAW_HOME/artifacts/models/nnUNet/nnUNet_results")
     default_trainer = Path(
-        "/data/data2/yiyang/JoD/nnUNet/nnUNet_results/"
+        "$NNUNET_HOME/nnUNet/nnUNet_results/"
         "Dataset106_Teeth32_Labelbox/"
         "nnUNetTrainer__nnUNetPlans__2d"
     )

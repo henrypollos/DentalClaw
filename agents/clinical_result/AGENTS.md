@@ -59,7 +59,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - Read files, explore, organize, learn
 - Search the web, check calendars
 - Work within this workspace
-- Store shared deliverables and status files under `/data/data2/yiyang/DentalClaw/artifacts`; keep this agent workspace limited to scratch or self-review material
+- Store shared deliverables and status files under `$DENTALCLAW_HOME/artifacts`; keep this agent workspace limited to scratch or self-review material
 
 **Ask first:**
 

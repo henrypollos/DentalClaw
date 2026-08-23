@@ -40,7 +40,7 @@ DEFAULT_NNUNET_RAW_ROOT = REPO_ROOT / 'artifacts' / 'datasets' / 'nnUNet' / 'nnU
 DEFAULT_NNUNET_PREPROCESSED_ROOT = REPO_ROOT / 'artifacts' / 'datasets' / 'nnUNet' / 'nnUNet_preprocessed'
 DEFAULT_NNUNET_RESULTS_ROOT = REPO_ROOT / 'artifacts' / 'models' / 'nnUNet' / 'nnUNet_results'
 DEFAULT_NNUNET_TRAINER_SOURCE_ROOT = REPO_ROOT.parent / 'JoD' / 'nnUNet' / 'nnunetv2' / 'training' / 'nnUNetTrainer'
-NNUNETV2_BIN_DIR = Path('/home/yiyang/miniconda3/envs/nnunetv2/bin')
+NNUNETV2_BIN_DIR = Path('$CONDA_HOME/envs/nnunetv2/bin')
 NNUNET_EPOCH_TRAINERS = {
     1: 'nnUNetTrainer_1epoch',
     5: 'nnUNetTrainer_5epochs',

@@ -1,5 +1,5 @@
 {
-  "root": "/data/data2/yiyang/DentalClaw/artifacts/datasets/nnUNet/nnUNet_raw",
+  "root": "$DENTALCLAW_HOME/artifacts/datasets/nnUNet/nnUNet_raw",
   "imagesTr": "Dataset501_TDDTeethBinary2D/imagesTr",
   "labelsTr": "Dataset501_TDDTeethBinary2D/labelsTr",
   "imagesTs": "Dataset501_TDDTeethBinary2D/imagesTs",

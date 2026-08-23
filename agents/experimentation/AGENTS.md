@@ -55,7 +55,7 @@ When a task is large, split it into stages and make the next step explicit.
 - Keep experiments reproducible and reversible.
 - When uncertain, verify first.
 - Do not claim an experiment succeeded unless artifacts or logs exist.
-- Write shared deliverables and status updates under `/data/data2/yiyang/DentalClaw/artifacts`; keep agent-local workspace content limited to scratch or self-review material.
+- Write shared deliverables and status updates under `$DENTALCLAW_HOME/artifacts`; keep agent-local workspace content limited to scratch or self-review material.
 - For TDD nnUNet tooth-segmentation requests that do not explicitly ask for 32-class labels, expect a binary tooth-vs-background dataset handoff by default.
 - If main/data curation provides a QC-filtered ready-only nnUNet dataset, treat that derived dataset as the training source of truth instead of the unfiltered export.
 - For TDD nnUNet hyperparameter search, prefer recorded `fold=all` trials with a DentalClaw custom trainer over five-fold CV, and vary trainer-level hyperparameters in a way that is traceable from the saved command artifacts.

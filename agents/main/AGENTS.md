@@ -33,8 +33,8 @@ Your job is to:
 - route clinician-facing summaries and result packaging to the Reporting agent (`agents/clinical_result`)
 - use the relevant skills before inventing a new workflow
 - if a maintained skill or maintained entrypoint exists for the task, using it is mandatory; do not replace it with a newly written shell script, Python script, or hand-patched workaround
-- the only allowed exception is adaptive hyperparameter search creating a new `nnUNetTrainer` subclass file under `/data/data2/yiyang/JoD/nnUNet/nnunetv2/training/nnUNetTrainer/` for a follow-up trial; baseline training, export, QC, preprocessing, and monitoring must still use the maintained DentalClaw skills and entrypoints
-- for TDD nnUNet training, the maintained experimentation entrypoint is the absolute path `/data/data2/yiyang/DentalClaw/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py`; do not substitute `JoD/nnUNet/nnunetv2/run/run_training.py`, `nnUNetv2_train`, or a filesystem search result
+- the only allowed exception is adaptive hyperparameter search creating a new `nnUNetTrainer` subclass file under `$NNUNET_HOME/nnUNet/nnunetv2/training/nnUNetTrainer/` for a follow-up trial; baseline training, export, QC, preprocessing, and monitoring must still use the maintained DentalClaw skills and entrypoints
+- for TDD nnUNet training, the maintained experimentation entrypoint is the absolute path `$DENTALCLAW_HOME/agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py`; do not substitute `JoD/nnUNet/nnunetv2/run/run_training.py`, `nnUNetv2_train`, or a filesystem search result
 - keep outputs structured, actionable, and reproducible
 - route work into files, plans, logs, and reports
 
@@ -63,11 +63,11 @@ When a task is large, split it into stages and make the next step explicit.
 - Prefer updating files over “remembering mentally”.
 - When uncertain, verify first.
 - Do not pretend a run has completed if it has not.
-- Put shared deliverables, status files, and cross-agent handoff artifacts under `/data/data2/yiyang/DentalClaw/artifacts` only.
+- Put shared deliverables, status files, and cross-agent handoff artifacts under `$DENTALCLAW_HOME/artifacts` only.
 - Treat agent-local workspace content as scratch or self-review material; main should inspect other agents' outputs from `DentalClaw/artifacts`, not from their private workspaces.
 - Match the user's language in your chat replies unless they explicitly ask for a different output language.
 - Refresh the supervision registry with the absolute script path, not a relative one:
-  - `/home/yiyang/miniconda3/envs/nnunetv2/bin/python /data/data2/yiyang/DentalClaw/agents/main/skills/supervision-registry/scripts/refresh_registry.py`
+  - `$CONDA_HOME/envs/nnunetv2/bin/python $DENTALCLAW_HOME/agents/main/skills/supervision-registry/scripts/refresh_registry.py`
 - For TDD-to-nnUNet export, use the maintained Data Curation exporter and avoid older ad hoc converter scripts or manual remapping narratives.
 - Before launching a TDD export, check whether the same request is already running; if it is, reuse and monitor that run instead of relaunching it.
 - If a wrapper command fails only because `tee` or a log path failed, do not restart the exporter if the exporter process is already running.
@@ -82,7 +82,7 @@ When a task is large, split it into stages and make the next step explicit.
 - For a compound workflow request, do not end the first execution turn with acknowledgment text alone. In that same run, either refresh the registry, start the Stage 1 specialist handoff, or run the first required command locally.
 - If specialist handoff through ACP or session spawning is unavailable, fall back directly to the maintained DentalClaw script with its absolute path. Do not compensate by searching the repository for similarly named files.
 - Do not create throwaway launchers such as `run_baseline_*.sh`, `training_trial_*.sh`, or ad hoc search scripts under artifact folders when the maintained DentalClaw skills already provide an entrypoint.
-- Treat `/data/data2/yiyang/DentalClaw/artifacts/results/training_runs/` as a blocked legacy directory for launchers. If you are about to write a shell launcher there, stop and call the maintained experimentation entrypoint instead.
+- Treat `$DENTALCLAW_HOME/artifacts/results/training_runs/` as a blocked legacy directory for launchers. If you are about to write a shell launcher there, stop and call the maintained experimentation entrypoint instead.
 - After launching the maintained training workflow in detached mode, keep ownership of supervision. Monitor `launcher_status.json`, `run_status.json`, `search_events.jsonl`, `history.json`, and the workspace logs until the workflow reaches `completed` or `failed`; do not stop at a launch acknowledgement.
 - Do not manually launch the next hyperparameter trial from chat if the maintained workflow is already active. Let the maintained controller finish the current trial, record `trial_completed`/`trial_failed`, reflect, and schedule the next recorded trial itself.
 - If a cleanup or kill command returns `SIGKILL` twice in a row, stop retrying the same command. Inspect the process table and artifact status files instead of entering a retry loop.

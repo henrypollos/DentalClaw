@@ -1,5 +1,5 @@
 {
-  "root": "/data/data2/yiyang/DentalClaw/data/pano2d",
+  "root": "$DENTALCLAW_HOME/data/pano2d",
   "imagesTr": "imagesTr",
   "labelsTr": "labelsTr",
   "imagesVal": "imagesVal",

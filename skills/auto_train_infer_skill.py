@@ -1051,8 +1051,8 @@ def _launch_detached_controller(args) -> Dict[str, Any]:
         'workspace': args.workspace,
         'pid': process.pid,
         'monitor_paths': _monitor_paths(args.workspace),
-        'supervision_command': '/home/yiyang/miniconda3/envs/nnunetv2/bin/python '
-                               '/data/data2/yiyang/DentalClaw/agents/main/skills/supervision-registry/scripts/monitor_training_run.py '
+        'supervision_command': '$CONDA_HOME/envs/nnunetv2/bin/python '
+                               '$DENTALCLAW_HOME/agents/main/skills/supervision-registry/scripts/monitor_training_run.py '
                                '--workspace {}'.format(str(Path(args.workspace).resolve())),
         'next_action': 'Monitor launcher_status.json, run_status.json, search_events.jsonl, and history.json until the workflow reaches completed or failed. Do not replace the workflow with a handwritten launcher.',
     }

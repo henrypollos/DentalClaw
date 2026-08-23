@@ -11,7 +11,7 @@ from typing import Optional, Tuple, List, Dict, Any
 import cv2
 import numpy as np
 
-ARTIFACT_ROOT = Path("/data/data2/yiyang/DentalClaw/artifacts")
+ARTIFACT_ROOT = Path("$DENTALCLAW_HOME/artifacts")
 DEFAULT_CLINICAL_WORKSPACE = ARTIFACT_ROOT / "results" / "reports" / "dentalclaw_result_workspace"
 
 
