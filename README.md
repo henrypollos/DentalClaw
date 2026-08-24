@@ -67,6 +67,8 @@ ssh -N -L 18789:127.0.0.1:18789 <user>@<workstation>
 # then open http://127.0.0.1:18789/ and enter your token
 ```
 
+In the chat panel, type a natural-language research request (for example, any of the 30 prespecified intents in `benchmark_intents/`); the platform parses the request, plans and schedules the tasks, and displays the workflow trace and generated reports in the same interface (manuscript Figs. 1--3).
+
 Local paths in code and documentation use the placeholders `$DENTALCLAW_HOME` (repository root), `$NNUNET_HOME` (nnU-Net installation directory), and `$CONDA_HOME` (Python environment directory). Replace them with your local paths (or export the corresponding environment variables) before running workflows.
 
 ## Decision evaluation (30 prespecified intents)
@@ -79,6 +81,13 @@ python benchmark_trace/run_intent.py --intents-file benchmark_intents/intents.pl
 
 # Score the resulting traces with the six-dimension rubric
 python benchmark_trace/eval_intents.py --all --csv report.csv
+```
+
+`run_intent.py` replays the deterministic decision logic used by the platform. To drive the evaluation through the real reasoning backend as reported in the manuscript (DeepSeek V4 Pro via the OpenClaw CLI), use `openclaw_runner.py`:
+
+```bash
+# Real LLM decisions through `openclaw agent`
+python benchmark_trace/openclaw_runner.py --all
 ```
 
 The rubric dimensions (planning 0.35, QC blocking 0.20, intent parsing 0.15, external proposal quality 0.15, ambiguity handling 0.10, boundary identification 0.05) and per-dimension scoring rules are documented in `benchmark_trace/eval_intents.py` and the Supplementary Materials of the manuscript. Expected outcomes are prespecified per request; scores are computed by a deterministic script.
