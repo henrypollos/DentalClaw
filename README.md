@@ -56,7 +56,7 @@ python platform_mvp/run_platform_mvp.py \
 
 `--allow-external` is required only when executing an externally proposed route; it is never enabled by default (fail-safe policy).
 
-Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes. The reasoning backend (DeepSeek V4 Pro in the reported evaluation) is configurable through environment variables.
+Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes, and the [OpenClaw](https://github.com/openclaw/openclaw) runtime for the decision layer and front-end interface. The reasoning backend (DeepSeek V4 Pro in the reported evaluation) is configurable through environment variables.
 
 ## Front-end interface
 
