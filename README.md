@@ -42,6 +42,13 @@ mvp_fullflow/          End-to-end MVP runner
 
 Data, model weights, training artifacts, and experiment outputs are intentionally not versioned here. See [Data](#data) and [Artifacts](#artifacts) below.
 
+## Installation
+
+1. **Python 3.10** environment on Linux (an NVIDIA GPU is required for training routes).
+2. **nnU-Net v2** for segmentation routes (see the [nnU-Net documentation](https://github.com/MIC-DKFZ/nnUNet)).
+3. **OpenClaw runtime** for the decision layer and the web interface; install it following the instructions in the [official repository](https://github.com/openclaw/openclaw). The platform invokes it through the `openclaw agent` CLI and reads its authentication profile from `~/.openclaw/`.
+4. Set the environment variables used throughout the repository: `$DENTALCLAW_HOME` (this repository), `$NNUNET_HOME` (nnU-Net installation), `$CONDA_HOME` (Python environment), plus the API credentials for the reasoning backend (DeepSeek V4 Pro in the reported evaluation; credentials are read from environment variables and are never committed to the repository).
+
 ## Quick start
 
 ```bash
@@ -56,20 +63,16 @@ python platform_mvp/run_platform_mvp.py \
 
 `--allow-external` is required only when executing an externally proposed route; it is never enabled by default (fail-safe policy).
 
-Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes, and the [OpenClaw](https://github.com/openclaw/openclaw) runtime for the decision layer and front-end interface. The reasoning backend (DeepSeek V4 Pro in the reported evaluation) is configurable through environment variables.
-
 ## Front-end interface
 
-The interactive chat and workflow-trace interface shown in the manuscript (Fig. 3) is rendered by the [OpenClaw](https://github.com/openclaw/openclaw) runtime. It is typically accessed by opening the runtime's web interface in a browser (directly or through an SSH tunnel) and authenticating with a token:
+The interactive chat and workflow-trace interface shown in the manuscript (Fig. 3) is rendered by the OpenClaw runtime. After installing OpenClaw, start the runtime on the machine hosting the platform and open its web interface in a browser, then authenticate with your token (see the OpenClaw documentation for startup options). If the platform runs on a remote workstation, the interface can be reached through an SSH tunnel:
 
 ```bash
 ssh -N -L 18789:127.0.0.1:18789 <user>@<workstation>
-# then open http://127.0.0.1:18789/ and enter your token
+# open http://127.0.0.1:18789/ in the local browser
 ```
 
 In the chat panel, type a natural-language research request (for example, any of the 30 prespecified intents in `benchmark_intents/`); the platform parses the request, plans and schedules the tasks, and displays the workflow trace and generated reports in the same interface (manuscript Figs. 1--3).
-
-Local paths in code and documentation use the placeholders `$DENTALCLAW_HOME` (repository root), `$NNUNET_HOME` (nnU-Net installation directory), and `$CONDA_HOME` (Python environment directory). Replace them with your local paths (or export the corresponding environment variables) before running workflows.
 
 ## Decision evaluation (30 prespecified intents)
 
