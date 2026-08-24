@@ -2,7 +2,7 @@
 
 A modular, natural-language-driven workflow platform for standardized and auditable dental imaging AI experiments.
 
-DentalClaw converts researcher intent into executable, reviewable, and traceable workflows. It is best understood as a **workflow orchestration and validation layer** — not a new segmentation model and not a clinical decision-support system. This repository contains the platform code and the materials needed to reproduce the decision-level evaluation described in the accompanying manuscript:
+DentalClaw converts researcher intent into executable, reviewable, and traceable workflows. It is designed as a **workflow orchestration and validation layer** for dental imaging AI research, rather than as a segmentation model or clinical decision-support system. This repository contains the platform code and the materials needed to reproduce the decision-level evaluation described in the accompanying manuscript:
 
 > *DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments* (under review, Journal of Dentistry).
 
@@ -21,8 +21,8 @@ The platform is built around five specialized agents and a set of shared platfor
 
 **Key design properties**
 
-- **Decision/execution separation.** A reasoning agent decides *which* workflow should be attempted; a deterministic execution layer runs only the validated route or an approved external proposal.
-- **Offline method registry.** Route selection is deterministic and does not depend on live search results. Each validated entry declares its required annotation type, evaluation unit, evaluation metrics, quality-control gates, and contraindications (`platform_mvp/method_registry.json`).
+- **Decision/execution separation.** A reasoning agent decides *which* workflow should be attempted; a deterministic execution layer runs only the validated route or an externally proposed route explicitly enabled by the user.
+- **Offline method registry.** Route selection is deterministic and does not depend on live search results. Each validated entry declares its required annotation type, evaluation unit, evaluation metrics, quality-control gates, and applicability constraints (`platform_mvp/method_registry.json`).
 - **Fail-safe policy.** Unsupported or ambiguous requests are rejected or clarified; agent-proposed external solutions remain non-executable until explicitly confirmed with `--allow-external`.
 - **Audit trail.** Plan files, QC decisions, execution logs, and generated reports form a per-run record for downstream review.
 
@@ -49,18 +49,20 @@ Data, model weights, training artifacts, and experiment outputs are intentionall
 python platform_mvp/run_platform_mvp.py \
   --intent "Run inference with the existing TDD binary segmentation model on the test set, and report Dice, IoU, HD95, and overlay visualizations."
 
-# Same, with execution enabled (requires a configured dataset; see Data)
+# Execute the validated route (requires a configured dataset; see Data)
 python platform_mvp/run_platform_mvp.py \
-  --intent "<request>" --execute --allow-external
+  --intent "<request>" --execute
 ```
 
-Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes. The reasoning backend (DeepSeek V4 Pro) is configured through environment variables.
+`--allow-external` is required only when executing an externally proposed route; it is never enabled by default (fail-safe policy).
+
+Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes. The reasoning backend (DeepSeek V4 Pro in the reported evaluation) is configurable through environment variables.
 
 Local paths in code and documentation use the placeholders `$DENTALCLAW_HOME` (repository root), `$NNUNET_HOME` (nnU-Net installation directory), and `$CONDA_HOME` (Python environment directory). Replace them with your local paths (or export the corresponding environment variables) before running workflows.
 
 ## Decision evaluation (30 prespecified intents)
 
-The intent-to-workflow decision evaluation reported in the manuscript (weighted score 0.958, 30/30 above the 0.70 pass threshold) can be rerun as follows:
+The intent-to-workflow decision evaluation reported in the manuscript achieved a weighted overall score of 0.958, with all 30 prespecified intents exceeding the 0.70 pass threshold; it can be rerun as follows:
 
 ```bash
 # Run the full 30-intent evaluation through the platform
@@ -78,7 +80,7 @@ The platform itself does not bundle datasets. The representative tasks in the ma
 
 | Dataset | Use | Access |
 |---|---|---|
-| Tufts Dental Database (TDD) | 2D panoramic radiograph segmentation | Public; see the manuscript reference (IEEE DataPort) |
+| Tufts Dental Database (TDD) | 2D panoramic radiograph segmentation | Public; accessed through the IEEE DataPort repository cited in the manuscript |
 | ToothFairy3 (ToothFairy Challenge) | 3D CBCT segmentation | Public; see [github.com/AImageLab-zip/ToothFairy](https://github.com/AImageLab-zip/ToothFairy) |
 | Private panoramic dataset (290 images) | Exploratory task extension and quality review | Available from the corresponding author upon reasonable request, subject to institutional ethical approval (PKUSSIRB-2025,107,012) |
 
@@ -86,7 +88,7 @@ Raw inputs are converted to a canonical case-level representation and pass deter
 
 ## Artifacts
 
-Training runs, predictions, reports, and evaluation outputs produced by the platform are stored under per-run directories (by default outside this repository). They are not versioned here but form the audit trail described in the manuscript.
+Training runs, predictions, reports, and evaluation outputs are stored in per-run directories and are not versioned in this repository. These artifacts constitute the per-run audit trail described in the manuscript.
 
 ## Citing
 
@@ -96,8 +98,8 @@ If you use this platform or its evaluation materials, please cite the manuscript
 
 ## Code availability
 
-The platform source code, method registry, intent set, and scoring scripts are provided in this repository. They will also be deposited in a public repository with an archived DOI upon acceptance.
+The platform source code, method registry, intent set, and scoring scripts are provided in this repository, with a DOI-based archival release planned upon acceptance.
 
 ## License
 
-Source code is provided for research and review purposes; a license will be added upon publication.
+Source code is currently provided for research and peer-review purposes. The final license will be specified upon publication.
