@@ -58,6 +58,15 @@ python platform_mvp/run_platform_mvp.py \
 
 Environment requirements: Python 3.10 on Linux, NVIDIA GPU for training routes, nnU-Net v2 for segmentation routes. The reasoning backend (DeepSeek V4 Pro in the reported evaluation) is configurable through environment variables.
 
+## Front-end interface
+
+The interactive chat and workflow-trace interface shown in the manuscript (Fig. 3) is rendered by the [OpenClaw](https://github.com/openclaw/openclaw) runtime. It is typically accessed by opening the runtime's web interface in a browser (directly or through an SSH tunnel) and authenticating with a token:
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 <user>@<workstation>
+# then open http://127.0.0.1:18789/ and enter your token
+```
+
 Local paths in code and documentation use the placeholders `$DENTALCLAW_HOME` (repository root), `$NNUNET_HOME` (nnU-Net installation directory), and `$CONDA_HOME` (Python environment directory). Replace them with your local paths (or export the corresponding environment variables) before running workflows.
 
 ## Decision evaluation (30 prespecified intents)
