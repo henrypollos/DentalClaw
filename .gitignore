@@ -46,3 +46,12 @@ run_verification_traced.py
 run_tdd_detection_traced.py
 run_tdd_nnunet_export.sh
 workflow_aliases.json
+
+# Local revision evidence and author-only development material
+/paperrevisionnew/
+/platform_mvp/development/
+/tests/page.png
+/备份.md
+*.pth
+.pytest_cache/
+/README.review.*

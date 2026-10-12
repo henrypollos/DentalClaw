@@ -11,6 +11,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -29,9 +31,11 @@ except ImportError:
     _call_ocl = None
 from schemas.agent_trace import TraceRecorder, create_trace_recorder, AgentTraceEvent
 from platform_mvp.i18n import _, detect_language
+from platform_mvp.training_status import inspect_training_status
+from platform_mvp.route_preflight import preflight, GATED_ROUTES
 
 DEFAULT_REGISTRY = THIS_DIR / "method_registry.json"
-DEFAULT_DENTALCLAW_PYTHON = "$CONDA_HOME/envs/nnunetv2/bin/python"
+DEFAULT_DENTALCLAW_PYTHON = os.environ.get("DENTALCLAW_PYTHON") or (str(Path(os.environ["CONDA_HOME"]) / "envs/nnunetv2/bin/python") if os.environ.get("CONDA_HOME") else sys.executable)
 
 # DeepSeek API 配置（从 OpenClaw auth 配置读取，作为 fallback）
 def _load_deepseek_api_key() -> str | None:
@@ -137,35 +141,70 @@ def _contains_any(text: str, keywords: list[str]) -> bool:
     return any(keyword.lower() in lowered for keyword in keywords)
 
 
+def _affirmative_action_text(text: str) -> str:
+    """Remove locally negated actions, preserving affirmative actions elsewhere.
+
+    This is a conservative surface parser, not a general language understanding
+    claim. In particular, one negated training clause must not cancel a later
+    affirmative training clause.
+    """
+    actions = r'(?:训练|微调|分割|分类|检测|超分辨率|超分|掩膜)'
+    text = re.sub(
+        r'(?:不要|不用|无需|不必|不需要|不进行|不做|不想|不再|不重新)'
+        r'(?:\s*(?:再|重新|继续|做|进行|任何|监督|新的|新))*\s*'+actions,
+        ' ', text)
+    english_actions = r'(?:retrain(?:ing)?|train(?:ing)?|fine[- ]?tun(?:e|ing)|segment(?:ation|ing)?|classif(?:y|ication)|detect(?:ion|ing)?)\b'
+    text = re.sub(
+        r"\b(?:do\s+not|don['’]t|without|no\s+need\s+to|never|not)"
+        r'\s+(?:(?:do|run|perform|repeat|any|new|a|the)\s+)*'+english_actions,
+        ' ', text, flags=re.IGNORECASE)
+    return text
+
+
 def parse_intent(intent: str) -> dict[str, Any]:
     """Parse a one-sentence medical CV request into a narrow MVP intent."""
     dataset = "unknown"
-    if _contains_any(intent, ["tdd", "全景", "panoramic", "dataset501"]):
-        dataset = "TDD"
-    elif _contains_any(intent, ["toothfairy", "cbct", "锥形束", "三维", "3d"]):
-        dataset = "ToothFairy3"
-    elif _contains_any(intent, ["私有", "自己的", "我提供的", "我自己的", "private", "本院", "院内"]):
+    # Explicit user ownership takes precedence over image modality keywords.
+    ownership = bool(re.search(
+        r'\b(?:my|our)\s+(?:[a-z0-9\u2019\' -]{0,50})\b(?:images|radiographs|x-rays|data(?:set)?)\b',
+        intent, re.IGNORECASE)) or bool(re.search(r'我有[^，。；\n]{0,40}(?:影像|全景片|图像|数据)', intent))
+    if ownership or _contains_any(intent, ["私有", "自己的", "我提供的", "private", "本院", "院内", "user-supplied"]):
         dataset = "Private2D"
+    elif _contains_any(intent, ["tdd", "dataset501"]):
+        dataset = "TDD"
+    elif _contains_any(intent, ["toothfairy"]):
+        dataset = "ToothFairy3"
 
+    affirmative = _affirmative_action_text(intent)
     task_family = "unknown"
-    if _contains_any(intent, ["检测框", "检测模型", "bbox", "detector"]):
+    if _contains_any(affirmative, ["检测框", "检测模型", "bbox", "detector"]):
         # 检测框/检测模型是强检测信号，优先于后文的 segmentation 等词
         # （如 “把 segmentation mask 转成检测框并训练 detector” 应解析为 detection）
         task_family = "detection"
-    elif _contains_any(intent, ["超分", "super-resolution", "super resolution", "分辨率", "清晰"]):
+    elif _contains_any(affirmative, ["超分", "super-resolution", "super resolution", "分辨率", "清晰"]):
         task_family = "super_resolution"
-    elif _contains_any(intent, ["异常", "anomaly", "病灶", "可疑"]):
+    elif _contains_any(affirmative, ["异常", "anomaly", "病灶", "可疑"]):
         task_family = "anomaly_detection"
-    elif _contains_any(intent, ["分割", "segmentation", "segment", "mask", "掩膜"]):
+    elif _contains_any(affirmative, ["分割", "segmentation", "segment", "mask", "掩膜"]):
         task_family = "segmentation"
-    elif _contains_any(intent, ["检测", "detection", "detect", "框"]):
+    elif _contains_any(affirmative, ["检测", "detection", "detect", "框"]):
         task_family = "detection"
-    elif _contains_any(intent, ["分类", "classification", "classify"]):
+    elif (_contains_any(affirmative, ["分类", "classification", "classify"])
+          or re.search(r'\bassign\b[^.;\n]*\b(?:categories|classes)\b', affirmative, re.IGNORECASE)):
         task_family = "classification"
 
+    segmentation_target = 'unspecified'
+    if task_family == 'segmentation':
+        if _contains_any(affirmative, ['instance segmentation', '实例分割', '每颗牙', '逐牙',
+                                       '牙位编号', 'tooth numbering', 'tooth numbers', 'fdi']):
+            segmentation_target = 'instance'
+        elif (_contains_any(affirmative, ['multiclass', 'multi-class', 'multi class', '多类别', '多类分割'])
+              or re.search(r'(?:[三四五六七八九十]|[3-9]|\d{2,})\s*(?:个)?\s*(?:类别|类|classes|categories)', affirmative, re.IGNORECASE)):
+            segmentation_target = 'multiclass'
+
     # TTA / ensemble flags
-    tta = _contains_any(intent, ["tta", "test-time augmentation", "测试时增强", "test time"])
-    ensemble = _contains_any(intent, ["ensemble", "集成", "ensemble学习", "多模型"])
+    tta = _contains_any(affirmative, ["tta", "test-time augmentation", "测试时增强", "test time"])
+    ensemble = _contains_any(affirmative, ["ensemble", "集成", "ensemble学习", "多模型"])
     task_variant = ""
     if tta and ensemble:
         task_variant = "tta_ensemble"
@@ -174,30 +213,31 @@ def parse_intent(intent: str) -> dict[str, Any]:
     elif ensemble:
         task_variant = "ensemble"
 
-    # TTA/Ensemble 未指定数据集时默认 TDD
-    if task_variant and dataset == "unknown":
-        dataset = "TDD"
+    # TTA is not evidence of dataset identity; leave unspecified data unknown.
 
     modality = "2d"
     if _contains_any(intent, ["3d", "三维", "cbct", "体积", "volume"]):
         modality = "3d"
 
-    # mode 判定：训练优先；显式否定（不做/不进行训练）或“重新训练”否定词 → 推理。
-    # 注意：单独出现“报告/评估”不应覆盖“训练”（如“训练检测模型并报告 mAP”应为 train）。
+    # Only affirmative training actions count; English past-tense metadata such
+    # as "model trained on TDD" is not a new training instruction.
     mode = "inference"
-    has_train = _contains_any(intent, ["训练", "train", "微调", "fine-tune", "finetune"])
-    train_negated = _contains_any(intent, ["不做监督训练", "不做训练", "不进行训练",
-                                          "不要重新训练", "不重新训练"])
-    if has_train and not train_negated:
+    has_train = (_contains_any(affirmative, ["训练", "微调"])
+                 or bool(re.search(r'\b(?:train|training|retrain|retraining|fine-tune|finetune)\b', affirmative, re.IGNORECASE))
+                 or bool(re.search(r'(?:学出|学得)[^，。；\n]*模型', affirmative))
+                 or bool(re.search(r'\blearn\s+from\b', affirmative, re.IGNORECASE)))
+    if has_train:
         mode = "private_train" if dataset == "Private2D" else "train"
     elif _contains_any(intent, ["推理", "预测", "评估", "报告"]):
         mode = "inference"
 
     return {
+        "dataset_source": "user_supplied" if dataset == "Private2D" else ("unspecified" if dataset == "unknown" else "named_dataset"),
         "raw_intent": intent,
         "dataset": dataset,
         "task_family": task_family,
         "task_variant": task_variant,
+        "segmentation_target": segmentation_target,
         "modality": modality,
         "mode": mode,
         "tta": tta,
@@ -318,6 +358,9 @@ def select_method(parsed: dict[str, Any], registry: dict[str, Any]) -> tuple[dic
         if method.get("domain") != "dental_cv":
             continue
         if method.get("task_family") != parsed["task_family"]:
+            continue
+        if (parsed.get('segmentation_target') in {'instance', 'multiclass'}
+                and parsed['segmentation_target'] not in method.get('supported_segmentation_targets', [])):
             continue
         if method.get("modality") != parsed["modality"]:
             continue
@@ -870,6 +913,10 @@ def _agent_decide(
     registry_reasons: list[str],
     lang: str = "en",
     timeout: int = 60,
+    data_card: dict[str, Any] | None = None,
+    online_settings: dict[str, Any] | None = None,
+    audit_dir: Path | None = None,
+    audit_record: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Agent 综合决策：web search 结果 + 离线方法表匹配 + 代码库资产 → 最终方案。
 
@@ -913,6 +960,33 @@ def _agent_decide(
         registry_text=registry_text,
     )
 
+    if data_card is not None:
+        prompt += "\n\n=== INPUT DATA CARD (observed facts, not reference answers) ===\n"
+        prompt += json.dumps(data_card, ensure_ascii=False, sort_keys=True)
+        prompt += "\nData or annotation incompatibility must not be repaired by relabelling the user's task or substituting TDD. Execution remains subject to the deterministic input gate."
+        prompt += (
+            "\nSelecting use_registry means selecting a candidate template, NOT granting execution permission."
+            " If the template fits, retain that candidate and explicitly describe any observed input defects in reasoning."
+            " In particular, report nonzero unmatched images in train/validation, nonzero image_mask_shape_mismatch_count,"
+            " and unreadable files; never claim all input requirements are satisfied when such defects are recorded."
+            " Do not suggest that training can ignore or automatically repair those defects: the input gate must stop execution."
+            " dataset_json_present describes the INPUT PACKAGE, not the entrypoint script; use its observed value"
+            " or acknowledge it is unknown, and apply only the selected template's contract."
+            " Patient split independence is unknown when patient_split_check is not_established."
+            " External proposals are unvalidated, non-executable suggestions."
+        )
+    if online_settings is not None:
+        from platform_mvp.online_agent import call_planner
+        key = os.environ.get(online_settings['credential_env'])
+        if key is None and online_settings['provider'] == 'deepseek':
+            key = _load_deepseek_api_key()
+        result = call_planner(prompt, settings=online_settings,
+                              api_key=key,
+                              registry_available=registry_match is not None, audit_dir=audit_dir)
+        if audit_record is not None:
+            audit_record.update(result)
+        return result['decision'] if result['status'] == 'ok' else None
+
     proposal = None
 
     # OpenClaw Agent (--local 模式，DeepSeek V4 Pro，约需 25s)
@@ -954,6 +1028,23 @@ def _strip_ansi(text: str) -> str:
     return _re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
+def apply_preflight_explanation(plan: dict[str, Any]) -> None:
+    """Keep the plan's execution statement tied to inspected input facts."""
+    status = (plan.get('preflight') or {}).get('status')
+    lang = plan.get('lang', 'en')
+    text = {
+        'block': ('候选路线已选定，但输入检查未通过，当前不允许执行。',
+                  'A candidate route was selected, but input checks blocked execution.'),
+        'clarify': ('候选路线已选定，仍需补充输入信息，当前不允许执行。',
+                    'A candidate route was selected; input clarification is required before execution.'),
+        'route_ready': ('当前输入和资产检查通过，路线可准备执行。',
+                        'Current input and asset checks passed; the route can be prepared for execution.'),
+    }
+    if status in text:
+        plan['reason'] = text[status][0 if lang == 'zh' else 1]
+        plan['reason_source'] = 'deterministic_preflight'
+
+
 def build_plan(
     *,
     intent: str,
@@ -963,6 +1054,12 @@ def build_plan(
     reuse_fullflow_run: Path | None,
     trace: "TraceRecorder | None" = None,
     lang: str = "auto",
+    data_root: Path | None = None,
+    data_card: dict[str, Any] | None = None,
+    online_settings: dict[str, Any] | None = None,
+    agent_audit_dir: Path | None = None,
+    search_enabled: bool = True,
+    agent_enabled: bool = True,
 ) -> dict[str, Any]:
     """构建平台计划。核心流程：web search 驱动 → Agent 决策 → 方法表作为缓存。
 
@@ -978,7 +1075,7 @@ def build_plan(
                    output_summary=f"dataset={parsed['dataset']}, task={parsed['task_family']}, mode={parsed['mode']}",
                    detail=dict(parsed))
 
-    # ── Step 0: 关键信息缺失？先判断是否完全超出牙科 CV 范围 ──
+    # ── Step 0: 关键信息缺失？保留牙科领域内请求的澄清机会 ──
     missing = []
     if parsed["dataset"] == "unknown":
         missing.append(_(lang, "clarification_field_dataset"))
@@ -986,14 +1083,21 @@ def build_plan(
         missing.append(_(lang, "clarification_field_task"))
 
     if missing:
-        # 数据集 AND 任务都未知 → 完全超出牙科 CV 范围，直接拒绝
-        if parsed["dataset"] == "unknown" and parsed["task_family"] == "unknown":
+        # 数据集和任务未知并不代表领域未知，例如“帮我研究牙齿情况”。
+        # 领域提示只用于选择澄清动作，不推断数据集或许可执行。
+        dental_context = _contains_any(intent, [
+            "牙齿", "牙科", "口腔", "全景片", "dental", "tooth", "teeth",
+            "panoramic", "radiograph", "cbct",
+        ])
+        if (parsed["dataset"] == "unknown" and parsed["task_family"] == "unknown"
+                and not dental_context):
             return {
                 "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
                 "platform_mvp_version": registry.get("version"),
                 "intent": parsed,
                 "supported": False, "executable": False,
                 "selected_method": None,
+                "agent_call": {"status": "not_called_early_rejection", "attempt_count": 0},
                 "selection_reasons": [],
                 "workflow": ["intent.parse", "platform.out_of_scope"],
                 "execution": {
@@ -1006,7 +1110,7 @@ def build_plan(
                 "lang": lang,
             }
 
-        # 仅部分信息缺失 → 友好追问
+        # 部分信息缺失，或领域已知而数据/任务缺失 → 友好追问
         return {
             "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
             "platform_mvp_version": registry.get("version"),
@@ -1020,6 +1124,7 @@ def build_plan(
                 "available_datasets": _(lang, "available_datasets"),
                 "available_tasks": _(lang, "available_tasks"),
             },
+            "agent_call": {"status": "not_called_early_clarification", "attempt_count": 0},
             "selection_reasons": [],
             "workflow": ["intent.parse", "platform.request_clarification"],
             "execution": {
@@ -1033,7 +1138,7 @@ def build_plan(
         }
 
     # ── Step 1: Web search (彭老师要求：以 web search 为主) ──
-    web_search_results = _do_web_search(intent, parsed)
+    web_search_results = _do_web_search(intent, parsed) if search_enabled and agent_enabled else []
     if trace:
         trace.step("planner", "web.search",
                    input_summary=f"task={parsed['task_family']}, dataset={parsed['dataset']}",
@@ -1047,13 +1152,18 @@ def build_plan(
                    output_summary=f"match={'found' if registry_match else 'none'}, reasons={registry_reasons[0][:80] if registry_reasons else 'none'}")
 
     # ── Step 3: Agent 综合决策 (web 结果 + 方法表匹配 + 代码库资产) ──
+    agent_audit = {}
     agent_decision = _agent_decide(
         intent=intent, parsed=parsed,
         search_results=web_search_results,
         registry_match=registry_match,
         registry_reasons=registry_reasons,
         lang=lang,
-    )
+        data_card=data_card, online_settings=online_settings,
+        audit_dir=agent_audit_dir, audit_record=agent_audit,
+    ) if agent_enabled else None
+    if not agent_enabled:
+        agent_audit = {"status": "disabled_for_local_verification", "attempt_count": 0}
     if trace and agent_decision:
         trace.step("planner", "agent.decide",
                    input_summary=f"registry_match={'yes' if registry_match else 'no'}",
@@ -1061,6 +1171,10 @@ def build_plan(
                    decision=agent_decision.get('reasoning', '')[:200],
                    detail=dict(agent_decision))
 
+    if agent_decision and agent_decision.get('decision') == 'use_registry' and registry_match is None:
+        agent_audit.update(status='invalid_schema', decision=None,
+                           validation_error='use_registry_without_match')
+        agent_decision = None
     if agent_decision is None:
         # Agent 完全不可用 → 回退到纯方法表
         if registry_match:
@@ -1077,7 +1191,7 @@ def build_plan(
                 "expected_outputs": selected_method.get("expected_outputs", []),
                 "limitations": selected_method.get("limitations", []),
             }
-            reason = "Agent 不可用，回退到离线方法表匹配。"
+            reason = "已请求离线验证，使用方法表匹配。" if not agent_enabled else "Agent 不可用，回退到离线方法表匹配。"
         else:
             supported, executable = False, False
             workflow = ["intent.parse", "registry.method_lookup", "agent.unavailable", "platform.reject_or_explain"]
@@ -1127,7 +1241,8 @@ def build_plan(
                                 if registry_match else "No registry match; Agent used web search."]
 
             # ── 自动注册: 记录 Agent 发现的代码库资产 ──
-            if proposed_entrypoint and proposed_entrypoint.startswith(("agents/", "run_", "platform_mvp/")):
+            if (online_settings is None and proposed_entrypoint
+                    and proposed_entrypoint.startswith(("agents/", "run_", "platform_mvp/"))):
                 discovery_count = _track_agent_discovery(
                     entrypoint=proposed_entrypoint,
                     display_name=agent_decision.get("reasoning", proposed_entrypoint)[:80],
@@ -1153,6 +1268,9 @@ def build_plan(
 
     plan = {
         "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "registry_lookup_performed": True,
+        "registry_match_id": registry_match.get("id") if registry_match else None,
+        "registry_path": str(registry_path.resolve()),
         "platform_mvp_version": registry.get("version"),
         "intent": parsed,
         "supported": supported,
@@ -1169,12 +1287,21 @@ def build_plan(
         },
         "reason": reason,
         "lang": lang,
+        "agent_call": agent_audit or {"status": "legacy_unrecorded"},
+        "decision_source": ("offline_registry_requested" if not agent_enabled else
+                            "online_agent" if agent_decision is not None else "offline_registry_fallback"),
+        "online_call_required": online_settings is not None,
+        "data_card": data_card,
         "web_search": {
-            "performed": True,
+            "performed": search_enabled and agent_enabled,
             "query": web_search_results[0].get("query", "") if web_search_results else "",
             "result_count": len(web_search_results),
         },
     }
+    if (selected_payload or {}).get("id") in GATED_ROUTES:
+        plan["preflight"] = preflight(plan, registry, data_root)
+        plan["execution"]["execution_permission"] = plan["preflight"]["execution_permission"]
+        apply_preflight_explanation(plan)
     return plan
 
 
@@ -1211,7 +1338,9 @@ def build_plan_md(plan: dict[str, Any], execution_result: dict[str, Any] | None 
         "## 3. 离线方法表选择",
         "",
         f"- Supported by registry: `{plan['supported']}`",
-        f"- Executable now: `{plan['executable']}`",
+        f"- Candidate adapter executable: `{plan['executable']}`",
+        f"- Input preflight: `{(plan.get('preflight') or {}).get('status', 'not_checked')}`",
+        f"- Execution permission after preflight: `{(plan.get('preflight') or {}).get('execution_permission', 'not_checked')}`",
         f"- Selected method: `{selected.get('id', 'n/a')}`",
         f"- Method name: `{selected.get('display_name', 'n/a')}`",
         f"- Framework: `{selected.get('framework', 'n/a')}`",
@@ -1309,10 +1438,46 @@ def execute_selected_route(
     trace: "TraceRecorder | None" = None,
 ) -> dict[str, Any]:
     selected = plan.get("selected_method") or {}
+    gate = None
+    if selected.get("id") in GATED_ROUTES:
+        execution = plan.setdefault("execution", {})
+        execution["will_execute"] = False
+        if getattr(args, "case_id", None) is not None:
+            execution["requested_case_id"] = args.case_id
+        registry_path = Path(getattr(args, "registry", None) or plan.get("registry_path") or DEFAULT_REGISTRY)
+        data_root = getattr(args, "private_data_root", None)
+        try:
+            # Always refresh: do not trust a previous route_ready after input/asset changes.
+            gate = preflight(plan, load_registry(registry_path), Path(data_root) if data_root else None)
+        except (OSError, ValueError, TypeError) as exc:
+            gate = {"candidate_route_id": selected["id"], "status": "block",
+                    "execution_permission": False, "reason_codes": ["preflight_unavailable"],
+                    "error_type": type(exc).__name__}
+        plan["preflight"] = gate
+        execution["execution_permission"] = gate["execution_permission"]
+        apply_preflight_explanation(plan)
+        _write_json(run_dir / "preflight.json", gate)
+        validation = gate.get("qc_report")
+        if validation is not None:
+            _write_json(run_dir / "input_manifest.json", validation["manifest"])
+        if gate["status"] != "route_ready" or gate["execution_permission"] is not True:
+            return {"status": "awaiting_clarification" if gate["status"] == "clarify" else "blocked_incompatible",
+                    "reason_codes": gate.get("reason_codes", []),
+                    "clarification_fields": gate.get("clarification_fields", []), "preflight": gate}
+    if plan.get("intent", {}).get("dataset") == "Private2D" and selected.get("id") in {
+        "tdd_2d_segmentation_infer_report", "dental_2d_super_resolution", "dental_anomaly_detection", "tta_ensemble_inference"
+    }:
+        return {"status": "blocked_incompatible", "reason_codes": ["user_input_adapter_not_bound"],
+                "reason": "This adapter currently uses named TDD assets; it must not substitute them for user data."}
+    if (plan.get("intent", {}).get("tta") or plan.get("intent", {}).get("ensemble")) and (
+        plan["intent"].get("dataset") != "TDD" or plan["intent"].get("modality") != "2d"
+        or plan["intent"].get("mode") != "inference" or plan["intent"].get("task_family") != "segmentation"
+    ):
+        return {"status": "blocked_incompatible", "reason_codes": ["tta_route_contract_mismatch"]}
     if trace:
         trace.step("clinician", "platform.collect_evidence",
                    input_summary=f"method={selected.get('id', 'unknown')}, execute={args.execute}",
-                   output_summary="execution started",
+                   output_summary="adapter reached; subprocess launch is recorded separately",
                    status="running")
 
     # ── Agent 外部提议 ──
@@ -1554,54 +1719,28 @@ def execute_selected_route(
 
     if selected.get("id") == "private_2d_segmentation_train":
         # ── 私有 2D 训练 adapter ──
-        private_data_root = Path(args.private_data_root) if args.private_data_root else None
-
-        # 1. 前置检查：有标签才能训练
-        validate_cmd = [
-            sys.executable,
-            str(REPO_ROOT / "platform_mvp/validate_private2d_package.py"),
-            "--mode", "private_train",
-        ]
-        if private_data_root:
-            validate_cmd.extend(["--data-root", str(private_data_root)])
-        else:
-            validate_cmd.extend(["--data-root", str(REPO_ROOT / "data/private01")])
-        validate_out = run_dir / "logs" / "private2d_validation_report.json"
-        validate_cmd.extend(["--out-dir", str(run_dir / "logs")])
-        validate_out.parent.mkdir(parents=True, exist_ok=True)
-        env = os.environ.copy()
-        env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
-        _run_subprocess(validate_cmd, run_dir / "logs/private2d_validate_stdout.log",
-                        run_dir / "logs/private2d_validate_stderr.log")
-
-        validation = _read_json(validate_out) if validate_out.exists() else {}
-        can_train = validation.get("can_execute_requested_mode", False)
-        mask_count = validation.get("mask_count", 0)
-
-        if not can_train:
-            return {
-                "status": "blocked_missing_labels",
-                "reason": f"Private 2D training requires masks/labels. Found {mask_count} mask files. "
-                          "Please supply images/ and masks/ directories with paired cases.",
-                "validation": {k: validation.get(k) for k in
-                               ["image_count", "mask_count", "paired_case_count", "can_execute_requested_mode"]
-                               if k in validation},
-            }
-
+        from platform_mvp.validate_private2d_package import build_report_md
+        private_data_root = Path(args.private_data_root).resolve()
+        validation = gate["qc_report"]
+        _write_json(run_dir / "logs/private2d_validation_report.json", validation)
+        (run_dir / "logs/private2d_validation_report.md").write_text(build_report_md(validation), encoding="utf-8")
+        layout = validation["manifest"]["layouts"]
         # 2. 生成训练命令（dry-run 模式只出命令，--execute 才真跑）
         training_workspace = run_dir / "training_workspace"
+        if (training_workspace / "launcher_status.json").exists() or (training_workspace / "run_status.json").exists():
+            return {"status": "blocked_existing_run", "reason": "Use a fresh run directory; inspect the existing training workspace."}
         training_workspace.mkdir(parents=True, exist_ok=True)
         dataset_spec = _write_json(
             run_dir / "private2d_dataset_spec.json",
             {
-                "root": str(private_data_root.resolve()) if private_data_root else str(REPO_ROOT / "data/private01"),
-                "imagesTr": "imagesTr",
-                "labelsTr": "labelsTr",
-                "imagesTs": "imagesTs",
-                "labelsTs": "labelsTs",
-                "dataset_name": "Private 2D Dental Segmentation",
-                "modality": "2d",
-                "extra": {"target_backend": "builtin"},
+                "root": str(private_data_root),
+                "imagesTr": layout["train"]["images"],
+                "labelsTr": layout["train"]["masks"],
+                "imagesVal": layout["val"]["images"],
+                "labelsVal": layout["val"]["masks"],
+                "imagesTs": layout["test"]["images"],
+                "extra": {"target_backend": "builtin", "labelsTs": layout["test"]["masks"],
+                          "input_manifest_id": validation["manifest_id"]},
             },
         )
         task_spec = _write_json(
@@ -1655,10 +1794,11 @@ def execute_selected_route(
         # --execute: 真正启动训练（1 trial / 1 epoch smoke）
         train_stdout = run_dir / "logs/training_stdout.log"
         train_stderr = run_dir / "logs/training_stderr.log"
+        plan["execution"]["will_execute"] = True
         completed = _run_subprocess(train_cmd, train_stdout, train_stderr)
 
         return {
-            "status": "completed" if completed.returncode == 0 else "failed",
+            **inspect_training_status(training_workspace, completed.returncode),
             "returncode": completed.returncode,
             "command": train_cmd,
             "stdout": _rel(train_stdout),
@@ -1670,7 +1810,7 @@ def execute_selected_route(
             "validation": {k: validation.get(k) for k in
                            ["image_count", "mask_count", "paired_case_count", "can_execute_requested_mode"]
                            if k in validation},
-            "note": "训练已启动（1 trial / 1 epoch smoke），通过 --detach 后台运行。",
+            "note": "异步训练提交；状态来自控制器与必需产物，启动器返回0不代表训练完成。",
         }
 
     if selected.get("id") == "toothfairy3_3d_segmentation_infer_or_train":
@@ -1698,13 +1838,16 @@ def execute_selected_route(
             "--report-key", "platform_mvp_tf3",
             "--output-root", str(qc_out_dir),
         ]
-        _run_subprocess(qc_cmd, run_dir / "logs/cbct_qc_stdout.log",
+        qc_process = _run_subprocess(qc_cmd, run_dir / "logs/cbct_qc_stdout.log",
                         run_dir / "logs/cbct_qc_stderr.log")
 
         qc_summary_path = qc_out_dir / "cohort_summary.json"
         qc_data = _read_json(qc_summary_path) if qc_summary_path.exists() else {}
         usable = qc_data.get("status_counter", {}).get("usable", 0)
         review = qc_data.get("status_counter", {}).get("needs_manual_review", 0)
+
+        if qc_process.returncode != 0 or not qc_summary_path.exists() or usable == 0 or review > 0:
+            return {"status": "blocked_qc", "reason_codes": ["cbct_qc_not_cleared"], "cbct_qc": {"usable": usable, "needs_review": review}}
 
         # Training: 生成命令 + 可选执行
         training_workspace = run_dir / "training_workspace"
@@ -1769,7 +1912,7 @@ def execute_selected_route(
         train_stderr = run_dir / "logs/training_stderr.log"
         completed = _run_subprocess(train_cmd, train_stdout, train_stderr)
         return {
-            "status": "completed" if completed.returncode == 0 else "failed",
+            **inspect_training_status(training_workspace, completed.returncode),
             "returncode": completed.returncode,
             "command": train_cmd,
             "stdout": _rel(train_stdout),
@@ -1779,7 +1922,7 @@ def execute_selected_route(
             "budget_spec": _rel(budget_spec),
             "training_workspace": _rel(training_workspace),
             "cbct_qc": {"usable": usable, "needs_review": review},
-            "note": "训练已启动（1 trial / 1 epoch smoke），通过 --detach 后台运行。",
+            "note": "异步训练提交；状态来自控制器与必需产物，启动器返回0不代表训练完成。",
         }
 
     if selected.get("id") == "dental_anomaly_detection":
@@ -1829,9 +1972,10 @@ def execute_selected_route(
         }
 
     reuse_fullflow_run = args.reuse_fullflow_run or DEFAULT_SUCCESSFUL_FULLFLOW_RUN
-    delegate_run_dir = Path(reuse_fullflow_run).resolve()
-    if not delegate_run_dir.exists():
-        delegate_run_dir = run_dir / "delegate_tdd_fullflow"
+    # A reuse source is historical evidence, never the output destination.
+    delegate_run_dir = run_dir / "delegate_tdd_fullflow"
+    if delegate_run_dir.exists() and any(delegate_run_dir.iterdir()):
+        return {"status": "blocked_existing_run", "reason": "Use a fresh platform run directory."}
 
     command = [
         args.dentalclaw_python,
@@ -1840,27 +1984,43 @@ def execute_selected_route(
         str(delegate_run_dir),
         "--case-id",
         args.case_id,
+        "--dataset-root", gate["validated_assets"]["dataset_root"],
+        "--dataset-spec", gate["validated_assets"]["dataset_spec"],
+        "--task-spec", gate["validated_assets"]["task_spec"],
+        "--model-path", gate["validated_assets"]["checkpoint"],
     ]
     if args.reuse_inference:
         command.append("--reuse-inference")
+    if getattr(args, 'tdd_case_only', False):
+        command.append('--inference-case-only')
 
     stdout_path = run_dir / "logs/delegate_stdout.log"
     stderr_path = run_dir / "logs/delegate_stderr.log"
-    stdout_path.parent.mkdir(parents=True, exist_ok=True)
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
-    with stdout_path.open("w", encoding="utf-8") as stdout_file, stderr_path.open(
-        "w", encoding="utf-8"
-    ) as stderr_file:
-        completed = subprocess.run(
-            command,
-            cwd=str(REPO_ROOT),
-            env=env,
-            text=True,
-            stdout=stdout_file,
-            stderr=stderr_file,
-            check=False,
-        )
+    if not args.execute:
+        return {"status": "command_generated", "command": command, "preflight": gate}
+    if args.reuse_inference:
+        source = Path(reuse_fullflow_run).resolve()
+        try:
+            manifest = _read_json(source / "manifest.json")
+            for key in ("dataset_root", "dataset_spec", "task_spec", "model_path"):
+                asset_key = "checkpoint" if key == "model_path" else key
+                if (REPO_ROOT / manifest[key]).resolve() != Path(gate["validated_assets"][asset_key]).resolve():
+                    raise ValueError("reuse_asset_identity_mismatch")
+            if not (source / "inference/inference_summary.json").is_file():
+                raise ValueError("reuse_summary_missing")
+            if not (source / "inference" / f"{args.case_id}.png").is_file():
+                raise ValueError("reuse_case_missing")
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            return {"status": "blocked_incompatible", "reason_codes": ["reuse_source_invalid"],
+                    "error_type": type(exc).__name__}
+        shutil.copytree(source / "inference", delegate_run_dir / "inference")
+        _write_json(run_dir / "reuse_provenance.json", {
+            "source_run": str(source), "destination_run": str(delegate_run_dir.resolve()),
+            "new_model_inference": False,
+            "identity_check": "Recorded source asset paths match; historical weight content is not attested.",
+        })
+    plan["execution"]["will_execute"] = True
+    completed = _run_subprocess(command, stdout_path, stderr_path)
 
     if completed.returncode != 0:
         return {
@@ -1873,6 +2033,12 @@ def execute_selected_route(
 
     manifest_path = delegate_run_dir / "manifest.json"
     manifest = _read_json(manifest_path) if manifest_path.exists() else {}
+    required = ["inference_summary_json", "report_html", "report_overlay"]
+    missing = [key for key in required if not manifest.get(key) or not (REPO_ROOT / manifest[key]).is_file()]
+    if missing:
+        return {"status": "incomplete_artifacts", "missing_artifacts": missing,
+                "returncode": completed.returncode, "command": command,
+                "stdout": _rel(stdout_path), "stderr": _rel(stderr_path)}
     return {
         "status": "completed",
         "command": command,
@@ -1884,6 +2050,8 @@ def execute_selected_route(
         "report_html": manifest.get("report_html"),
         "report_overlay": manifest.get("report_overlay"),
         "metrics": manifest.get("metrics", {}),
+        "new_model_inference": manifest.get("new_model_inference"),
+        "inference_reused": manifest.get("inference_reused"),
     }
 
 
@@ -1898,6 +2066,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--case-id", default="100")
+    parser.add_argument('--tdd-case-only', action='store_true',
+                        help='Limit fresh TDD inference to the requested case; use for bounded execution checks.')
     parser.add_argument("--super-resolution-scale", type=int, default=2)
     parser.add_argument(
         "--execute",
@@ -1913,7 +2083,7 @@ def parse_args() -> argparse.Namespace:
         "--reuse-fullflow-run",
         type=Path,
         default=DEFAULT_SUCCESSFUL_FULLFLOW_RUN,
-        help="Existing mvp_fullflow run to reuse for quick reporting.",
+        help="Read-only source of existing predictions when --reuse-inference is set; output is always in the new run.",
     )
     parser.add_argument(
         "--dentalclaw-python",
@@ -1941,15 +2111,42 @@ def parse_args() -> argparse.Namespace:
         choices=["auto", "zh", "en"],
         help="Interface language: auto (detect from intent), zh (Chinese), en (English). Default: auto.",
     )
-    return parser.parse_args()
+    parser.add_argument('--online-agent-settings', type=Path, default=None,
+                        help='Explicit single-attempt planner settings JSON; records raw API response.')
+    parser.add_argument('--data-card', type=Path, default=None,
+                        help='Aggregate input facts JSON supplied to the planner; omit patient records and reference answers.')
+    parser.add_argument('--disable-search', action='store_true',
+                        help='Disable live literature/web search for a recorded planner-only development run.')
+    parser.add_argument('--offline-planner', action='store_true',
+                        help='Use the registry for local execution verification; disables all Agent and search calls.')
+    args = parser.parse_args()
+    if args.offline_planner and args.online_agent_settings:
+        parser.error('--offline-planner cannot be combined with --online-agent-settings')
+    if args.tdd_case_only and args.reuse_inference:
+        parser.error('--tdd-case-only cannot be combined with --reuse-inference')
+    return args
 
 
 def main() -> int:
+    if '--next-version' in sys.argv[1:]:
+        from platform_mvp.next_version.runner import main as next_version_main
+        return next_version_main([a for a in sys.argv[1:] if a != '--next-version'])
+    if '--data-services' in sys.argv[1:]:
+        from platform_mvp.data_services.runner import main as data_services_main
+        return data_services_main([a for a in sys.argv[1:] if a != '--data-services'])
     args = parse_args()
     run_dir = args.run_dir.resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
 
     trace = create_trace_recorder(args.run_dir, args.case_id)
+
+    settings_path = getattr(args, 'online_agent_settings', None)
+    settings = _read_json(settings_path) if settings_path else None
+    if settings is not None:
+        from platform_mvp.online_agent import validate_settings
+        validate_settings(settings)
+    card_path = getattr(args, 'data_card', None)
+    card = _read_json(card_path) if card_path else None
 
     plan = build_plan(
         intent=args.intent,
@@ -1959,14 +2156,22 @@ def main() -> int:
         reuse_fullflow_run=args.reuse_fullflow_run,
         trace=trace,
         lang=args.lang,
+        data_root=Path(args.private_data_root) if args.private_data_root else None,
+        data_card=card, online_settings=settings,
+        agent_audit_dir=run_dir / 'online_agent' if settings is not None else None,
+        search_enabled=not getattr(args, 'disable_search', False),
+        agent_enabled=not getattr(args, 'offline_planner', False),
     )
 
     execution_result = None
     if args.execute:
-        plan["execution"]["will_execute"] = bool(plan.get("executable"))
+        plan["execution"]["will_execute"] = (
+            False if (plan.get("selected_method") or {}).get("id") in GATED_ROUTES
+            else bool(plan.get("executable"))
+        )
         can_execute = plan.get("executable") or (
             getattr(args, "allow_external", False)
-            and plan.get("selected_method", {}).get("status") == "external_suggestion"
+            and (plan.get("selected_method") or {}).get("status") == "external_suggestion"
         )
         if can_execute:
             execution_result = execute_selected_route(plan=plan, args=args, run_dir=run_dir)

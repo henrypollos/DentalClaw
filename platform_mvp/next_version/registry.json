@@ -1,0 +1,203 @@
+{
+  "version": "four-routes-development-20261008",
+  "methods": [
+    {
+      "id": "tdd_2d_segmentation_infer_report",
+      "display_name": "TDD 2D tooth binary segmentation inference and report",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "TDD",
+        "Dataset501_TDDTeethBinary2D"
+      ],
+      "task_family": "segmentation",
+      "task_variant": "tooth_binary",
+      "supported_segmentation_targets": [
+        "binary"
+      ],
+      "modality": "2d",
+      "allowed_modes": [
+        "inference"
+      ],
+      "framework": "nnunetv2",
+      "method": "nnU-Net v2 with existing DentalClaw TDD binary checkpoint",
+      "entrypoint": "mvp_fullflow/run_mvp_fullflow.py",
+      "existing_assets": {
+        "dataset_root": "artifacts/datasets/nnUNet/nnUNet_raw/Dataset501_TDDTeethBinary2D",
+        "dataset_spec": "artifacts/results/specs/dataset_spec_501_binary.json",
+        "task_spec": "artifacts/results/specs/task_spec_501_binary.json",
+        "checkpoint": "artifacts/training_runs/trial_501_binary_baseline/best_model/checkpoint_best.pth",
+        "successful_fullflow_run": "artifacts/mvp_runs/tdd_binary_fullflow_20260709_085641"
+      },
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "dataset.qc_read",
+        "model.checkpoint_select",
+        "experiment.inference",
+        "clinical_report.generate",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "manifest.json",
+        "mvp_summary.md",
+        "inference/inference_summary.json",
+        "report_case_<case_id>/report.html",
+        "report_case_<case_id>/overlay.png"
+      ],
+      "limitations": [
+        "Uses an existing checkpoint rather than launching a new training job.",
+        "This is the first executable platform route and is used as the reportable smoke test."
+      ],
+      "required_annotation_type": "pixel_mask",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "mean_dice",
+        "iou"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "annotation_integrity",
+        "split_leakage_check"
+      ],
+      "contraindications": [
+        "bbox_only_annotations",
+        "case_level_labels",
+        "3d_volumes",
+        "training_requests"
+      ],
+      "precheck_entrypoint": "platform_mvp/route_preflight.py"
+    },
+    {
+      "id": "private_2d_segmentation_train",
+      "display_name": "Private 2D dental image segmentation training",
+      "status": "executable",
+      "domain": "dental_cv",
+      "datasets": [
+        "Private2D"
+      ],
+      "task_family": "segmentation",
+      "task_variant": "private_2d_mask_segmentation",
+      "supported_segmentation_targets": [
+        "binary"
+      ],
+      "modality": "2d",
+      "allowed_modes": [
+        "private_train"
+      ],
+      "framework": "pytorch_builtin",
+      "method": "Spec-driven binary 2D training using the verified built-in TinyUNet2D backend",
+      "entrypoint": "agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py",
+      "precheck_entrypoint": "platform_mvp/route_preflight.py",
+      "input_contract": "platform_mvp/private_data_contract.json",
+      "required_inputs": [
+        "private image directory",
+        "private mask directory or annotation export",
+        "dataset spec",
+        "task spec",
+        "budget spec"
+      ],
+      "workflow": [
+        "intent.parse",
+        "registry.method_lookup",
+        "platform.private2d_input_precheck",
+        "dataset.manifest_record",
+        "dataset.validated_spec_generation",
+        "experiment.training",
+        "experiment.best_model_select",
+        "experiment.inference",
+        "platform.collect_evidence"
+      ],
+      "expected_outputs": [
+        "dataset registration record",
+        "QC report",
+        "training run directory",
+        "best checkpoint",
+        "inference summary",
+        "report summary"
+      ],
+      "limitations": [
+        "Requires an explicit data root, binary masks encoded 0/1, and separate training/validation/test directories for this adapter.",
+        "The 2026-10-01 smoke run verifies the built-in TinyUNet2D executor on a TDD-derived development package, not a private clinical cohort or the nnU-Net v2 backend.",
+        "Patient-level split independence is not established without complete patient ID metadata.",
+        "The shared gate blocks packages containing dataset.json; a nnU-Net v2 user-package backend is not released by this route."
+      ],
+      "required_annotation_type": "pixel_mask",
+      "evaluation_unit": "image",
+      "evaluation_metrics": [
+        "mean_dice",
+        "iou"
+      ],
+      "required_qc_gates": [
+        "image_completeness",
+        "annotation_integrity",
+        "annotation_completeness",
+        "split_leakage_check"
+      ],
+      "contraindications": [
+        "bbox_only_annotations",
+        "case_level_labels",
+        "unpaired_images_labels"
+      ],
+      "verification": {
+        "scope": "development_executor_smoke",
+        "backend": "builtin_nnunet_style_2d",
+        "run": "artifacts/platform_mvp_runs/r2_execution_contract_20261001",
+        "independent_clinical_validation": false,
+        "nnunetv2_backend_verified_by_this_run": false
+      }
+    },
+    {
+      "id": "existing_result_delivery",
+      "status": "executable",
+      "verification_status": "development_unit_and_cli_smoke_verified",
+      "domain": "dental_cv",
+      "task_family": "result_delivery",
+      "modality": "2d",
+      "allowed_modes": [
+        "deliver"
+      ],
+      "backend": "readonly_python",
+      "entrypoint": "platform_mvp.data_services.runner",
+      "required_inputs": [
+        "result_manifest with dataset/run identity and SHA256-bound artifacts"
+      ],
+      "expected_outputs": [
+        "delivery_manifest.json",
+        "report.html",
+        "copied original artifacts",
+        "per_case_metrics.csv only when requested"
+      ],
+      "limitations": [
+        "No new inference, training, metric computation or ranking",
+        "Explicit selected cases required when user selection is requested"
+      ]
+    },
+    {
+      "id": "binary2d_package_qc",
+      "status": "executable",
+      "verification_status": "development_unit_and_cli_smoke_verified",
+      "domain": "dental_cv",
+      "task_family": "binary2d_qc",
+      "modality": "2d",
+      "allowed_modes": [
+        "qc"
+      ],
+      "backend": "readonly_python",
+      "entrypoint": "platform_mvp.data_services.runner",
+      "required_inputs": [
+        "explicit data root"
+      ],
+      "expected_outputs": [
+        "qc_report.json",
+        "qc_issues.csv",
+        "input_manifest.json",
+        "report.html"
+      ],
+      "limitations": [
+        "Successful inspection may find defects; quality_passed is separate",
+        "No training permission, repairs, clinical annotation validation or near-duplicate similarity analysis"
+      ]
+    }
+  ]
+}

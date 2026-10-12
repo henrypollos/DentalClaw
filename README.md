@@ -2,125 +2,145 @@
 
 A modular, natural-language-driven workflow platform for standardized and auditable dental imaging AI experiments.
 
-DentalClaw converts researcher intent into executable, reviewable, and traceable workflows. It is designed as a **workflow orchestration and validation layer** for dental imaging AI research, rather than as a segmentation model or clinical decision-support system. This repository contains the platform code and the materials needed to reproduce the decision-level evaluation described in the accompanying manuscript:
+DentalClaw connects research requests to registered workflows, local input checks, execution records and reviewable outputs. The browser interface uses OpenClaw; the workflow backend can also run directly from the command line.
 
-> *DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments* (under review, Journal of Dentistry).
+> *DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments* — under review, Journal of Dentistry.
 
-## Architecture
+## Supported workflows
 
-The platform is built around five specialized agents and a set of shared platform services:
+| Workflow | Delivery |
+|---|---|
+| Existing-result delivery | Bound saved summaries, images, masks and overlays; optional CSV of stored metrics |
+| Binary 2D package QC | Pairing, readability, dimensions, binary labels, inventory and exact cross-split image duplicate checks |
+| TDD inference and reporting | Bound nnU-Net checkpoint inference, metrics and a selected-case report |
+| Binary-raster training | TinyUNet2D training and test outputs from explicitly partitioned image-mask packages |
 
-| Component | Path | Role |
-|---|---|---|
-| Main agent | `agents/main/` | Coordinates request handling across the platform |
-| Data Curation Agent | `agents/data_curator/` | Dataset audit, quality-control gates, canonical case packaging, deterministic splitting |
-| Experimentation Agent | `agents/experimentation/` | Registered training/inference skills (nnU-Net v2, TTA, ensemble) |
-| Reporting Agent | `agents/clinical_result/` | Generates structured, review-oriented reports |
-| Research Agent | `agents/research/` | Task-aware literature search (Europe PMC / arXiv) |
-| Platform orchestrator | `platform_mvp/` | Intent parsing, offline method registry lookup, fail-safe execution policy |
-
-**Key design properties**
-
-- **Decision/execution separation.** A reasoning agent decides *which* workflow should be attempted; a deterministic execution layer runs only the validated route or an externally proposed route explicitly enabled by the user.
-- **Offline method registry.** Route selection is deterministic and does not depend on live search results. Each validated entry declares its required annotation type, evaluation unit, evaluation metrics, quality-control gates, and applicability constraints (`platform_mvp/method_registry.json`).
-- **Fail-safe policy.** Unsupported or ambiguous requests are rejected or clarified; agent-proposed external solutions remain non-executable until explicitly confirmed with `--allow-external`.
-- **Audit trail.** Plan files, QC decisions, execution logs, and generated reports form a per-run record for downstream review.
-
-## Repository layout
-
-```
-platform_mvp/          Platform orchestrator, registry, data contracts
-agents/                Five specialized agents (code only; run artifacts excluded)
-benchmark_trace/       Decision-evaluation framework (scoring rubric, runner)
-benchmark_intents/     Prespecified 30-intent evaluation set (JSONL)
-registry/              Method registry schemas
-schemas/               Platform schema definitions
-skills/                Reusable workflow skills
-tests/                 Unit tests
-mvp_fullflow/          End-to-end MVP runner
-```
-
-Data, model weights, training artifacts, and experiment outputs are intentionally not versioned here. See [Data](#data) and [Artifacts](#artifacts) below.
+These are the four routes evaluated in the revised manuscript. Existing-result delivery does not run inference. QC does not repair data or authorize training. TDD inference requires its named assets. Training was evaluated with one-epoch workflow checks, not convergence or clinical performance.
 
 ## Installation
 
-1. **Python 3.10** environment on Linux (an NVIDIA GPU is required for training routes).
-2. **nnU-Net v2** for segmentation routes (see the [nnU-Net documentation](https://github.com/MIC-DKFZ/nnUNet)).
-3. **OpenClaw runtime** for the decision layer and the web interface; install it following the instructions in the [official repository](https://github.com/openclaw/openclaw). The platform invokes it through the `openclaw agent` CLI and reads its authentication profile from `~/.openclaw/`.
-4. Set the environment variables used throughout the repository: `$DENTALCLAW_HOME` (this repository), `$NNUNET_HOME` (nnU-Net installation), `$CONDA_HOME` (Python environment), plus the API credentials for the reasoning backend (DeepSeek V4 Pro in the reported evaluation; credentials are read from environment variables and are never committed to the repository).
+Use Python 3.10 or later on Linux. For planning, QC and regression checks:
 
-## Quick start
-
-```bash
-# Parse and plan a natural-language request (decision layer, no execution)
-python platform_mvp/run_platform_mvp.py \
-  --intent "Run inference with the existing TDD binary segmentation model on the test set, and report Dice, IoU, HD95, and overlay visualizations."
-
-# Execute the validated route (requires a configured dataset; see Data)
-python platform_mvp/run_platform_mvp.py \
-  --intent "<request>" --execute
+```sh
+python -m pip install numpy Pillow pytest
 ```
 
-`--allow-external` is required only when executing an externally proposed route; it is never enabled by default (fail-safe policy).
+Neural execution additionally requires PyTorch, SciPy and OpenCV; TDD inference also requires nnU-Net v2 and its bound checkpoint/model metadata. Data and model weights are not included.
 
-## Front-end interface
+For the browser interface, install and configure OpenClaw and a coordinator model. The backend planner has its own settings in `platform_mvp/next_version/settings.json`; provide `DEEPSEEK_API_KEY` to the process running it. The recorded study alias is retained in that file; current availability depends on the provider. Compatible explicit endpoint settings are also supported.
 
-The interactive chat and workflow-trace interface shown in the manuscript (Fig. 3) is rendered by the OpenClaw runtime. After installing OpenClaw, start the runtime on the machine hosting the platform and open its web interface in a browser, then authenticate with your token (see the OpenClaw documentation for startup options). If the platform runs on a remote workstation, the interface can be reached through an SSH tunnel:
+## Browser chat with OpenClaw
 
-```bash
+The repository includes the custom **DentalClaw Workflow** panel and an installation preparation script. The reference OpenClaw version is **2026.3.13**; other versions require compatibility checking.
+
+```sh
+python integrations/openclaw/prepare_ui.py \
+  --openclaw-package /absolute/path/to/node_modules/openclaw \
+  --out-dir artifacts/openclaw-ui \
+  --python /absolute/path/to/python \
+  --base-config /absolute/path/to/openclaw.json
+```
+
+This prepares a separate Control UI directory and a merged local configuration with a dedicated `dentalclaw` coordinator. It preserves the existing installation and does not restart the live service. The merged config may contain existing credentials and stays outside the served UI directory.
+
+After reviewing the configuration and ensuring its port is available:
+
+```sh
+OPENCLAW_CONFIG_PATH=/absolute/path/to/artifacts/openclaw-ui/openclaw.local.json \
+  openclaw gateway run
+
+# In another terminal, with the same configuration:
+OPENCLAW_CONFIG_PATH=/absolute/path/to/artifacts/openclaw-ui/openclaw.local.json \
+  openclaw dashboard
+```
+
+For a remote workstation:
+
+```sh
 ssh -N -L 18789:127.0.0.1:18789 <user>@<workstation>
-# open http://127.0.0.1:18789/ in the local browser
 ```
 
-In the chat panel, type a natural-language research request (for example, any of the 30 prespecified intents in `benchmark_intents/`); the platform parses the request, plans and schedules the tasks, and displays the workflow trace and generated reports in the same interface (manuscript Figs. 1--3).
+Open `http://127.0.0.1:18789/`, authenticate, select the **dentalclaw** chat and use the **DentalClaw Workflow** panel:
 
-## Decision evaluation (30 prespecified intents)
+1. Select an input context and describe the required outputs.
+2. Leave execution unchecked to generate a plan only.
+3. Enable **Execute if the route is ready** for delivery/QC; model computation additionally requires **Allow training or inference**.
+4. Review the returned decision, execution status and artifact paths. A finished chat is not proof of successful delivery.
 
-The intent-to-workflow decision evaluation reported in the manuscript achieved a weighted overall score of 0.958, with all 30 prespecified intents exceeding the 0.70 pass threshold; it can be rerun as follows:
+For example: “Audit this binary image-mask package for pairing, dimensions and label values; do not train.” The default context is empty. Bind actual server-side contexts with `--profiles` before requesting work on data.
 
-```bash
-# Run the full 30-intent evaluation through the platform
-python benchmark_trace/run_intent.py --intents-file benchmark_intents/intents.platform_mvp_30.jsonl
+See [setup, context profiles and troubleshooting](integrations/openclaw/README.md). The panel delegates through OpenClaw to `--next-version`; the backend selects the route. It does not preselect a task or default case. This agent-mediated browser path includes an outer coordinator call and is not a one-call reproduction of the paper's routing evaluation.
 
-# Score the resulting traces with the six-dimension rubric
-python benchmark_trace/eval_intents.py --all --csv report.csv
+## Command-line use
+
+Create a local context file:
+
+```json
+{"data_root": "/absolute/path/to/binary2d_package"}
 ```
 
-`run_intent.py` replays the deterministic decision logic used by the platform. To drive the evaluation through the real reasoning backend as reported in the manuscript (DeepSeek V4 Pro via the OpenClaw CLI), use `openclaw_runner.py`:
+Plan a request without execution; this makes one backend model call:
 
-```bash
-# Real LLM decisions through `openclaw agent`
-python benchmark_trace/openclaw_runner.py --all
+```sh
+python platform_mvp/run_platform_mvp.py --next-version \
+  --intent "Audit pairing, dimensions and binary labels; do not train." \
+  --context context.json --out-dir artifacts/plan_001
 ```
 
-The rubric dimensions (planning 0.35, QC blocking 0.20, intent parsing 0.15, external proposal quality 0.15, ambiguity handling 0.10, boundary identification 0.05) and per-dimension scoring rules are documented in `benchmark_trace/eval_intents.py` and the Supplementary Materials of the manuscript. Expected outcomes are prespecified per request; scores are computed by a deterministic script.
+Use a fresh output directory each time. Add `--execute` for an eligible route and `--allow-model-execution` for training/inference. The optional `--coverage-check` enables the subsequent development check of mandatory deliverables.
 
-## Data
+For direct QC without a model call:
 
-The platform itself does not bundle datasets. The representative tasks in the manuscript use:
+```sh
+python platform_mvp/run_platform_mvp.py --data-services \
+  --intent "Check image-mask pairing, dimension consistency and label values." \
+  --data-root /absolute/path/to/binary2d_package \
+  --out-dir artifacts/qc_001 --execute
+```
 
-| Dataset | Use | Access |
-|---|---|---|
-| Tufts Dental Database (TDD) | 2D panoramic radiograph segmentation | Public; accessed through the IEEE DataPort repository cited in the manuscript |
-| ToothFairy3 (ToothFairy Challenge) | 3D CBCT segmentation | Public; see [github.com/AImageLab-zip/ToothFairy](https://github.com/AImageLab-zip/ToothFairy) |
-| Private panoramic dataset (290 images) | Exploratory task extension and quality review | Available from the corresponding author upon reasonable request, subject to institutional ethical approval (PKUSSIRB-2025,107,012) |
+See [planner contexts](platform_mvp/next_version/README.md), [result bindings and QC](platform_mvp/data_services/README.md), and [runtime contracts](platform_mvp/README.md).
 
-Raw inputs are converted to a canonical case-level representation and pass deterministic QC gates before use; see `agents/data_curator/skills/` and `platform_mvp/private_data_contract.json`.
+## Manuscript evaluation
 
-## Artifacts
+| Stage | Exact decisions | Verified positive deliveries |
+|---|---:|---:|
+| Post-repair development coverage | 35/35 | 14/14 |
+| First test of 14 additional requests | 11/14 | 5/6 |
+| Routing regression on the same 14 requests | 14/14 | Not rerun |
+| First test of 30 further requests after refreezing | 24/30 | 4/6 |
 
-Training runs, predictions, reports, and evaluation outputs are stored in per-run directories and are not versioned in this repository. These artifacts constitute the per-run audit trail described in the manuscript.
+Incorrect release with partial execution occurred for 2/8 and 3/24 non-executable references in the two first tests. The collections included capability-informed requests, known assets and author-team references. Results describe that scope, not clinical diagnostic performance.
 
-## Citing
+This repository integrates the runtime and refrozen routing repairs; it is not a byte-identical evaluation snapshot. The optional coverage check and browser packaging are subsequent integration work. Historical results require the locked requests, references, asset bindings and execution records. The former weighted 30-intent benchmark is legacy material, not the revised manuscript's primary endpoint.
 
-If you use this platform or its evaluation materials, please cite the manuscript:
+## Data, artifacts and code
 
-> DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments. *Journal of Dentistry* (under review).
+Study assets comprise a local TDD binary export (900 training/100 test pairs), a synthetic non-patient package (2/1/1 train/validation/test pairs), and a TDD-derived development package (4/2/2). The derived package is not an independent clinical cohort; available metadata do not establish patient-level split independence for TDD.
 
-## Code availability
+Data, checkpoints, credentials and run outputs are excluded from source control. Runs retain plans, normalized decisions, API audit records and execution artifacts. Images and masks remain local. The configured models receive request text and the relevant metadata; the OpenClaw coordinator also sees command paths.
 
-The platform source code, method registry, intent set, and scoring scripts are provided in this repository, with a DOI-based archival release planned upon acceptance.
+```text
+integrations/openclaw/  Browser panel, configuration preparation and setup guide
+platform_mvp/          Four-route planner, services, contracts and checks
+agents/                Broader agent workspaces and executor skills
+skills/                Training and inference implementations
+mvp_fullflow/          Bound TDD inference/report executor
+schemas/               Structured task, dataset and trace records
+benchmark_trace/       Legacy benchmark and retained OpenClaw bridge
+benchmark_intents/     Legacy request sets
+registry/              Historical registry schemas
+tests/                 Local regression checks
+```
 
-## License
+Legacy adapters are retained where needed by existing entrypoints; they do not expand the revised manuscript's evaluated scope.
 
-Source code is currently provided for research and peer-review purposes. The final license will be specified upon publication.
+## Validation and citation
+
+```sh
+python -m pytest tests -q
+node --test tests/test_openclaw_workflow.cjs
+```
+
+Local checks use fixtures, mocked responses and offline replay. They do not rerun the online study or establish clinical performance.
+
+Please cite the manuscript title above while it is under review. Source is provided for research and peer-review purposes; a final license and DOI-based archival release are planned upon publication/acceptance. OpenClaw retains its own license.

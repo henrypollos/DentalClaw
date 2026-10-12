@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Validate a private 2D dental image package for the platform MVP.
-
-The validator is intentionally lightweight: it checks package structure and
-whether supervised training is allowed. It does not inspect pixel-level DICOM
-metadata, because the current platform MVP only needs a reliable gate before
-training is launched.
-"""
+"""Validate binary 2D input contents and splits before the training adapter runs."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import hashlib
+from collections import defaultdict
+
+import numpy as np
+from PIL import Image
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -87,76 +86,156 @@ def _find_masks(root: Path, mask_exts: set[str]) -> tuple[str | None, list[Path]
 
 
 def validate_package(data_root: Path, contract_path: Path, mode: str) -> dict[str, Any]:
+    """Inspect the complete binary 2D package; never infer clinical provenance."""
+    data_root = data_root.resolve()
     contract = _read_json(contract_path)
     image_exts = set(contract["accepted_image_extensions"])
     mask_exts = set(contract["accepted_mask_extensions"])
-    image_layout, image_files = _find_images(data_root, image_exts)
-    mask_layout, mask_files = _find_masks(data_root, mask_exts)
-
-    image_ids = {_case_id(path) for path in image_files}
-    mask_ids = {_case_id(path) for path in mask_files}
-    paired_ids = sorted(image_ids & mask_ids)
-    unmatched_images = sorted(image_ids - mask_ids)
-    unmatched_masks = sorted(mask_ids - image_ids)
-
-    checks = []
-    checks.append(
-        {
-            "name": "image_count_positive",
-            "passed": len(image_files) > 0,
-            "detail": f"{len(image_files)} image files found.",
-        }
-    )
-    checks.append(
-        {
-            "name": "label_count_positive",
-            "passed": len(mask_files) > 0,
-            "detail": f"{len(mask_files)} mask/label files found.",
-        }
-    )
-    checks.append(
-        {
-            "name": "paired_case_count_positive",
-            "passed": len(paired_ids) > 0,
-            "detail": f"{len(paired_ids)} paired image-mask cases found.",
-        }
-    )
-
-    if mode == "private_train":
-        can_execute = len(image_files) > 0 and len(mask_files) > 0 and len(paired_ids) > 0
-        terminal_policy = "allow_private_train" if can_execute else "stop_without_training"
-    else:
-        can_execute = len(image_files) > 0
-        terminal_policy = "allow_qc_or_inference_only" if can_execute else "reject_missing_images"
-
-    if mode == "private_train" and len(mask_files) == 0:
-        reason = "Images were found, but no masks/labels were detected; supervised segmentation training must not start."
-    elif can_execute:
-        reason = "The package satisfies the minimum structure required for the requested mode."
-    else:
-        reason = "The package does not satisfy the minimum structure required for the requested mode."
-
-    return {
-        "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "contract": _rel(contract_path),
-        "data_root": _rel(data_root),
-        "mode": mode,
-        "image_layout": image_layout,
-        "mask_layout": mask_layout,
-        "image_count": len(image_files),
-        "mask_count": len(mask_files),
-        "paired_case_count": len(paired_ids),
-        "sample_images": [_rel(path) for path in image_files[:10]],
-        "sample_masks": [_rel(path) for path in mask_files[:10]],
-        "unmatched_image_count": len(unmatched_images),
-        "unmatched_mask_count": len(unmatched_masks),
-        "unmatched_images_preview": unmatched_images[:20],
-        "unmatched_masks_preview": unmatched_masks[:20],
-        "checks": checks,
-        "can_execute_requested_mode": can_execute,
-        "terminal_policy": terminal_policy,
-        "reason": reason,
-    }
+    issues, cases, layouts = [], [], {}
+    def issue(code, detail):
+        issues.append({"code": code, "detail": detail})
+    if not data_root.is_dir():
+        issue("missing_data_root", str(data_root))
+    pairs = [("train", "imagesTr", "labelsTr"), ("val", "imagesVal", "labelsVal"),
+             ("test", "imagesTs", "labelsTs")]
+    if not any((data_root / im).is_dir() or (data_root / la).is_dir() for _, im, la in pairs):
+        im = _first_existing_dir(data_root, ["images", "image", "imgs"])
+        la = _first_existing_dir(data_root, ["masks", "labels", "mask", "label"])
+        pairs = [("train", im.name if im else ".", la.name if la else "masks")]
+    elif any((data_root / n).is_dir() for n in ["images", "masks"]):
+        issue("ambiguous_layout", "Both canonical and imagesTr layouts are present.")
+    # The adapter consumes directory splits; do not silently ignore a separate split contract.
+    if (data_root / "splits.json").exists():
+        issue("unsupported_split_file", "Resolve splits.json into explicit split directories before training.")
+    metadata = {}
+    if (data_root / "metadata.json").exists():
+        try:
+            metadata = _read_json(data_root / "metadata.json")
+            if not isinstance(metadata, dict):
+                raise ValueError("metadata must be an object")
+        except (OSError, ValueError) as exc:
+            issue("invalid_metadata", str(exc))
+            metadata = {}
+    patient_ids = metadata.get("patient_ids", {})
+    if not isinstance(patient_ids, dict):
+        issue("invalid_patient_mapping", "patient_ids must map split/case_id to patient ID")
+        patient_ids = {}
+    seen_pixels, seen_patients = defaultdict(list), defaultdict(set)
+    totals = {"image_count": 0, "mask_count": 0, "paired_case_count": 0,
+              "unmatched_image_count": 0, "unmatched_mask_count": 0}
+    split_counts = {}
+    raster = {".png", ".jpg", ".jpeg", ".tif", ".tiff"}
+    allowed_labels = set(contract.get("allowed_label_values", [0, 1]))
+    all_images, all_masks = [], []
+    for split, im_name, la_name in pairs:
+        imdir, ladir = data_root / im_name, data_root / la_name
+        images = (_collect_files(imdir, image_exts) if im_name != "." else
+                  sorted(p for p in data_root.iterdir() if p.is_file() and _norm_suffix(p) in image_exts)) if imdir.is_dir() else []
+        masks = _collect_files(ladir, mask_exts) if ladir.is_dir() else []
+        # Unknown data files cannot be silently skipped by the gate.
+        for folder, accepted in [(imdir, image_exts), (ladir, mask_exts)]:
+            if folder.is_dir() and folder != data_root:
+                for f in folder.rglob("*"):
+                    if f.is_file() and _norm_suffix(f) not in accepted and f.suffix.lower() not in {".json", ".txt", ".xml"}:
+                        issue("unsupported_file", str(f.relative_to(data_root)))
+        if not images and not masks:
+            continue
+        layouts[split] = {"images": im_name, "masks": la_name}
+        indexed = []
+        for files in (images, masks):
+            lookup = defaultdict(list)
+            for f in files:
+                lookup[_case_id(f)].append(f)
+            if any(len(v) > 1 for v in lookup.values()):
+                issue("duplicate_case_id", split)
+            indexed.append({k: v[0] for k, v in lookup.items()})
+        ims, mas = indexed
+        paired = set(ims) & set(mas)
+        missing, orphan = set(ims) - set(mas), set(mas) - set(ims)
+        counts = dict(image_count=len(images), mask_count=len(masks), paired_case_count=len(paired),
+                      unmatched_image_count=len(missing), unmatched_mask_count=len(orphan))
+        split_counts[split] = counts
+        for k, v in counts.items(): totals[k] += v
+        all_images.extend(images); all_masks.extend(masks)
+        # Test images without any labels are allowed for prediction only, never metrics.
+        require_labels = mode == "private_train" and (split in {"train", "val"} or bool(masks))
+        if require_labels and missing:
+            issue("missing_masks" if not masks else "incomplete_pairing", split)
+        if orphan:
+            issue("orphan_masks", split)
+        decoded = {}
+        for is_mask, files in [(False, images), (True, masks)]:
+            for f in files:
+                record = {"split": split, "case_id": _case_id(f), "kind": "mask" if is_mask else "image",
+                          "path": str(f.relative_to(data_root))}
+                try:
+                    record["sha256"] = hashlib.sha256(f.read_bytes()).hexdigest()
+                    if _norm_suffix(f) not in raster:
+                        issue("unsupported_2d_format", record["path"])
+                        continue
+                    with Image.open(f) as img:
+                        if getattr(img, "n_frames", 1) != 1:
+                            raise ValueError("Multi-frame input is not a single 2D image")
+                        arr = np.asarray(img if is_mask else img.convert("L"))
+                    if arr.ndim != 2:
+                        issue("invalid_mask_dimension" if is_mask else "invalid_image_dimension", record["path"])
+                        continue
+                    record["shape"] = list(arr.shape)
+                    decoded[(is_mask, _case_id(f))] = arr.shape
+                    if is_mask:
+                        vals = np.unique(arr).tolist()
+                        record["label_values"] = vals
+                        if not set(vals) <= allowed_labels:
+                            issue("invalid_label_values", record["path"])
+                    else:
+                        fingerprint = hashlib.sha256(str(arr.shape).encode() + arr.tobytes()).hexdigest()
+                        record["pixel_sha256"] = fingerprint
+                        seen_pixels[fingerprint].append((split, _case_id(f)))
+                        pid = patient_ids.get(split + "/" + _case_id(f))
+                        if pid is not None:
+                            if not isinstance(pid, (str, int)) or str(pid) == "":
+                                issue("invalid_patient_id", record["path"])
+                            else:
+                                seen_patients[str(pid)].add(split)
+                except (OSError, ValueError) as exc:
+                    issue("unreadable_file", record["path"] + ": " + str(exc))
+                finally:
+                    cases.append(record)
+        for cid in paired:
+            if decoded.get((False, cid)) != decoded.get((True, cid)):
+                issue("image_mask_shape_mismatch", split + "/" + cid)
+            # The current built-in trainer pairs exact filenames, not normalized stems.
+            if mode == "private_train" and ims[cid].name != mas[cid].name:
+                issue("backend_filename_mismatch", split + "/" + cid)
+    if not totals["image_count"]:
+        issue("missing_images", "No readable-layout images found")
+    if mode == "private_train" and not split_counts.get("train", {}).get("paired_case_count"):
+        issue("missing_training_pairs", "Training requires image-mask pairs in the training split")
+    if any(len({s for s, _ in v}) > 1 for v in seen_pixels.values()):
+        issue("cross_split_image_duplicate", "Identical decoded pixels occur in different splits")
+    if any(len(v) > 1 for v in seen_patients.values()):
+        issue("cross_split_patient_duplicate", "A supplied patient ID occurs in different splits")
+    image_records = [x for x in cases if x["kind"] == "image"]
+    complete_patient_mapping = bool(image_records) and all(
+        str(x["split"]) + "/" + str(x["case_id"]) in patient_ids for x in image_records)
+    manifest = {"schema_version": 1, "data_root": str(data_root), "dataset_source": "user_supplied",
+                "declared_provenance": metadata.get("provenance"), "expected_modality": "2d",
+                "annotation_contract": "binary_pixel_mask_0_1", "layouts": layouts, "files": cases,
+                "patient_split_check": "checked_supplied_ids" if complete_patient_mapping else "not_established",
+                "test_metrics_available": bool(split_counts.get("test", {}).get("paired_case_count"))}
+    manifest_id = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
+    ready = not issues
+    return {"created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "contract": _rel(contract_path), "data_root": str(data_root), "mode": mode,
+            "image_layout": layouts.get("train", {}).get("images"),
+            "mask_layout": layouts.get("train", {}).get("masks"), **totals,
+            "sample_images": [_rel(p) for p in all_images[:10]], "sample_masks": [_rel(p) for p in all_masks[:10]],
+            "checks": [{"name": "binary_2d_package_contract", "passed": ready, "detail": ", ".join(sorted({x['code'] for x in issues})) or "All inspected checks passed"}],
+            "issues": issues, "reason_codes": sorted({x["code"] for x in issues}),
+            "manifest": manifest, "manifest_id": manifest_id, "split_counts": split_counts,
+            "can_execute_requested_mode": ready,
+            "terminal_policy": ("allow_private_train" if mode == "private_train" else "allow_qc_or_inference_only") if ready else "stop_without_training",
+            "reason": "Validated binary 2D input contract; patient independence only if supplied IDs checked." if ready else "Input contract failed; see reason_codes."}
 
 
 def build_report_md(report: dict[str, Any]) -> str:
@@ -198,7 +277,7 @@ def build_report_md(report: dict[str, Any]) -> str:
     ]
     if report["mode"] == "private_train" and not report["can_execute_requested_mode"]:
         lines.append(
-            "当前私有数据包可以进入数据登记/QC阶段，但不能进入监督训练阶段；原因是缺少可配对的 mask/label。平台必须停止训练并给出原因，避免伪造私有数据训练能力。"
+            "当前输入包未通过兼容性检查；请按 issues/reason_codes 修正后再训练。"
         )
     elif report["can_execute_requested_mode"]:
         lines.append(

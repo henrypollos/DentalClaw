@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-09-mvp",
+  "version": "2026-10-02-shared-route-gate",
   "purpose": "Offline capability registry for the DentalClaw platform MVP. It intentionally limits scope to CV tasks and pre-approved methods.",
   "scope_policy": {
     "allowed_domain": "dental_cv",
@@ -22,6 +22,7 @@
       ],
       "task_family": "segmentation",
       "task_variant": "tooth_binary",
+      "supported_segmentation_targets": ["binary"],
       "modality": "2d",
       "allowed_modes": [
         "inference"
@@ -72,7 +73,8 @@
         "case_level_labels",
         "3d_volumes",
         "training_requests"
-      ]
+      ],
+      "precheck_entrypoint": "platform_mvp/route_preflight.py"
     },
     {
       "id": "private_2d_segmentation_train",
@@ -84,14 +86,15 @@
       ],
       "task_family": "segmentation",
       "task_variant": "private_2d_mask_segmentation",
+      "supported_segmentation_targets": ["binary"],
       "modality": "2d",
       "allowed_modes": [
         "private_train"
       ],
-      "framework": "nnunetv2",
-      "method": "DentalClaw spec-driven nnU-Net v2 training",
+      "framework": "pytorch_builtin",
+      "method": "Spec-driven binary 2D training using the verified built-in TinyUNet2D backend",
       "entrypoint": "agents/experimentation/skills/tooth_autotrain_nnunet/scripts/run_training.py",
-      "precheck_entrypoint": "platform_mvp/validate_private2d_package.py",
+      "precheck_entrypoint": "platform_mvp/route_preflight.py",
       "input_contract": "platform_mvp/private_data_contract.json",
       "required_inputs": [
         "private image directory",
@@ -104,9 +107,8 @@
         "intent.parse",
         "registry.method_lookup",
         "platform.private2d_input_precheck",
-        "data.private_dataset_register",
-        "dataset.qc_run",
-        "dataset.export_to_nnunet",
+        "dataset.manifest_record",
+        "dataset.validated_spec_generation",
         "experiment.training",
         "experiment.best_model_select",
         "experiment.inference",
@@ -121,7 +123,10 @@
         "report summary"
       ],
       "limitations": [
-        "The adapter is defined for the platform MVP, but this route is not executed until a private dataset package is supplied."
+        "Requires an explicit data root, binary masks encoded 0/1, and separate training/validation/test directories for this adapter.",
+        "The 2026-10-01 smoke run verifies the built-in TinyUNet2D executor on a TDD-derived development package, not a private clinical cohort or the nnU-Net v2 backend.",
+        "Patient-level split independence is not established without complete patient ID metadata.",
+        "The shared gate blocks packages containing dataset.json; a nnU-Net v2 user-package backend is not released by this route."
       ],
       "required_annotation_type": "pixel_mask",
       "evaluation_unit": "image",
@@ -139,7 +144,14 @@
         "bbox_only_annotations",
         "case_level_labels",
         "unpaired_images_labels"
-      ]
+      ],
+      "verification": {
+        "scope": "development_executor_smoke",
+        "backend": "builtin_nnunet_style_2d",
+        "run": "artifacts/platform_mvp_runs/r2_execution_contract_20261001",
+        "independent_clinical_validation": false,
+        "nnunetv2_backend_verified_by_this_run": false
+      }
     },
     {
       "id": "toothfairy3_3d_segmentation_infer_or_train",

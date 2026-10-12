@@ -1,0 +1,8 @@
+{
+  "version": "data-services-development-20261008",
+  "scope": "Opt-in development only; not the frozen v5 registry",
+  "methods": [
+    {"id":"existing_result_delivery","status":"executable","verification_status":"development_unit_and_cli_smoke_verified","domain":"dental_cv","task_family":"result_delivery","modality":"2d","allowed_modes":["deliver"],"backend":"readonly_python","entrypoint":"platform_mvp.data_services.runner","required_inputs":["result_manifest with dataset/run identity and SHA256-bound artifacts"],"expected_outputs":["delivery_manifest.json","report.html","copied original artifacts","per_case_metrics.csv only when requested"],"limitations":["No new inference, training, metric computation or ranking","Explicit selected cases required when user selection is requested"]},
+    {"id":"binary2d_package_qc","status":"executable","verification_status":"development_unit_and_cli_smoke_verified","domain":"dental_cv","task_family":"binary2d_qc","modality":"2d","allowed_modes":["qc"],"backend":"readonly_python","entrypoint":"platform_mvp.data_services.runner","required_inputs":["explicit data root"],"expected_outputs":["qc_report.json","qc_issues.csv","input_manifest.json","report.html"],"limitations":["Successful inspection may find defects; quality_passed is separate","No training permission, repairs, clinical annotation validation or near-duplicate similarity analysis"]}
+  ]
+}

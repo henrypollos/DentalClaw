@@ -22,6 +22,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
 DEFAULT_DATASET_ROOT = (
     REPO_ROOT
@@ -151,7 +152,7 @@ def _resolve_best_nnunet_config(training_run: Path) -> dict[str, str]:
     result: dict[str, str] = {}
     if config.get("nnunet_trainer"):
         result["nnunet_trainer"] = str(config["nnunet_trainer"])
-    if config.get("fold"):
+    if config.get("fold") is not None:
         result["fold"] = str(config["fold"])
     if config.get("configuration"):
         result["nnunet_configuration"] = str(config["configuration"])
@@ -322,6 +323,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--python", default=sys.executable, help="Python executable.")
     parser.add_argument("--case-id", default="100", help="Case ID for report generation.")
+    parser.add_argument("--inference-case-only", action="store_true",
+                        help="Run new inference only for the requested case, using a copied input subset.")
     parser.add_argument("--dataset-root", type=Path, default=DEFAULT_DATASET_ROOT)
     parser.add_argument("--dataset-spec", type=Path, default=DEFAULT_DATASET_SPEC)
     parser.add_argument("--task-spec", type=Path, default=DEFAULT_TASK_SPEC)
@@ -353,7 +356,10 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Reuse existing inference_summary.json and masks in run-dir/inference.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.inference_case_only and args.reuse_inference:
+        parser.error('--inference-case-only requires fresh inference; cannot reuse a cohort summary')
+    return args
 
 
 def main() -> int:
@@ -394,13 +400,34 @@ def main() -> int:
         fold=args.nnunet_fold,
         configuration=args.nnunet_configuration,
     )
+    inference_reused = args.reuse_inference and (inference_dir / "inference_summary.json").is_file()
+    model_binding = None
+    if not inference_reused:
+        from platform_mvp.tdd_model_binding import resolve_model_binding
+        model_binding = resolve_model_binding(args.model_path, args.training_run)
+        task_payload = _read_json(runtime_task_spec)
+        for key, bound in (("nnunet_trainer", model_binding["trainer"]),
+                           ("fold", model_binding["fold"]),
+                           ("nnunet_configuration", model_binding["configuration"])):
+            if task_payload["extra"][key] != bound:
+                raise ValueError("Requested nnU-Net configuration differs from the bound checkpoint: " + key)
+        task_payload["extra"]["nnunet_model_binding"] = model_binding
+        _write_json(runtime_task_spec, task_payload)
+        _write_json(run_dir / "model_binding.json", model_binding)
 
     inference_stdout = logs_dir / "inference_stdout.log"
     inference_stderr = logs_dir / "inference_stderr.log"
     report_stdout = logs_dir / "report_stdout.log"
     report_stderr = logs_dir / "report_stderr.log"
 
-    if not args.reuse_inference or not (inference_dir / "inference_summary.json").exists():
+    if not inference_reused:
+        input_dir = args.dataset_root / "imagesTs"
+        gt_dir = args.dataset_root / "labelsTs"
+        if args.inference_case_only:
+            input_dir = run_dir / "case_input"; input_dir.mkdir(exist_ok=False)
+            gt_dir = run_dir / "case_gt"; gt_dir.mkdir(exist_ok=False)
+            shutil.copy2(args.dataset_root / "imagesTs" / f"{args.case_id}_0000.png", input_dir)
+            shutil.copy2(args.dataset_root / "labelsTs" / f"{args.case_id}.png", gt_dir)
         inference_cmd = [
             args.python,
             str(args.inference_script),
@@ -413,9 +440,9 @@ def main() -> int:
             "--output-dir",
             str(inference_dir),
             "--input-dir",
-            str(args.dataset_root / "imagesTs"),
+            str(input_dir),
             "--gt-dir",
-            str(args.dataset_root / "labelsTs"),
+            str(gt_dir),
         ]
         _run_command(
             inference_cmd,
@@ -486,6 +513,10 @@ def main() -> int:
         "report_stdout": _rel(report_stdout),
         "report_stderr": _rel(report_stderr),
         "metrics": inference_metrics,
+        "new_model_inference": not inference_reused,
+        "inference_reused": bool(inference_reused),
+        "model_binding": model_binding,
+        "inference_case_only": bool(args.inference_case_only),
     }
     _write_json(run_dir / "manifest.json", manifest)
 

@@ -8,6 +8,7 @@ import random
 import re
 import shutil
 import subprocess
+import sys
 from dataclasses import asdict, fields, is_dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -40,7 +41,7 @@ DEFAULT_NNUNET_RAW_ROOT = REPO_ROOT / 'artifacts' / 'datasets' / 'nnUNet' / 'nnU
 DEFAULT_NNUNET_PREPROCESSED_ROOT = REPO_ROOT / 'artifacts' / 'datasets' / 'nnUNet' / 'nnUNet_preprocessed'
 DEFAULT_NNUNET_RESULTS_ROOT = REPO_ROOT / 'artifacts' / 'models' / 'nnUNet' / 'nnUNet_results'
 DEFAULT_NNUNET_TRAINER_SOURCE_ROOT = REPO_ROOT.parent / 'JoD' / 'nnUNet' / 'nnunetv2' / 'training' / 'nnUNetTrainer'
-NNUNETV2_BIN_DIR = Path('$CONDA_HOME/envs/nnunetv2/bin')
+NNUNETV2_BIN_DIR = Path(sys.executable).resolve().parent
 NNUNET_EPOCH_TRAINERS = {
     1: 'nnUNetTrainer_1epoch',
     5: 'nnUNetTrainer_5epochs',
@@ -259,6 +260,7 @@ def _nnunet_cli_targets(command_name: str) -> List[str]:
     mapping = {
         'train': ['nnUNetv2_train', 'nnUNet_train'],
         'predict': ['nnUNetv2_predict', 'nnUNet_predict'],
+        'predict_modelfolder': ['nnUNetv2_predict_from_modelfolder'],
         'plan_and_preprocess': ['nnUNetv2_plan_and_preprocess'],
     }
     return mapping[command_name]
@@ -266,12 +268,12 @@ def _nnunet_cli_targets(command_name: str) -> List[str]:
 
 def _resolve_nnunet_cli(command_name: str) -> Optional[str]:
     for candidate in _nnunet_cli_targets(command_name):
-        found = shutil.which(candidate)
-        if found:
-            return found
         env_candidate = NNUNETV2_BIN_DIR / candidate
         if env_candidate.is_file():
             return str(env_candidate)
+        found = shutil.which(candidate)
+        if found:
+            return found
     return None
 
 
@@ -1110,8 +1112,8 @@ class ToothSegmentationSkill(BaseSkill):
         output_root = Path(workspace) / 'preprocessed_dataset'
         output_root.mkdir(parents=True, exist_ok=True)
 
-        def process_split(split_name: str, label_split: bool = False) -> Dict[str, Any]:
-            src_name = getattr(dataset_spec, split_name)
+        def process_split(split_name: str, label_split: bool = False, source_name: Optional[str] = None) -> Dict[str, Any]:
+            src_name = source_name or getattr(dataset_spec, split_name)
             src_dir = root / src_name
             dst_dir = output_root / src_name
             dst_dir.mkdir(parents=True, exist_ok=True)
@@ -1145,6 +1147,9 @@ class ToothSegmentationSkill(BaseSkill):
             'labelsVal': process_split('labelsVal', label_split=True),
             'imagesTs': process_split('imagesTs', label_split=False),
         }
+        test_labels = _existing_label_ts(root, dataset_spec)
+        if test_labels and (root / test_labels).is_dir():
+            splits['labelsTs'] = process_split('labelsTs', label_split=True, source_name=test_labels)
         info = {
             'source_root': str(root),
             'output_root': str(output_root),
@@ -2076,7 +2081,8 @@ class ToothSegmentationSkill(BaseSkill):
         return payload
 
     def _run_nnunet_cli_inference(self, infer_input: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
-        nnunet_predict = _resolve_nnunet_cli('predict')
+        binding = infer_input['task_spec'].extra.get('nnunet_model_binding')
+        nnunet_predict = _resolve_nnunet_cli('predict_modelfolder' if binding else 'predict')
         if not nnunet_predict:
             raise RuntimeError('当前环境没有可用的 nnUNetv2_predict。')
         dataset_spec = infer_input['dataset_spec']
@@ -2102,9 +2108,16 @@ class ToothSegmentationSkill(BaseSkill):
         if results_override:
             resolved_roots['nnUNet_results'] = str(results_override)
         nnunet_env = {**dict(os.environ), **resolved_roots}
-        command = [nnunet_predict, '-i', str(input_dir), '-o', str(output_path), '-d', str(dataset_id), '-c', configuration, '-f', fold]
-        if trainer:
-            command.extend(['-tr', trainer])
+        if binding:
+            from platform_mvp.tdd_model_binding import verify_model_binding
+            verify_model_binding(binding, infer_input['model_path'])
+            command = [nnunet_predict, '-i', str(input_dir), '-o', str(output_path),
+                       '-m', binding['model_folder'], '-f', binding['fold'],
+                       '-chk', binding['checkpoint_name']]
+        else:
+            command = [nnunet_predict, '-i', str(input_dir), '-o', str(output_path), '-d', str(dataset_id), '-c', configuration, '-f', fold]
+            if trainer:
+                command.extend(['-tr', trainer])
         result = subprocess.run(command, capture_output=True, text=True, env=nnunet_env)
         _write_json(output_path / 'nnunet_predict_command.json', {'command': command, 'returncode': result.returncode, 'env': {k: nnunet_env[k] for k in ('nnUNet_raw', 'nnUNet_preprocessed', 'nnUNet_results')}})
         (output_path / 'stdout.log').write_text(result.stdout or '', encoding='utf-8')
