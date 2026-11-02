@@ -1,25 +1,27 @@
 # DentalClaw
 
-A modular, natural-language-driven workflow platform for standardized and auditable dental imaging AI experiments.
+A modular, natural-language-driven workflow platform for auditable dental imaging AI experiments.
 
-DentalClaw connects research requests to registered workflows, local input checks, execution records and reviewable outputs. The browser interface uses OpenClaw; the workflow backend can also run directly from the command line.
+DentalClaw connects research requests to registered workflow contracts, deterministic pre-dispatch checks, execution records and reviewable outputs. The browser interface uses OpenClaw; the workflow backend can also run directly from the command line.
 
-> *DentalClaw: A Modular Workflow Platform for Standardized and Auditable Dental Imaging AI Experiments* — under review, Journal of Dentistry.
+> *DentalClaw: Contract-Based Workflow Enforcement for Auditable Dental Imaging AI Experiments* — under review, International Dental Journal.
+
+This repository is the code accompanying the manuscript. It implements the four registered workflow contracts evaluated in the paper. It is not a segmentation model and not a clinical decision support system.
 
 ## Supported workflows
 
 | Workflow | Delivery |
 |---|---|
 | Existing-result delivery | Bound saved summaries, images, masks and overlays; optional CSV of stored metrics |
-| Binary 2D package QC | Pairing, readability, dimensions, binary labels, inventory and exact cross-split image duplicate checks |
+| Binary 2D package quality control | Pairing, readability, dimensions, binary labels, inventory and exact cross-split image duplicate checks |
 | TDD inference and reporting | Bound nnU-Net checkpoint inference, metrics and a selected-case report |
 | Binary-raster training | TinyUNet2D training and test outputs from explicitly partitioned image-mask packages |
 
-These are the four routes evaluated in the revised manuscript. Existing-result delivery does not run inference. QC does not repair data or authorize training. TDD inference requires its named assets. Training was evaluated with one-epoch workflow checks, not convergence or clinical performance.
+These are the four routes evaluated in the manuscript. Existing-result delivery does not run inference. Quality control does not repair data or authorize training. TDD inference requires its named assets. Training was evaluated with one-epoch workflow checks, not convergence or clinical performance.
 
 ## Installation
 
-Use Python 3.10 or later on Linux. For planning, QC and regression checks:
+Use Python 3.10 or later on Linux. For planning, quality control and regression checks:
 
 ```sh
 python -m pip install numpy Pillow pytest
@@ -64,7 +66,7 @@ Open `http://127.0.0.1:18789/`, authenticate, select the **dentalclaw** chat and
 
 1. Select an input context and describe the required outputs.
 2. Leave execution unchecked to generate a plan only.
-3. Enable **Execute if the route is ready** for delivery/QC; model computation additionally requires **Allow training or inference**.
+3. Enable **Execute if the route is ready** for delivery or quality control; model computation additionally requires **Allow training or inference**.
 4. Review the returned decision, execution status and artifact paths. A finished chat is not proof of successful delivery.
 
 For example: “Audit this binary image-mask package for pairing, dimensions and label values; do not train.” The default context is empty. Bind actual server-side contexts with `--profiles` before requesting work on data.
@@ -89,7 +91,7 @@ python platform_mvp/run_platform_mvp.py --next-version \
 
 Use a fresh output directory each time. Add `--execute` for an eligible route and `--allow-model-execution` for training/inference. The optional `--coverage-check` enables the subsequent development check of mandatory deliverables.
 
-For direct QC without a model call:
+For direct quality control without a model call:
 
 ```sh
 python platform_mvp/run_platform_mvp.py --data-services \
@@ -98,18 +100,20 @@ python platform_mvp/run_platform_mvp.py --data-services \
   --out-dir artifacts/qc_001 --execute
 ```
 
-See [planner contexts](platform_mvp/next_version/README.md), [result bindings and QC](platform_mvp/data_services/README.md), and [runtime contracts](platform_mvp/README.md).
+See [planner contexts](platform_mvp/next_version/README.md), [result bindings and quality control](platform_mvp/data_services/README.md), and [runtime contracts](platform_mvp/README.md).
 
 ## Manuscript evaluation
 
 | Stage | Exact decisions | Verified positive deliveries |
 |---|---:|---:|
-| Post-repair development coverage | 35/35 | 14/14 |
-| First test of 14 additional requests | 11/14 | 5/6 |
-| Routing regression on the same 14 requests | 14/14 | Not rerun |
-| First test of 30 further requests after refreezing | 24/30 | 4/6 |
+| Development set (n = 35) | 35/35 | 14/14 |
+| Set 1, first run (n = 14) | 11/14 | 5/6 |
+| Set 1, routing regression (n = 14) | 14/14 | Not rerun |
+| Set 2, first run (n = 30) | 24/30 (80.0%) | 4/6 (66.7%) |
 
-Incorrect release with partial execution occurred for 2/8 and 3/24 non-executable references in the two first tests. The collections included capability-informed requests, known assets and author-team references. Results describe that scope, not clinical diagnostic performance.
+Eight requests were dispatched in Set 2: five of the six executable references and three non-executable references that were released and executed. All eight completed their registered sub-workflow, and four of the six executable references met whole-request acceptance. The dispatch count and the delivery count therefore have different denominators and should not be combined.
+
+Incorrect release never occurred in the development set (0/21) and occurred for 2/8 and 3/24 non-executable references in the two prospective sets. The development results describe requests used during development and are not evidence of generalisation. The collections included requests written with awareness of the registered workflow scopes, known assets and author-team reference decisions. Results describe that scope, not clinical diagnostic performance.
 
 This repository integrates the runtime and refrozen routing repairs; it is not a byte-identical evaluation snapshot. The optional coverage check and browser packaging are subsequent integration work. Historical results require the locked requests, references, asset bindings and execution records. The former weighted 30-intent benchmark is legacy material, not the revised manuscript's primary endpoint.
 
